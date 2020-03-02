@@ -1,0 +1,116 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{tikz}
+\usepackage{tikz-qtree}
+\usepackage{subfigure}
+\usepackage{graphicx}
+
+\hypersetup{}
+\DeclareMathOperator*{\argmax}{arg\,max}
+
+%opening
+\title{Provably Constant-time Motion Planning}
+\author{Fahad Islam\\
+The Robotics Institute\\
+Carnegie Mellon University\\
+\texttt{fi@andrew.cmu.edu}}
+\begin{document}
+
+\maketitle
+
+\centering
+\Large{Thesis Proposal}
+\vspace{40mm}
+
+\large{
+\textbf{Thesis Committee:}
+
+Maxim Likhachev (Chair)\\
+Chris Atkeson\\
+Oliver Kroemer\\
+Siddhartha Srinivasa (UW)\\
+Oren Salzman (Technion)\\
+}
+\newpage
+
+\begin{abstract}
+In manufacturing and warehouse scenarios, robots often perform recurring manipulation tasks in structured environments. Fast and reliable motion planning is one of the key elements that ensure efficient operations in such environments. A very common example scenario is of manipulators working at conveyor belts, where they have limited time to pick moving objects and if the planner exceeds a certain time threshold, they would fail to pick the objects up. Similar scenarios are encountered in automated assembly lines. Such time critical applications spur the need for planners which are guaranteed to be fast. To this end we introduce the concept of Constant-time Motion Planning; namely, the ability to provably guarantee to generate a full motion plan within a (small) constant time. We then develop several algorithms that fall into the class of constant-time motion planning algorithms.
+
+Specifically, up to now we have developed constant-time motion planning algorithms for two domains; (1) Manipulation for repetitive tasks in static environments (2) Manipulation for the task of picking up moving objects (of known models) off a conveyor belt. For the latter, the robot typically perceives a rough pose estimate viewing from a distance, but it must start moving early on (relying on that rough estimate) to be able to reach the object in time and then adjust its motion in real time as it gets improved estimates.
+Our key insight is that since these domains are fairly repetitive, the space in which the robot operates is a very small subset of its configuration space, which allows us to preprocess it exhaustively. The preprocessing step generates a representative set of paths that can be used by search at query time in a way that assures small constant-time planning.
+%
+For the former domain, we evaluate our algorithm for a mail sorting task in simulation on PR2 and also tested the algorithm on a real truck-unloading robot. For the latter domain, we perform real robot experiments on PR2 working at a conveyor belt.
+
+For the remainder of this thesis, we propose to further study and formally define what constant-time planning implies in practice and what underlying assumptions it entails. We also propose to boost the capability of the conveyor pick up task by having multiple robot arms simultaneously picking up objects, while still maintaining strong theoretical guarantees on the planning side. This introduces new algorithmic challenges including decision making about which object to assign to which arm and motion synchronization between the arms.
+\end{abstract}
+\newpage
+
+\tableofcontents
+\newpage
+
+\section{Introduction}
+\subsection{Motivation}
+\subsection{Approach}
+\subsection{Expected Contribution}
+
+\section{Background}
+\subsection{Configuration Space and Motion Planning}
+\subsection{C-space representation for Search-based Planning}
+\subsection{Computational Complexity in Motion Planning}
+\subsection{Constant-time Motion Planning (CTMP)}
+
+\section{Related Work}
+\subsection{Preprocessing-based Methods}
+\subsection{Motion Planning with Reuse}
+\subsection{Real-time Motion Planning}
+\subsection{Global Control using Local Potential Functions}
+
+\section{CTMP for Repetitive Tasks in Static Environments}
+\subsection{Overview}
+\subsection{Algorithmic Framework}
+\subsubsection{Problem formulation and assumptions}
+\subsubsection{Preprocessing Phase}
+\subsubsection{Reachability Search}
+\subsubsection{Query Phase}
+\subsubsection{Implementation Details}
+\subsection{Theoretical Analysis}
+\subsubsection{Correctness}
+\subsubsection{Time Complexity of Query Phase}
+\subsubsection{Memory Requirement}
+\subsubsection{Algorithm Completeness}
+\subsubsection{Bound on Solution Quality}
+\subsection{Experimental Results}
+\subsubsection{Mail Sorting Task}
+\subsubsection{Motion Planning for Truck-unloading Robot}
+
+\section{CTMP to Pickup Moving Objects off a Conveyor}
+\subsection{Overview}
+\subsection{Algorithmic Framework}
+\subsubsection{Straw man Approach}
+\subsubsection{Algorithm Building Blocks}
+\subsubsection{Preprocessing Phase}
+\subsubsection{Query Phase}
+\subsection{Theoretical Analysis}
+\subsubsection{Completeness}
+\subsubsection{Time Complexity of Query Phase}
+\subsection{Experimental Results}
+\subsubsection{Experimental Setup}
+\subsubsection{Real Robot Experiments}
+\subsubsection{Simulation Experiments}
+
+\section{Proposed Work}
+\subsection{CTMP for Conveyor Task with Multiple Arms}
+\subsection{CTMP for Motion Planning on Constrained Manifolds}
+\subsection{Timeline}
+
+
+
+
+\newpage
+
+\bibliographystyle{IEEEtran}
+\bibliography{biblio}
+
+\end{document}
