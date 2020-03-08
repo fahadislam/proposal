@@ -6,6 +6,7 @@
 \usepackage{tikz-qtree}
 \usepackage{subfigure}
 \usepackage{graphicx}
+\usepackage[numbers]{natbib}
 
 \hypersetup{}
 \DeclareMathOperator*{\argmax}{arg\,max}
@@ -16,11 +17,14 @@
 The Robotics Institute\\
 Carnegie Mellon University\\
 \texttt{fi@andrew.cmu.edu}}
+
+\input{macros1.tex}
+\input{macros2.tex}
 \begin{document}
 
 \maketitle
 
-\centering
+\begin{center}
 \Large{Thesis Proposal}
 \vspace{40mm}
 
@@ -33,17 +37,18 @@ Oliver Kroemer\\
 Siddhartha Srinivasa (UW)\\
 Oren Salzman (Technion)\\
 }
+\end{center}
 \newpage
 
 \begin{abstract}
-In manufacturing and warehouse scenarios, robots often perform recurring manipulation tasks in structured environments. Fast and reliable motion planning is one of the key elements that ensure efficient operations in such environments. A very common example scenario is of manipulators working at conveyor belts, where they have limited time to pick moving objects and if the planner exceeds a certain time threshold, they would fail to pick the objects up. Similar scenarios are encountered in automated assembly lines. Such time critical applications spur the need for planners which are guaranteed to be fast. To this end we introduce the concept of Constant-time Motion Planning; namely, the ability to provably guarantee to generate a full motion plan within a (small) constant time. We then develop several algorithms that fall into the class of constant-time motion planning algorithms.
+In manufacturing and warehouse scenarios, robots often perform recurring manipulation tasks in structured environments. Fast and reliable motion planning is one of the key elements that ensure efficient operations in such environments. A very common example scenario is of manipulators working at conveyor belts, where they have limited time to pick moving objects and if the planner exceeds a certain time threshold, they would fail to pick the objects up. Similar scenarios are encountered in automated assembly lines. Such time-critical applications spur the need for planners which are \emph{guaranteed} to be fast. To this end we introduce the concept of Constant-time Motion Planning (CTMP); namely, the ability to provably guarantee to generate a full motion plan within a (small) constant time. We then develop several algorithms that fall into the class of constant-time motion planning algorithms.
 
 Specifically, up to now we have developed constant-time motion planning algorithms for two domains; (1) Manipulation for repetitive tasks in static environments (2) Manipulation for the task of picking up moving objects (of known models) off a conveyor belt. For the latter, the robot typically perceives a rough pose estimate viewing from a distance, but it must start moving early on (relying on that rough estimate) to be able to reach the object in time and then adjust its motion in real time as it gets improved estimates.
 Our key insight is that since these domains are fairly repetitive, the space in which the robot operates is a very small subset of its configuration space, which allows us to preprocess it exhaustively. The preprocessing step generates a representative set of paths that can be used by search at query time in a way that assures small constant-time planning.
 %
 For the former domain, we evaluate our algorithm for a mail sorting task in simulation on PR2 and also tested the algorithm on a real truck-unloading robot. For the latter domain, we perform real robot experiments on PR2 working at a conveyor belt.
 
-For the remainder of this thesis, we propose to further study and formally define what constant-time planning implies in practice and what underlying assumptions it entails. We also propose to boost the capability of the conveyor pick up task by having multiple robot arms simultaneously picking up objects, while still maintaining strong theoretical guarantees on the planning side. This introduces new algorithmic challenges including decision making about which object to assign to which arm and motion synchronization between the arms.
+For the remainder of this thesis, we propose to further study and formally define what constant-time planning implies in practice and what underlying assumptions it entails. We also propose to boost the capability of the conveyor pick-up task by having multiple robot arms simultaneously picking up objects, while still maintaining strong theoretical guarantees on the planning side. This introduces new algorithmic challenges including decision making about which object to assign to which arm and motion synchronization between the arms.
 \end{abstract}
 \newpage
 
@@ -52,20 +57,60 @@ For the remainder of this thesis, we propose to further study and formally defin
 
 \section{Introduction}
 \subsection{Motivation}
+In industrial settings such as manufacturing and warehouse environments, the robots typically operate in structured environments and perform repetitive tasks. Despite significant advancements in the field of motion planning in the past several decades, a large percentage of warehousing and manufacturing industry still uses robots that run hardcoded routines to perform very specific tasks. The lack of penetration of modern motion planning algorithms at scale can be attributed to the fact that the industry needs systems which are \emph{guaranteed} to be fast and reliable, even at the cost of flexibility that these systems could potentially provide.
+
+In warehouses, robots are widely deployed at fast moving conveyor belts to perform repetitive pick and place or sorting tasks, which gives them a very short time buffer to plan their motion. Failing to plan within that time, the robot would skip objects and affect the throughput of the system. Similarly in assembly lines where multiple robots operate in their respective work stations, an overhead caused by the motion planner at one station can slow down the entire chain. This thesis focuses on such time critical applications and introduces the notion of (small) Constant-time Motion Planning (CTMP). CTMP implies generating full motion plans in provably-bounded short planning times.
+
+This thesis is motivated by the following key observations from the aforementioned domains; (1) The tasks are highly repetitious (2) The  environments are fairly structured. (1) gives us an insight that the operational space of the robot is a very small as compared to its full C-space and (2) implies that the environment model is known in advance. These two aspects allow us to fully preprocess the part of the C-space that the robot operates in while accounting for the known objects that exists in its surroundings.
+
+A naive way of providing constant-time guarantees would be to precompute paths for all possible start and goal states that the planner could be queried for and use a simple hash lookup at query time (assuming the lookup time is constant). However, as the set of start or goal states increase, this approach quickly becomes intractable memory and precomputation time wise. Our method provides a compression scheme and precomputes only a small set of representative paths which can still ``cover" the robot's operational space. Namely, using this set of paths, at query time, our method can solve any query within the robot's operational space in bounded time.
+
 \subsection{Approach}
+So far, we have developed CTMP algorithms for two domains.
+\subsubsection{Manipulation for repetitive tasks in static environments}
+In this work, we consider the specific case where the start state is fixed and there exists a ``goal region" which contains all possible goals. Consider for example, a typical mailroom scenario where the robot has to pick up mail from a fixed location and sort them in cubby shelves. The start corresponds to the pickup location for the packages and the goal region corresponds to all possible goal poses within the cubby shelves. Note that the cubbies reduce the robot's operational space drastically which makes the preprocessing tractable for our method.
+
+Our key insight is that given an ``attractor state''~$s$ in the goal region, typically there is a large region of states around it for which a greedy search (a search following a potential function) towards~$s$ is collision free. We show that such so called attractor regions can be efficiently computed by using dynamic programming.
+Importantly, the runtime-complexity of such a greedy search is bounded and there is no need to perform computationally-complex collision-detection operations. 
+This insight allows us to generate in an offline phase a small set of these attractor regions together with a path between each attractor state and the start, ensuring that together these attractor regions completely cover the full goal region.
+In the query phase, a path is generated by performing a greedy search from the goal to an attractor state (the one which contains the goal) followed by the precomputed path from the start.
+
+\subsubsection{Manipulation for picking up moving objects off a conveyor belt}
+We will refer to this problem as ``conveyor pickup task". For this domain we assume that the geometric models of the target objects are known in advance. The success of manipulation tasks relies heavily on the accuracy of the perception system which often is noisy, especially if the target objects are perceived from a distance. For fast moving conveyor belts, the robot cannot wait for a perfect estimate before it starts execution. In order to be able to reach the object in time it must start moving early on (relying on the initial noisy estimates) and adjust its motion on-the-fly in response to the pose updates from perception. We developed an approach that meets these requirements by providing provable constant-time planning and replanning guarantees.
+
+Again, with the same insight, in the first step we precompute a small set of paths from a fixed start (say drop off location) that can cover the goal region which in this domain is defined in the space of object poses. The goal can be any arbitrary object pose~$(x,y,yaw)$ of the objects. In the second step, we uniformly discretize these paths in time to get a set of states that we call ``replannable'' states. To handle pose updates online, we may need to replan from any of these states to all the goals in the goal region. The algorithm then goes back to the first step treating all the replannable states as new starts and this recursive process continues until all replannable states are taken care of. While the approach has exponential complexity in the number of timesteps from the start to the goal, we drastically save on computation and memory by reusing the first set of paths (from the drop off location to the goal region). Our algorithm guarantees that for any replannable state and a goal, a plan will be generated within a bounded time. Experimentally we observe that the robot fails most of the time without replanning i.e. in case it relies on the first estimate or if it waits for an accurate estimate before starting planning.
+
 \subsection{Expected Contribution}
+We expect to make the following contributions in this thesis.
+\begin{itemize}
+	\item Introduce and formalize the concept of Constant-time Motion Planning (CTMP)
+	\item Develop CTMP algorithm for domains with repetitive manipulation tasks in static environments
+	\item Develop CTMP algorithm for the conveyor pickup task
+	\item Enhance the conveyor pick task using multiple robot arms, simultaneously picking up multiple objects
+\end{itemize}
 
 \section{Background}
 \subsection{Configuration Space and Motion Planning}
+Motion planning algorithms operate in the state space often also referred to as the \emph{configuration space} (C-space) or~$\calC$~\cite{lozano1990spatial}. In this space a state or a configuration of the robot can be uniquely represented as a point which makes it convenient for the motion planners to operate. It can be the~($x,y$) position of the robot or~($x,y,yaw$) if the orientation also matters. For a robot arm the configuration can be composed of all the joint positions. If planning with dynamics, the velocities and times may also be added to the configuration. Similarly higher order derivatives can also be added as per the requirements of the domain. The number of variables in the configuration represents the \emph{dimension} of the C-space. For example, for a 7DoF robot arm, for only considering the joint positions, the dimension of the C-space is seven. The free space~$\Cfree$ contains all the configurations which are valid with respect to some state validity criterion such as violation of obstacle collision constraints or kinematic constraints etc. The obstacle space~$\Cobs$ contains all the configurations which are invalid and so~$\Cobs = \calC \backslash \Cfree$
+
+For the motion planning problem we define a start configuration~$\Sstart$ and a goal set~$\Sgoal$. The goal can be under-specified as the pose of the robot end-effector or the pose of the target object. For instance, given a target object that the robot needs to grasp, the goal can be the grasp pose (i.e. position and orientation of the end-effector) or it can be even more under-specified as the pose of the object, giving the flexiblity to select different grasp poses. The motion planning problem is defined as finding a continuous path~$\tau : [0:1] \rightarrow \Cfree$ s.t. $\tau(0) = \Sstart$ and $\tau(1) \in \Sgoal $. Typically in practice most motion planning algorithms find a path of the form~$[s_0, s_1, s_2,...,s_n] \in \Cfree$ s.t. $s_0 = \Sstart$ and $s_n \in \Sgoal$ assuming that the consecutive states i.e $s_i, s_{i+1}$ can be connected via some simple interpolation scheme.
+
+Computing~$\Cfree$ is extremely hard, specially in higher dimensions. Instead of doing that, most motion planners generally sample in~$\Cfree$ and use a collision checker to identify the validity of a configuration. These planners typically sample states in~$\Cfree$ using rejection sampling, connect those samples to construct a graph (or a tree) and then use graph search to find the path from a start to goal. A motion planner is referred to as \emph{complete} if it guarantees to find a path if one exists, and otherwise returns failure.
+
 \subsection{C-space representation for Search-based Planning}
+Search-based planning methods descritize the C-space into cells. This descritization relies generally relies on a grid-based or lattice-based structure. A cell is the smallest unit of this discrete space and represents a small volume of C-space states that lie within it. A representative state within a cell, commonly its geometric center is picked to denote a vertex for that cell. All the vertices~$\calV$ connect to their neighboring vertices through edges~$\calE$ to construct a graph~$\calG = (\calV, \calE)$. These edges may have associated costs. Only those vertices and edges are added to~$\calG$ that are valid. The motion planning problem is thus turned into a graph search problem which can be solved using any graph search algorithim. The search is done on an implicit graph as opposed to explicit graph. Namely, instead of precomputing the entire graph which is infeasible for large domains, the graph is constructed and evaluated on-the-fly as the search progresses.
+
+The C-space discretization is done at a certain resolution which is a domain dependent parameter. The resolution determines how course or fine the discretization is. Search-based algorithms are attributed as \emph{resolution complete} which means that they will return a path if one exists for the given resolution. Note that it is possible that a solution exists in the C-space and the search-based planner fails to find it because the resolution is not fine enough for that problem.
+
 \subsection{Computational Complexity in Motion Planning}
-\subsection{Constant-time Motion Planning (CTMP)}
 
 \section{Related Work}
 \subsection{Preprocessing-based Methods}
 \subsection{Motion Planning with Reuse}
 \subsection{Real-time Motion Planning}
 \subsection{Global Control using Local Potential Functions}
+
+\section{Constant-time Motion Planning (CTMP)}
 
 \section{CTMP for Repetitive Tasks in Static Environments}
 \subsection{Overview}
@@ -111,6 +156,6 @@ For the remainder of this thesis, we propose to further study and formally defin
 \newpage
 
 \bibliographystyle{IEEEtran}
-\bibliography{biblio}
+\bibliography{references}
 
 \end{document}
