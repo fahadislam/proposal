@@ -105,20 +105,58 @@ The C-space discretization is done at a certain resolution which is a domain dep
 \subsection{Computational Complexity in Motion Planning}
 The general motion planning problem was shown by Reif to be PSPACE-hard~\cite{reif1979complexity}. Later it was shown to be PSPACE-complete by Canny~\cite{canny1988complexity}. Their analysis was based on finding the \emph{exact} solutions. The class of algorithms that go for finding the exact solutions are called combinatorial algorithms or \emph{exact} algorithms~\cite{lavalle2006planning}. These algorithms do not rely on any approximation of the C-space and operate in the continuous C-space. They are also complete with respect to the continuous C-space which is a stronger notion of completeness compared to sampling-based planners or search-based planners which are probablisitically complete and resolution complete respectively.
 
+The dimension~$d$ of the C-space is the most crucial element in determining the complexity of the motion planning problem. It has been shown that for the general motion planning problem the computational complexity grows exponentially with~$d$~\cite{chazelle1991singly}.
+
 The exact motion planning algorithms do not scale to more complex problems as they make certain limiting assumptions about the geometry of the robot and the obstacles. Since the exact methods are no more used in modern days, the computational complexity analysis for the general motion planning problem is of less relevance and the community focusses more on the analysis of the specific algorithms.
+
+
 
 \section{Related Work}
 \subsection{Preprocessing-based Methods}
 Preprocessing-based motion planners often prove beneficial for real-time planning. They analyse the configuration space offline to generate some auxiliary information that can be used online to speed up planning. 
 
-The most reknowned example is the Probablistic Roadmap Method (PRM)~\cite{kavraki1996probabilistic} methods. They have a preprocessing and a query phase. In the preprocessing phase a roadmap is constructed in $\Cfree$ by randomly sampling valid states in the C-space and connecting them to their neighboring states if the edges making the connections are valid. In the query phase the start and goal states are connected to their neighboring states in the roadmap (if valid connections are possible) and then any search algorithm like A* search is used to find the path. PRM methods are categorized as multi-query methods meaning that once the roadmap is constructed it can be used to answer multiple queries for the same environment.
+The most reknowned example is the Probablistic Roadmap Method (PRM)~\cite{kavraki1996probabilistic} methods. They have a preprocessing and a query phase. In the preprocessing phase a roadmap is constructed in $\Cfree$ by randomly sampling valid states in the C-space and connecting them to their neighboring states if the edges making the connections are valid. In the query phase the start and goal states are connected to their neighboring states in the roadmap (if valid connections are possible) and then any search algorithm like A* search is used to find the path. PRM methods are categorized as multi-query methods meaning that once the roadmap is constructed it can be used to answer multiple queries for the same environment. Query times can be significantly sped up by further preprocessing the roadmaps using landmarks~\cite{paden2017landmark}. Recently,the repetition roadmap~\cite{LA18} was suggested as a way to extend the \textsf{PRM} for the case of multiple highly-similar scenarios. Some of these methods have been integrated with sparse motion-planning roadmaps (see e.g.,~\cite{SSAH14,DB14}) to reduce the memory footprint of the algorithm. All these methods only provide probablistic completeness guarantees.
+
+Our work bares resemblance to previous work on 
+subgoal graphs~\cite{UK17,UK18}.
+Subgoal graphs is a search-based method that preprocesses the entire C-space to generate a sparse overlay graph comprised of vertices called sub-goals. The pair of sub-goals connected by an edge are \emph{reachable} and thus searching on this overlay graph is significantly faster than searching on the original graph. The method assures that the path found on this subgoal graph has a path on the original graph and can be quickly computed at query time. As this method requires preprocessing the full C-space it is expensive and only is applicable to lower dimensional planning problems.
+
+While all these preprocessing-based approaches speedup planning times compared to planning from scratch by using the preprocessed information, they do not provide bounds on the planning times.
 
 
 \subsection{Motion Planning with Reuse}
+An alternative approach to address our problem is to precompute a set of complete paths into a library and given a query, attempt to match complete paths from the library to the new query~\cite{berenson2012robot,jetchev2013fast}.
+Using paths from previous search episodes (also known as using experience) has also been an active line of work~\cite{PCCL12,PDCL13,BAG12,CSMOC15}. E-graphs method~\cite{PCCL12} computes a heuristic function to guide the search in such a way as to reuse search efforts from previously generated paths. The Lightning framework~\cite{BAG12} runs two modules in parallel, a module that runs the planner from scratch and a module that retrieves and repairs path stored in a library. The Thunder framework~\cite{CSMOC15} also leverages previous experiences and the experiences are generated using probabilistic sampling. The experiences as stored as sparse roadmap spanner~(SPARS). 
+
+These methods also provide significant speedups in planning times, but they still do not provide constant-time planning guarantees which our method aims to provide.
+
 \subsection{Real-time Motion Planning}
+In practice, the only class of algorithms that provide constant-time planning guarantees are real-time algorithms~\cite{KL06,KS09,K90}.
+To provide guarantees on planning time the search only looks at a finite horizon, generating a partial plan, and interleaves planning and execution. These algorithms run repeated A* searches and update the heuristic values in the local search spaces while maintaining the admissibility of the heuristics. The heuristis get more informed as the search is run repeatedly. By doing so they provide completeness guarantees, meaning that the robot will eventually arrive at the goal.
+
+As opposed to these finite horizon planning algorithms, our method plans for indefinite horizons i.e. all the way from the start to the goal while providing constant-time planning guarantees
+
+\subsection{Online Replanning: Moving Target Search}
+The conveyor-planning problem can be modelled as a Moving Target Search problem (MTS) which is a widely-studied topic in the graph search-based planning literature~\cite{ishida1991moving,ishida1995moving,koenig2007speeding,sun2010moving}. 
+These approaches interleave planning and execution incrementally and update the heuristic values of the state space to improve the distance estimates to the moving target. Unfortunately, in high-dimensional planning problems, this process is computationally expensive which is why these approaches are typically used for two-dimensional grid problem such as those encountered in video games.
+
 \subsection{Global Control using Local Potential Functions}
+Finally, our notion of attractor states is similar (in spirit) to control-based methods that  ensure safe operation over local regions of the free configuration space~\cite{CRC03,CCR06,tedrake2010lqr}. Metaphorically they name these regions as ``funnels" that collapse a large set of input conditions to a single policy,
+These regions are then used within a high-level motion planner to compute collision-free paths. LQR-trees~\cite{tedrake2010lqr} computes local stability regions to build a sparse tree of LQR-stabilized trajectories. The union of these local regions covers the entire state space.
+
+\subsection{Motion Planning for Conveyor Pickup Task}
+Existing work on picking moving objects has focused on different aspects of the problem ranging from closed-loop controls to object perception and pose estimation, motion planning and others~\cite{allen1993automated, han2019toward, stogl2017tracking, zhang2018gilbreth}. 
+%
+Here, we focus on motion-planning related work. Graph-searched based approaches have been used for the motion-planning problem~\cite{cowley2013perception, menon2014motion}. The former uses a kinodynamic motion planner to smoothly pick up moving objects i.e., without an impactful contact. A heuristic search-based motion planner that plans with dynamics and could generate optimal trajectories with respect to the time of execution was used. While this planner provides strong optimality guarantees, it is not real-time and thus cannot be used online.
+%
+The latter work was demonstrated in the real world showing real-time planning capability. While the planner is fast, it does  pure kinematic planning and does not require collision checking with the target object. The approach plans to a pregrasp pose and relies on Cartesian-space controllers to perform the pick up. The usage of the Cartesian controller limits the types of objects that the robot can grasp.
 
 \section{Constant-time Motion Planning (CTMP)}
+In this thesis we introduce the concept of Constant-time Motion Planning (CTMP). We develop algorithms that will provably guarantee constant query-time complexity. Constant-time complexity implies that regardless of the problem size or the input size, the algorithm demands the same computation time.
+
+
+
+
 
 \section{CTMP for Repetitive Tasks in Static Environments}
 \subsection{Overview}
