@@ -768,6 +768,51 @@ Among other planners, PRM shows the highest success rate but at the cost of a la
 \end{figure}
 
 \subsubsection{Motion Planning for Truck-unloading Robot}
+We tested our algorithm on an industrial truck-unloading robot~(see Fig.~\ref{fig:gmt}). The robot has a mobile omnidirectional base referred to as \textit{base} and two articulated mechanisms--a manipulator-like tool with suction grippers and a  scooper-like tool with conveyor belts, referred to as \textit{arm} and \textit{nose}, respectively. The general task of this robot is to unload boxes from delivery trucks as quickly and efficiently as possible and that is why it requires fast and reliable motion planning.
+
+The robot's arm is 4-Dof and the nose has 3-Dof. We restrict the base motion to be one-dimensional and only allow the base to move either forward or backward. The robot can be controlled in different modes of operation and we tested our planner for each of these modes~(see table~\ref{tab:gmt}). The start state of the robot for each of these mode is a fixed configuration where the robot drops off the boxes or resets. Similar to the mail-sorting domain, the goal region is defined in the task space of the robot. For this robot we define two goal regions~$G_{\textrm{arm}}$ and~$G_{\textrm{nose}}$ for the arm and nose respectively. The discretization of~$G$ along position axes~($x,y,z$) is~0.05m and rotations axes~($\textit{roll, pitch, yaw}$) is 5 degrees. The sizes of the goal regions are selected as per the requirement of the task.
+We compare our results with Weighted A* (WA*)algorithm. The results are summarized in Table~\ref{tab:gmt}. We observe our algorithm shows over an order of magnitude improvements in terms of planning times over the WA*. For a timeout of 5 seconds both the planners showed 100 percent success.
+
+\begin{figure}
+\centering
+\includegraphics[width=0.5\textwidth]{gmt.pdf}
+    % \vspace{-2mm}
+  \caption{
+  Truck-unloader robot with its manipulator-like (arm) and scooper-like (nose) end effectors
+}
+    \label{fig:gmt}
+% \vspace{-6mm}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=0.5\textwidth]{gmt_sim.png}
+    % \vspace{-2mm}
+  \caption{
+  A simulated real world truck-unloading scenario
+}
+    \label{fig:gmt_sim}
+% \vspace{-6mm}
+\end{figure}
+
+\begin{table*}[t]
+\centering
+     \resizebox{0.7\columnwidth}{!}{%
+    % \resizebox{1.4\textwidth}{!}{\begin{minipage}{\textwidth}
+        \begin{tabular}{ l | c c c c}  
+           & arm & nose & arm+base & nose+base\\
+         \hline
+         WA* 		& 12.8 & 7.2 & 7.5 & 4.4 \\
+         Our Method & 0.69 & 0.29 & 0.5 & 0.47 \\
+        \end{tabular}
+    }
+    \caption{Comparison of mean planning times~[ms] averaged over 100 randomized queries for different modes of operation of the truck-unloading robot. The number of subregions preprocessed for each of these modes~(left to right) are~101,~7,~85 and~308.}
+    \label{tab:gmt}
+  % \end{center}
+% \vspace{-6mm}
+\end{table*}
+
+As this algorithm is only applicable to static (known) environments, we only preprocessed it with collision checking against the walls of the truck and with self collision checking and not with the boxes inside the truck. We also tested our planner in a simulated real world scenario~(see Fig.\ref{fig:gmt_sim}) in conjunction with the WA* planner. For each query, we first ran our planner and validated the computed path against non-static obstacles i.e the boxes. We employed WA* as a fallback planner in case the first path is invalid. We observed that for all the queries ran for this scene, the fallback planner was never invoked. This experiment gave us an interesting use case for our planner to be employed in conjunction with conventional planners in the environments that are partially static.
 
 \section{CTMP to Pickup Moving Objects off a Conveyor}
 \label{sec:conveyor}
