@@ -83,6 +83,7 @@ This thesis is motivated by the following key observations from the aforemention
 A naive way of providing constant-time guarantees would be to precompute paths for all possible start and goal states that the planner could be queried for and use a simple hash lookup at query time (assuming the lookup time is constant). However, as the set of start or goal states increase, this approach quickly becomes intractable memory and precomputation time wise. Our method provides a compression scheme and precomputes only a small set of representative paths which can still ``cover" the robot's operational space. Namely, using this set of paths, at query time, our method can solve any query within the robot's operational space in bounded time.
 
 \subsection{Approach}
+\label{sec:approach}
 So far, we have developed CTMP algorithms for two domains.
 \subsubsection{Manipulation for repetitive tasks in static environments}
 In this work, we consider the specific case where the start state is fixed and there exists a ``goal region" which contains all possible goals. Consider for example, a typical mailroom scenario where the robot has to pick up mail from a fixed location and sort them in cubby shelves. The start corresponds to the pickup location for the packages and the goal region corresponds to all possible goal poses within the cubby shelves. Note that the cubbies reduce the robot's operational space drastically which makes the preprocessing tractable for our method.
@@ -115,6 +116,7 @@ For the motion planning problem we define a start configuration~$\Sstart$ and a 
 Computing~$\Cfree$ is extremely hard, specially in higher dimensions. Instead of doing that, most motion planners generally sample in~$\Cfree$ and use a collision checker to identify the validity of a configuration. These planners typically sample states in~$\Cfree$ using rejection sampling, connect those samples to construct a graph (or a tree) and then use graph search to find the path from a start to goal. These algorithms are called sampling-based algorithms. A motion planner is referred to as \emph{complete} if it guarantees to find a path if one exists, and otherwise returns failure. Sampling-based planners are \emph{probablisitically complete}, meaning that in the limit of the number of samples they are guaranteed to find a solution if one exists.
 
 \subsection{C-space representation for Search-based Planning}
+\label{sec:sbp}
 Search-based planning methods descritize the C-space into cells. This descritization relies generally relies on a grid-based or lattice-based structure. A cell is the smallest unit of this discrete space and represents a small volume of C-space states that lie within it. A representative state within a cell, commonly its geometric center is picked to denote a vertex for that cell. All the vertices~$\calV$ connect to their neighboring vertices through edges~$\calE$ to construct a graph~$\calG = (\calV, \calE)$. These edges may have associated costs. Only those vertices and edges are added to~$\calG$ that are valid. The motion planning problem is thus turned into a graph search problem which can be solved using any graph search algorithim. The search is done on an implicit graph as opposed to explicit graph. Namely, instead of precomputing the entire graph which is infeasible for large domains, the graph is constructed and evaluated on-the-fly as the search progresses.
 
 The C-space discretization is done at a certain resolution which is a domain dependent parameter. The resolution determines how course or fine the discretization is. Search-based algorithms are attributed as \emph{resolution complete} which means that they will return a path if one exists for the given resolution. Note that it is possible that a solution exists in the C-space and the search-based planner fails to find it because the resolution is not fine enough for that problem.
@@ -169,20 +171,20 @@ Here, we focus on motion-planning related work. Graph-searched based approaches 
 The latter work was demonstrated in the real world showing real-time planning capability. While the planner is fast, it does  pure kinematic planning and does not require collision checking with the target object. The approach plans to a pregrasp pose and relies on Cartesian-space controllers to perform the pick up. The usage of the Cartesian controller limits the types of objects that the robot can grasp.
 
 \section{Constant-time Motion Planning (CTMP)}
+\label{sec:ctmp}
 In this thesis we introduce the concept of Constant-time Motion Planning (CTMP). We develop algorithms that will provably guarantee constant query-time complexity. Constant-time complexity implies that regardless of the problem size or the input size, the algorithm demands the same computation time.
 
 \subsection{Input size of the Algorithm}
-In our problem setting, under the assumption that the tasks are fairly repetitive we constrain the motion planning problem to a small subset of the C-space. We define a fixed start state~$\Sstart$ and a goal region~$G \in \calC$ such that all the queries will fall within~$G$. In section~\ref{sec:conveyor}, we will also consider a setting where there can be multiple starts but in this section for the sake of simplicity we will consider the case for a fixed~$\Sstart$. Next, we discretize~$G$ with some resolution~\textit{res} to get a discrete set of goals. The size of this set determines the size of the input to our algorithm.
+As described in section~\ref{sec:conveyor}, our approach operates in discretized search spaces. The size of the input to the query phase of our algorithm is determined by the size of the discretized operational space of the robot. 
+To prove that the algorithm has a constant time complexity, we need to show that its computation time is bounded and the bound is independent of the input size.
+%In our problem setting our input to the algorithm is the full configuration space of the robot~$\calC$. The size of~$\calC$ by definition is unbounded since it is a continuous space. We will also consider the case in section~\ref{sec:conveyor} where we consider a discretized search space as highlighted in section~\ref{sec:sbp}. In that case the input is finite is defined by the size of the underlying implicit graph~$\calG$. 
 
 \subsection{(Small) Constant-time Algorithm}
-We now define a constant-time motion planning algorithm with respect the algorithm input size.
-\begin{definition}
-	Let~$n$ be the number of discrete goals in~$G$. An algorithm is considered as constant-time, if the time complexity~$T(n)$ is bounded by a value that is independent of~$n$.
-\end{definition}
-In Big O notation, we say that the algorithm has an asymptotic complexity of~$O(1)$. We also aim that~$T(n)$ of the algorithm is small as to have real-time performance.
+More formally an algorithm with input size~$n$ has a constant time complexity if~$T(n)$ is bounded by a value that does not depend on~$n$.
+Note that the running time does not have to be independent of~$n$, but an upper bound for the running time has to be bounded independently of~$n$. In Big O notation, a constant-time algorithm has an asymptotic complexity of~$O(1)$. In the proposed constant-time algorithms we also aim that~$T(n)$ of the algorithm is small as to have real-time performance.
 
 \subsubsection{A Naive Constant-time Algorithm}
-Given a finite set of goals in~$G$, the naive approach would be to precompute and store paths to each goal in~$G$ in a preprocessing stage and use a hash table mapping goals to paths and use it to answer any query goal~$g \in G$ in the query stage. Under the assumption that there are no hash collisions, the hash lookup is considered a constant-time operation and hence the algorithm will have a constant-time complexity. However, this approach becomes intractable when the number of queries becomes large. This is because the memory requirement or the precomputation time becomes very large for practical resources.
+Refering to the problem setting described in section~\ref{sec:approach}, given a goal region~$G$ with a finite set of goals, the naive approach would be to precompute and store paths to each goal in~$G$ in a preprocessing stage and use a hash table mapping goals to paths and use it to answer any query goal~$g \in G$ in the query stage. Under the assumption that there are no hash collisions, the hash lookup is considered a constant-time operation and hence the algorithm will have a constant-time complexity. However, this approach becomes intractable when the number of queries becomes large. This is because the memory requirement or the precomputation time becomes very large for computational resources.
 
 \subsubsection{Proposed Approach}
 The naive approach puts all the computation burden on the proprocessing phase and requires minimum computation time but a large memory during the query phase. On the other end of the spectrum we can just plan from scratch online every time and eliminate the preprocessing stage, shifting all the burden to the query phase. This would require minimal memory but the high computational complexity. We propose a middle ground where we can balance the offline-online burden in such a way that we can provide provable (small) constant time planning guarantees. Instead of having to precompute paths to all the goals in~$G$, we propose compression schemes to precompute and store only a small set of representative paths that can be used in query phase in such a way that assures (small) constant time planning. In the following two sections we will theoretically show that our algorithms run in constant-time and experimentally show that the planning times are small.
@@ -666,18 +668,22 @@ This may cause the algorithm to generate much more subregions (with smaller radi
 \subsubsection{Time Complexity of Query Phase}
 \label{subsec:complexity}
 The query time comprises of 
-(i)~finding the containing subregion $R_i$ 
+(i)~finding the containing subregion $R_i$
+(ii)~running the greedy search to $\sAttract$
 and
-(ii)~running the greedy search to $\sAttract$.
+(iii)~lookup operations from preprocessed data.
 Step~(i) requires iterating over all subregions (in the worst case) which takes $O(|\calR|)$ steps while 
 step~(ii) requires expanding the states along the path from $\sGoal$ to $\sAttract$ which requires~$O(\calD)$ expansions where $\calD$ is the depth (maximal number of expansions of a greedy search) of the deepest subregion. 
 For each expansion we need to find the greedy predecessor, considering at most $b$ predecessors, where $b$ is the maximal branching factor of our graph.
-We can measure the depth of each subregion in Alg.~\ref{alg:2} by keeping track of the depth of each expanded state from the root i.e., $\sAttract$. Hence, overall the query phase takes $O(|\calR| + \calD \cdot b)$ operations. The maximal query time can also be empirically profiled after the preprocessing phase.
+We can measure the depth of each subregion in Alg.~\ref{alg:2} by keeping track of the depth of each expanded state from the root i.e., $\sAttract$. We assume that step~(iii) is constant-time operation. Hence, overall the query phase takes $O(|\calR| + \calD \cdot b)$ operations. The maximal query time can also be empirically profiled after the preprocessing phase.
 
 %
 \textbf{Remark:}
 Note that we can also bound the number of expansions required for the query phase by bounding the maximum depth of the subregions. We can do that by terminating Alg.~\ref{alg:2} when the $R_i$ reaches the maximum depth or if the existing termination condition (line ~\ref{alg:2:terminate}) is satisfied.
 Having said that, this may come at the price of increasing the number of subregions.
+
+\textbf{Constant time Complexity}
+We need to show that $O(|\calR| + \calD \cdot b) \rightarrow O(1)$. Recall the definition of constant-time algorithm from section~\ref{sec:ctmp}. The input to the algorithm's query phase is~$G_\calS$. Note that in~$O(|\calR| + \calD \cdot b)$,~$\calD$ and~$b$ are trivially bounded; both are constants. The third term~$|\calR|$ however depends on goal region~$G_\calS$. Roughly speaking,~$|\calR|$ depends on three things~(1) how cluttered~$G_\calS$ is with obstacles, the more cluttered it is the more subregions we will get~(2) the size of~$G_\calS$; a bigger goal region will render more subregions and~(3) the parameter~$\calD$. We make the assumption that for a choice of~$\calD$~(large enough), for certain degree of obstacle clutter in C-space~(less enough) and by our original problem formulation that the goal region is a small subset of the C-space, the upper bound on~$|\calR|$ is bounded independently of the size of~$G_\calS$. Under this analysis we can conclude that the algorithm has a constant time complexity i.e~$O(1)$.
 
 \subsubsection{Algorithm Completeness}
 \label{subsec:completeness}
@@ -690,6 +696,52 @@ Let the function $c(\cdot)$ denote the cost of a path and $c^*(\cdot)$ denote th
  $c(\pi) - c^*(\pi) < 2 * c(\pi_g)$,
  % \end{center}
 where $c(\pi_g)$ is the cost of the greedy path from the attractor to the goal state.
+
+\subsection{Constant-time Variant}
+To alleviate the assumption that we made in section~\ref{sec:analysis} to guarantee constant time complexity we propose a variant of the algorithm. The key idea is to change the method of finding the subregion that contains the goal from geometric checks~(using radii of subregions) to a hash lookup. For doing so, the algorithm needs to pay extra price in terms of memory, since now it has to store all the goals in~$G_\calS$ and associated subregions in a lookup table.
+
+The preprocessing phase differs in the reachability search~(see Alg.~\ref{alg:reach2}). The algorithm no more requires a priority query. So OPEN now is a set instead of a queue.
+ 
+\begin{algorithm}[t]
+\footnotesize
+\caption{Reachability Search}\label{alg:reach2}
+
+\begin{algorithmic}[1]
+\Procedure{ComputeReachability}{$\sAttract$}
+%\Procedure{ComputeReachability}{$\sAttract, r_{\text{max}}$}
+\State $S_{\text{reachable}} \leftarrow \{\sAttract\}$ \Comment{reachable set} \label{alg:2:reachable}
+\State OPEN $\leftarrow \{$Succs($\sAttract$)$\}$  \Comment{key: $h(s,\sAttract)$} \label{alg:2:OPEN}
+\State CLOSED $\leftarrow \emptyset$
+\State $r_i \leftarrow 0$
+
+%\While {$r_i \leq r_{\text{max}}$}
+\While{OPEN$\neq \emptyset$}
+    \State $s \leftarrow$ OPEN.pop()
+    \State insert $s$ in CLOSED
+    \State $s'_g \leftarrow \argmin\limits_{s' \in \text{Preds}(s)} h(s', \sAttract)$ 
+%    \State $s'_g \leftarrow$ GreedySucc($s$)
+  \label{alg:2:greedy} 
+ \Comment{greedy predecessor}
+ % acc. to some tie-breaking criteria}
+    \If {$s'_g$ $\in$ $S_{\text{reachable}}$ and Valid(edge(s,$s'_g$))}  \label{alg:2:crit}
+        \State $S_{\text{reachable}} \leftarrow S_{\text{reachable}} \cup \{s\}$  \Comment{$s$ is greedy} \label{alg:2:set}
+%    \ElsIf {Valid($s$)} \label{alg:2:terminate}
+%        \State $r_i \leftarrow h(s, \sAttract)$ \label{alg:2:rad}
+%        \State \Return (OPEN, $r_i$)
+%%        \State break
+    \EndIf
+    \For {each $s' \in \text{Succs}(s) \cap G_\calS$} \label{alg:2:prun}
+        \If {$s' \notin$ CLOSED}
+            \State insert $s'$ in OPEN with priority $h(s', \sAttract)$
+        \EndIf
+    \EndFor
+\EndWhile
+%\State $r_i \leftarrow h(s, \sAttract) + \epsilon$    \Comment{$\epsilon$ is a small positive constant}
+\State \Return $S_{\text{reachable}}$
+
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
 
 \subsection{Experimental Results}
 \label{sec:eval}
@@ -775,7 +827,7 @@ We compare our results with Weighted A* (WA*)algorithm. The results are summariz
 
 \begin{figure}
 \centering
-\includegraphics[width=0.5\textwidth]{gmt.pdf}
+\includegraphics[width=0.6\textwidth]{gmt.pdf}
     % \vspace{-2mm}
   \caption{
   Truck-unloader robot with its manipulator-like (arm) and scooper-like (nose) end effectors
@@ -786,7 +838,7 @@ We compare our results with Weighted A* (WA*)algorithm. The results are summariz
 
 \begin{figure}
 \centering
-\includegraphics[width=0.5\textwidth]{gmt_sim.png}
+\includegraphics[width=0.6\textwidth]{gmt_sim.png}
     % \vspace{-2mm}
   \caption{
   A simulated real world truck-unloading scenario
