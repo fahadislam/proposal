@@ -1,4 +1,4 @@
-\documentclass[a4paper,10pt]{article}
+\documentclass[a4paper]{article}
 \usepackage[utf8]{inputenc}
 \DeclareUnicodeCharacter{2010}{-}% support older LaTeX versions
 \usepackage{hyperref}
@@ -69,18 +69,26 @@ Oliver Kroemer\\
 Siddhartha Srinivasa (UW)\\
 Oren Salzman (Technion)\\
 }
+
+\vspace{10mm}
+\textit{Submitted in partial fulfillment of the requirements
+for the degree of Doctor of Philosophy in Robotics.}
+
+\vspace{10mm}
+Copyright~$\copyright$ 2020 Fahad Islam. All rights reserved.
 \end{center}
 \newpage
 
 \begin{abstract}
-In manufacturing and warehouse scenarios, robots often perform recurring manipulation tasks in structured environments. Fast and reliable motion planning is one of the key elements that ensure efficient operations in such environments. A very common example scenario is of manipulators working at conveyor belts, where they have limited time to pick moving objects and if the planner exceeds a certain time threshold, they would fail to pick the objects up. Similar scenarios are encountered in automated assembly lines. Such time-critical applications spur the need for planners which are \emph{guaranteed} to be fast. To this end we introduce the concept of Constant-time Motion Planning (CTMP); namely, the ability to provably guarantee to generate a full motion plan within a (small) constant time. We then develop several algorithms that fall into the class of constant-time motion planning algorithms.
+In manufacturing and warehouse scenarios, robots often perform recurring manipulation tasks in structured environments. Fast and reliable motion planning is one of the key elements that ensure efficient operations in such environments. A very common example scenario is of manipulators working at conveyor belts, where they have limited time to pick moving objects and if the planner exceeds a certain time threshold, they would fail to pick the objects up. Similar scenarios are encountered in automated assembly lines. Such time-critical applications spur the need for planners which are \emph{guaranteed} to be fast. To this end we introduce the concept of Constant-time Motion Planning (CTMP); namely, the ability to provably guarantee to generate a motion plan within a (small) constant time. We then develop several algorithms that fall into the class of constant-time motion planning algorithms.
 
 Specifically, up to now we have developed constant-time motion planning algorithms for two domains; (1) Manipulation for repetitive tasks in static environments (2) Manipulation for the task of picking up moving objects (of known models) off a conveyor belt. For the latter, the robot typically perceives a rough pose estimate viewing from a distance, but it must start moving early on (relying on that rough estimate) to be able to reach the object in time and then adjust its motion in real time as it gets improved estimates.
 Our key insight is that since these domains are fairly repetitive, the space in which the robot operates is a very small subset of its configuration space, which allows us to preprocess it exhaustively. The preprocessing step generates a representative set of paths that can be used by search at query time in a way that assures small constant-time planning.
 %
 For the former domain, we evaluate our algorithm for a mail sorting task in simulation on PR2 and also tested the algorithm on a real truck-unloading robot. For the latter domain, we perform real robot experiments on PR2 working at a conveyor belt.
 
-For the remainder of this thesis, we propose to further study and formally define what constant-time planning implies in practice and what underlying assumptions it entails. We also propose to boost the capability of the conveyor pick-up task by having multiple robot arms simultaneously picking up objects, while still maintaining strong theoretical guarantees on the planning side. This introduces new algorithmic challenges including decision making about which object to assign to which arm and motion synchronization between the arms.
+For the remainder of this thesis we propose the following work. First, we propose to further study and formally define what constant-time planning implies in practice and what underlying assumptions it entails. Second, we propose to extend our  planning framework to semi-static environments (containting some movable obstacles). Third, we aim to boost the capability of the conveyor pick-up task by having multiple robot arms simultaneously picking up objects, while still maintaining strong theoretical guarantees on the planning side.
+%This introduces new algorithmic challenges including decision making about which object to assign to which arm and motion synchronization between the arms.
 \end{abstract}
 \newpage
 
@@ -91,11 +99,11 @@ For the remainder of this thesis, we propose to further study and formally defin
 \subsection{Motivation}
 In industrial settings such as manufacturing and warehouse environments, the robots typically operate in structured environments and perform repetitive tasks. Despite significant advancements in the field of motion planning in the past several decades, a large percentage of warehousing and manufacturing industry still uses robots that run hardcoded routines to perform very specific tasks. The lack of penetration of modern motion planning algorithms at scale can be attributed to the fact that the industry needs systems which are \emph{guaranteed} to be fast and reliable, even at the cost of flexibility that these systems could potentially provide.
 
-In warehouses, robots are widely deployed at fast moving conveyor belts to perform repetitive pick and place or sorting tasks, which gives them a very short time buffer to plan their motion. Failing to plan within that time, the robot would skip objects and affect the throughput of the system. Similarly in assembly lines where multiple robots operate in their respective work stations, an overhead caused by the motion planner at one station can slow down the entire chain. This thesis focuses on such time critical applications and introduces the notion of (small) Constant-time Motion Planning (CTMP). CTMP implies generating full motion plans in provably-bounded short planning times.
+In warehouses, robots are widely deployed at fast moving conveyor belts to perform repetitive pick and place or sorting tasks, which gives them a very short time budget to plan their motion. Failing to plan within that time, a robot would skip objects and affect the throughput of the system. Similarly in assembly lines where multiple robots operate in their respective work stations, an overhead caused by the motion planner at one station can slow down the entire chain. This thesis focuses on such time critical applications and introduces the notion of (small) Constant-time Motion Planning (CTMP). CTMP implies generating full motion plans in provably-bounded short planning times.
 
 This thesis is motivated by the following key observations from the aforementioned domains; (1) The tasks are highly repetitious (2) The  environments are fairly structured. (1) gives us an insight that the operational space of the robot is a very small as compared to its full C-space and (2) implies that the environment model is known in advance. These two aspects allow us to fully preprocess the part of the C-space that the robot operates in while accounting for the known objects that exists in its surroundings.
 
-A naive way of providing constant-time guarantees would be to precompute paths for all possible start and goal states that the planner could be queried for and use a simple hash lookup at query time (assuming the lookup time is constant). However, as the set of start or goal states increase, this approach quickly becomes intractable memory and precomputation time wise. Our method provides a compression scheme and precomputes only a small set of representative paths which can still ``cover" the robot's operational space. Namely, using this set of paths, at query time, our method can solve any query within the robot's operational space in bounded time.
+A naive way of providing constant-time guarantees would be to precompute paths for all possible start and goal states that the planner could be queried for and use a simple hash lookup at query time (assuming the lookup time is constant). However, as the set of start or goal states increase, this approach quickly becomes intractable, memory and precomputation time-wise. Our method provides a compression scheme and precomputes only a small set of representative paths which can still ``cover" the robot's operational space. Namely, using this set of paths, at query time, our method can solve any query within the robot's operational space in constant time.
 
 \subsection{Approach}
 \label{sec:approach}
@@ -103,116 +111,162 @@ So far, we have developed CTMP algorithms for two domains.
 \subsubsection{Manipulation for repetitive tasks in static environments}
 In this work, we consider the specific case where the start state is fixed and there exists a ``goal region" which contains all possible goals. Consider for example, a typical mailroom scenario where the robot has to pick up mail from a fixed location and sort them in cubby shelves. The start corresponds to the pickup location for the packages and the goal region corresponds to all possible goal poses within the cubby shelves. Note that the cubbies reduce the robot's operational space drastically which makes the preprocessing tractable for our method.
 
-Our key insight is that given an ``attractor state''~$s$ in the goal region, typically there is a large region of states around it for which a greedy search (a search following a potential function) towards~$s$ is collision free. We show that such so called attractor regions can be efficiently computed by using dynamic programming.
+Our key insight is that given an ``attractor state'' in the goal region, typically there is a large region of states around it for which a greedy search (a search following an attractive potential function) towards the attractor state is collision free. We show that such so called ``attractor regions" can be efficiently computed by using dynamic programming.
 Importantly, the runtime-complexity of such a greedy search is bounded and there is no need to perform computationally-complex collision-detection operations. 
 This insight allows us to generate in an offline phase a small set of these attractor regions together with a path between each attractor state and the start, ensuring that together these attractor regions completely cover the full goal region.
-In the query phase, a path is generated by performing a greedy search from the goal to an attractor state (the one which contains the goal) followed by the precomputed path from the start.
+In the query phase, a path is generated by performing a greedy search from the goal to an attractor state (the one which contains the goal) followed by the precomputed path from the start. The approach is described in detail in chapter~\ref{chap:icaps}.
 
 \subsubsection{Manipulation for picking up moving objects off a conveyor belt}
-We will refer to this problem as ``conveyor pickup task". For this domain we assume that the geometric models of the target objects are known in advance. The success of manipulation tasks relies heavily on the accuracy of the perception system which often is noisy, especially if the target objects are perceived from a distance. For fast moving conveyor belts, the robot cannot wait for a perfect estimate before it starts execution. In order to be able to reach the object in time it must start moving early on (relying on the initial noisy estimates) and adjust its motion on-the-fly in response to the pose updates from perception. We developed an approach that meets these requirements by providing provable constant-time planning and replanning guarantees.
+In this domain, the task for the robot to reliably and safely pickup objects coming on a conveyor belt. We will refer to this problem as ``conveyor-pickup task". We assume that the geometric models of the target objects are known in advance. The success of manipulation tasks relies heavily on the accuracy of the perception system which often is noisy, especially if the target objects are perceived from a distance. For fast moving conveyor belts, the robot cannot wait for a perfect estimate before it starts execution. In order to be able to reach the object in time it must start moving early on (relying on the initial noisy estimates) and adjust its motion on-the-fly in response to the pose updates from perception. We developed an approach that meets these requirements by providing provable constant-time planning and replanning guarantees.
 
-Again, with the same insight, in the first step we precompute a small set of paths from a fixed start (say drop off location) that can cover the goal region which in this domain is defined in the space of object poses. The goal can be any arbitrary object pose~$(x,y,yaw)$ of the objects. In the second step, we uniformly discretize these paths in time to get a set of states that we call ``replannable'' states. To handle pose updates online, we may need to replan from any of these states to all the goals in the goal region. The algorithm then goes back to the first step treating all the replannable states as new starts and this recursive process continues until all replannable states are taken care of. While the approach has exponential complexity in the number of timesteps from the start to the goal, we drastically save on computation and memory by reusing the first set of paths (from the drop off location to the goal region). Our algorithm guarantees that for any replannable state and a goal, a plan will be generated within a bounded time. Experimentally we observe that the robot fails most of the time without replanning i.e. in case it relies on the first estimate or if it waits for an accurate estimate before starting planning.
+Again, with the same insight, in the first step we precompute a small set of paths from a fixed start (say drop off location) that can cover the goal region which in this domain is defined in the space of object poses. The goal can be any arbitrary object pose~$(x,y,yaw)$ of the objects. In the second step, we uniformly discretize these paths in time to get a set of states that we call ``replannable'' states. To handle pose updates online, we may need to replan from any of these states to all the goals in the goal region. The algorithm then goes back to the first step treating all the replannable states as new starts and this recursive process continues until all replannable states are taken care of. While the approach has exponential complexity in the number of timesteps from the start to the goal, we drastically save on computation and memory by reusing the first set of paths (from the drop off location to the goal region). Our algorithm guarantees that for any replannable state and a goal, a plan is be computed in constant time. Experimentally we observe that the robot fails most of the time without replanning i.e. in case it relies on the first estimate or if it waits for an accurate estimate before starting planning. The details of the framework is provided in chapter~\ref{sec:rss}.
 
 \subsection{Expected Contribution}
 We expect to make the following contributions in this thesis.
 \begin{itemize}
 	\item Introduce and formalize the concept of Constant-time Motion Planning (CTMP)
 	\item Develop CTMP algorithm for domains with repetitive manipulation tasks in static environments
-	\item Develop CTMP algorithm for the conveyor pickup task
+	\item Develop CTMP algorithm for the conveyor-pickup task
+	\item Extend CTMP framework to semi-static environments
 	\item Enhance the conveyor pick task using multiple robot arms, simultaneously picking up multiple objects
 \end{itemize}
 
 \section{Background}
 \subsection{Configuration Space and Motion Planning}
-Motion planning algorithms operate in the state space often also referred to as the \emph{configuration space} (C-space) or~$\calC$~\cite{lozano1990spatial}. In this space a state or a configuration of the robot can be uniquely represented as a point which makes it convenient for the motion planners to operate. It can be the~($x,y$) position of the robot or~($x,y,yaw$) if the orientation also matters. For a robot arm the configuration can be composed of all the joint positions. If planning with dynamics, the velocities and times may also be added to the configuration. Similarly higher order derivatives can also be added as per the requirements of the domain. The number of variables in the configuration represents the \emph{dimension} of the C-space. For example, for a 7DoF robot arm, for only considering the joint positions, the dimension of the C-space is seven. The free space~$\Cfree$ contains all the configurations which are valid with respect to some state validity criterion such as violation of obstacle collision constraints or kinematic constraints etc. The obstacle space~$\Cobs$ contains all the configurations which are invalid and so~$\Cobs = \calC \backslash \Cfree$
+Motion planning algorithms operate in the state space often also referred to as the \emph{configuration space} (C-space) or~$\calC$~\cite{lozano1990spatial}. In this space a state or a configuration of the robot can be uniquely represented as a point which makes it convenient for the motion planners to operate. It can be the~($x,y$) position of the robot or~($x,y,yaw$) if the orientation also matters. For a robot arm the configuration can be composed of all the joint positions. If planning with dynamics, the velocities and times may also be added to the configuration. Similarly higher order derivatives can also be added as per the requirements of the domain. The number of variables in the configuration represents the \emph{dimension} of the C-space. For example, for a 7DoF robot arm, for only considering the joint positions, the dimension of the C-space is seven. The free space~$\Cfree$ contains all the configurations which are valid with respect to some state validity criterion such as violation of obstacle collision constraints or kinematic constraints etc. The obstacle space~$\Cobs$ contains all the configurations which are invalid and so~$\Cobs = \calC \backslash \Cfree$.
 
-For the motion planning problem we define a start configuration~$\Sstart$ and a goal set~$\Sgoal$. The goal can be under-specified as the pose of the robot end-effector or the pose of the target object. For instance, given a target object that the robot needs to grasp, the goal can be the grasp pose (i.e. position and orientation of the end-effector) or it can be even more under-specified as the pose of the object, giving the flexiblity to select different grasp poses. The motion planning problem is defined as finding a continuous path~$\tau : [0:1] \rightarrow \Cfree$ s.t. $\tau(0) = \Sstart$ and $\tau(1) \in \Sgoal $. Typically in practice most motion planning algorithms find a path of the form~$[s_0, s_1, s_2,...,s_n] \in \Cfree$ s.t. $s_0 = \Sstart$ and $s_n \in \Sgoal$ assuming that the consecutive states i.e $s_i, s_{i+1}$ can be connected via some simple interpolation scheme.
+For the general motion planning problem we define a start configuration~$\Sstart$ and a goal set~$\Sgoal$. The goal can be under-specified as the pose of the robot end-effector or the pose of the target object. For instance, given a target object that the robot needs to grasp, the goal can be the grasp pose (i.e. position and orientation of the end-effector) or it can be even more under-specified as the pose of the object, giving the flexiblity to select different grasp poses. The motion planning problem is defined as finding a continuous path~$\tau : [0:1] \rightarrow \Cfree$ s.t. $\tau(0) = \Sstart$ and $\tau(1) \in \Sgoal $. Typically in practice most motion planning algorithms find a path of the form~$[s_0, s_1, s_2,...,s_n] \in \Cfree$ s.t. $s_0 = \Sstart$ and $s_n \in \Sgoal$ assuming that the consecutive states i.e $s_i, s_{i+1}$ can be connected via some simple interpolation scheme.
 
 Computing~$\Cfree$ is extremely hard, specially in higher dimensions. Instead of doing that, most motion planners generally sample in~$\Cfree$ and use a collision checker to identify the validity of a configuration. These planners typically sample states in~$\Cfree$ using rejection sampling, connect those samples to construct a graph (or a tree) and then use graph search to find the path from a start to goal. These algorithms are called sampling-based algorithms. A motion planner is referred to as \emph{complete} if it guarantees to find a path if one exists, and otherwise returns failure. Sampling-based planners are \emph{probablisitically complete}, meaning that in the limit of the number of samples they are guaranteed to find a solution if one exists.
 
 \subsection{C-space representation for Search-based Planning}
 \label{sec:sbp}
-Search-based planning methods descritize the C-space into cells. This descritization relies generally relies on a grid-based or lattice-based structure. A cell is the smallest unit of this discrete space and represents a small volume of C-space states that lie within it. A representative state within a cell, commonly its geometric center is picked to denote a vertex for that cell. All the vertices~$\calV$ connect to their neighboring vertices through edges~$\calE$ to construct a graph~$\calG = (\calV, \calE)$. These edges may have associated costs. Only those vertices and edges are added to~$\calG$ that are valid. The motion planning problem is thus turned into a graph search problem which can be solved using any graph search algorithim. The search is done on an implicit graph as opposed to explicit graph. Namely, instead of precomputing the entire graph which is infeasible for large domains, the graph is constructed and evaluated on-the-fly as the search progresses.
+Search-based planning methods discretize the C-space into cells. This discreQIUarztization generally relies on a grid-based or lattice-based structure. A cell is the smallest unit of this discrete space and represents a small volume of C-space states that lie within it. A representative state within a cell, commonly its geometric center is picked to denote a vertex for that cell. All the vertices~$\calV$ connect to their neighboring vertices through edges~$\calE$ to construct a graph~$\calG = (\calV, \calE)$. These edges may have associated costs. Only those vertices and edges are added to~$\calG$ that are valid. The motion planning problem is thus turned into a graph search problem which can be solved using any graph search algorithim. The search is done on an implicit graph as opposed to explicit graph. Namely, instead of precomputing the entire graph which is infeasible for large domains, the graph is constructed and evaluated on-the-fly as the search progresses.
 
 The C-space discretization is done at a certain resolution which is a domain dependent parameter. The resolution determines how course or fine the discretization is. Search-based algorithms are attributed as \emph{resolution complete} which means that they will return a path if one exists for the given resolution. Note that it is possible that a solution exists in the C-space and the search-based planner fails to find it because the resolution is not fine enough for that problem.
 
 \subsection{Computational Complexity in Motion Planning}
-The general motion planning problem was shown by Reif to be PSPACE-hard~\cite{reif1979complexity}. Later it was shown to be PSPACE-complete by Canny~\cite{canny1988complexity}. Their analysis was based on finding the \emph{exact} solutions. The class of algorithms that go for finding the exact solutions are called combinatorial algorithms or \emph{exact} algorithms~\cite{lavalle2006planning}. These algorithms do not rely on any approximation of the C-space and operate in the continuous C-space. They are also complete with respect to the continuous C-space which is a stronger notion of completeness compared to sampling-based planners or search-based planners which are probablisitically complete and resolution complete respectively.
+The general motion planning problem was shown by Reif to be PSPACE-hard~\cite{reif1979complexity}. Later it was shown to be PSPACE-complete by Canny~\cite{canny1988complexity}. Their analysis was based on finding the \emph{exact} solutions. The class of algorithms that go for finding the exact solutions are called combinatorial algorithms or \emph{exact} algorithms~\cite{lavalle2006planning}. These algorithms do not rely on any approximation of the C-space and operate in the continuous C-space. They are also complete with respect to the continuous C-space which is a stronger notion of completeness compared to sampling-based planners or search-based planners which are probablisitically complete and resolution complete respectively~\citep{lavalle2006planning}.
 
 The dimension~$d$ of the C-space is the most crucial element in determining the complexity of the motion planning problem. It has been shown that for the general motion planning problem the computational complexity grows exponentially with~$d$~\cite{chazelle1991singly}.
 
-The exact motion planning algorithms do not scale to more complex problems as they make certain limiting assumptions about the geometry of the robot and the obstacles. Since the exact methods are no more used in modern days, the computational complexity analysis for the general motion planning problem is of less relevance and the community focusses more on the analysis of the specific algorithms.
+The exact motion planning algorithms do not scale to more complex problems as they make certain limiting assumptions about the geometry of the robot and the obstacles. Since the exact methods are no more used in modern days, the computational complexity analysis for the general motion planning problem is of less relevance and the more recent research literature focusses on the analysis of the specific algorithms such as sampling or search-based algorithms.
 
 
 \newpage
 \section{Related Work}
 \label{sec:rel}
+Our approach leverages preprocessing in order to speed up online planning. In this respect, first we cover some popoluar preprocessing-based approaches. Second, we review techniques that reuse previously generated plans or experiences to accelerate planning. Our method also bears resemblence with these methods as it also uses paths that are generated in the preprocessing phase in the search. Third, we cover real-time heuristic search and moving target search methods as they also provide constant-time guarantees, the key proporty that our approach also has. We then review some work from the controls communitee that explored similar high level ideas that our method builds upon. Finally, we cover some of the motion planning approaches particalurly used for the conveyor-pickup task.
+
 \subsection{Preprocessing-based Methods}
 Preprocessing-based motion planners often prove beneficial for real-time planning. They analyse the configuration space offline to generate some auxiliary information that can be used online to speed up planning. 
 
-The most reknowned example is the Probablistic Roadmap Method (PRM)~\cite{kavraki1996probabilistic} methods. They have a preprocessing and a query phase. In the preprocessing phase a roadmap is constructed in $\Cfree$ by randomly sampling valid states in the C-space and connecting them to their neighboring states if the edges making the connections are valid. In the query phase the start and goal states are connected to their neighboring states in the roadmap (if valid connections are possible) and then any search algorithm like A* search is used to find the path. PRM methods are categorized as multi-query methods meaning that once the roadmap is constructed it can be used to answer multiple queries for the same environment. Query times can be significantly sped up by further preprocessing the roadmaps using landmarks~\cite{paden2017landmark}. Recently,the repetition roadmap~\cite{LA18} was suggested as a way to extend the \textsf{PRM} for the case of multiple highly-similar scenarios. Some of these methods have been integrated with sparse motion-planning roadmaps (see e.g.,~\cite{SSAH14,DB14}) to reduce the memory footprint of the algorithm. All these methods only provide probablistic completeness guarantees.
+The most reknowned example is the Probablistic Roadmap Method (PRM)~\cite{kavraki1996probabilistic}. They have a preprocessing and a query phase. In the preprocessing phase a roadmap is constructed in $\Cfree$ by randomly sampling valid states in the C-space and connecting them to their neighboring states if the edges making the connections are valid. In the query phase the start and goal states are connected to their neighboring states in the roadmap (if valid connections are possible) and then any search algorithm like A* search is used to find the path. PRM methods are categorized as multi-query methods meaning that once the roadmap is constructed it can be used to answer multiple queries for the same environment. Query times can be significantly sped up by further preprocessing the roadmaps using landmarks~\cite{paden2017landmark}. Recently,the repetition roadmap~\cite{LA18} was suggested as a way to extend the PRM for the case of multiple highly-similar scenarios. Some of these methods have been integrated with sparse motion-planning roadmaps (see e.g.,~\cite{SSAH14,DB14}) to reduce the memory footprint of the algorithm. All these methods only provide probablistic completeness guarantees.
 
 Our work bares resemblance to previous work on 
 subgoal graphs~\cite{UK17,UK18}.
 Subgoal graphs is a search-based method that preprocesses the entire C-space to generate a sparse overlay graph comprised of vertices called sub-goals. The pair of sub-goals connected by an edge are \emph{reachable} and thus searching on this overlay graph is significantly faster than searching on the original graph. The method assures that the path found on this subgoal graph has a path on the original graph and can be quickly computed at query time. As this method requires preprocessing the full C-space it is expensive and only is applicable to lower dimensional planning problems.
 
-While all these preprocessing-based approaches speedup planning times compared to planning from scratch by using the preprocessed information, they do not provide bounds on the planning times.
+While all these preprocessing-based approaches speedup planning times compared to planning from scratch by using the preprocessed information, they do not provide constant-time bounds on the planning times.
 
 
 \subsection{Motion Planning with Reuse}
 An alternative approach to address our problem is to precompute a set of complete paths into a library and given a query, attempt to match complete paths from the library to the new query~\cite{berenson2012robot,jetchev2013fast}.
-Using paths from previous search episodes (also known as using experience) has also been an active line of work~\cite{PCCL12,PDCL13,BAG12,CSMOC15}. E-graphs method~\cite{PCCL12} computes a heuristic function to guide the search in such a way as to reuse search efforts from previously generated paths. The Lightning framework~\cite{BAG12} runs two modules in parallel, a module that runs the planner from scratch and a module that retrieves and repairs path stored in a library. The Thunder framework~\cite{CSMOC15} also leverages previous experiences and the experiences are generated using probabilistic sampling. The experiences as stored as sparse roadmap spanner~(SPARS). 
+Using paths from previous search episodes (also known as using experience) has also been an active line of work~\cite{PCCL12,PDCL13,BAG12,CSMOC15}. E-graphs method~\cite{PCCL12} computes a heuristic function to guide the search in such a way as to reuse search efforts from previously generated paths. The Lightning framework~\cite{BAG12} runs two modules in parallel, a module that runs the planner from scratch and a module that retrieves and repairs path stored in a library. The Thunder framework~\cite{CSMOC15} also leverages previous experiences and the experiences are generated using probabilistic sampling. The experiences are stored as sparse roadmap spanner~(SPARS). 
 
-These methods also provide significant speedups in planning times, but they still do not provide constant-time planning guarantees which our method aims to provide.
+These methods also provide significant speedups in planning times, yet they do not provide constant-time planning guarantees which our method aims for.
 
 \subsection{Real-time Motion Planning}
-In practice, the only class of algorithms that provide constant-time planning guarantees are real-time algorithms~\cite{KL06,KS09,K90}.
-To provide guarantees on planning time the search only looks at a finite horizon, generating a partial plan, and interleaves planning and execution. These algorithms run repeated A* searches and update the heuristic values in the local search spaces while maintaining the admissibility of the heuristics. The heuristis get more informed as the search is run repeatedly. By doing so they provide completeness guarantees, meaning that the robot will eventually arrive at the goal.
+\label{rel:real}
+In practice, the only class of algorithms that provide constant-time planning guarantees is of real-time algorithms~\cite{KL06,KS09,K90,bjornsson2009tba}.
+To provide guarantees on planning time the search only looks at a finite horizon, generating a partial plan, and interleaves planning and execution. In planning cycles, the robot may re-expand states multiple times. In addition, during execution, the robot is likely to visit the same states multiple times before it reaches the goal resulting in highly suboptimal behavior specially in higher dimensional problems. These algorithms run repeated A* searches and update the heuristic values in the local search spaces while maintaining the admissibility of the heuristics. The heuristis get more informed as the search is run repeatedly. By doing so they provide completeness guarantees, meaning that the robot will eventually arrive at the goal.
 
-As opposed to these finite horizon planning algorithms, our method plans for indefinite horizons i.e. all the way from the start to the goal while providing constant-time planning guarantees
+As opposed to these finite horizon planning algorithms, our methods either plan for indefinite horizons i.e. all the way from the start to the goal while providing constant-time planning guarantees or do limited horizon planning (interleaving planning and execution) while assuring that the planner never re-expands a state nor the robot never revisits the same state during execution.
 
 \subsection{Online Replanning: Moving Target Search}
-The conveyor-planning problem can be modelled as a Moving Target Search problem (MTS) which is a widely-studied topic in the graph search-based planning literature~\cite{ishida1991moving,ishida1995moving,koenig2007speeding,sun2010moving}. 
-These approaches interleave planning and execution incrementally and update the heuristic values of the state space to improve the distance estimates to the moving target. Unfortunately, in high-dimensional planning problems, this process is computationally expensive which is why these approaches are typically used for two-dimensional grid problem such as those encountered in video games.
+The conveyor-pickup task~(chapter~\ref{sec:rss}) can be modelled as a Moving Target Search problem (MTS) as the robot has to plan a motion to reach a moving target, that is the object coming on a conveyor belt. MTS is a widely-studied topic in the graph search-based planning literature~\cite{ishida1991moving,ishida1995moving,koenig2007speeding,sun2010moving}. 
+These approaches interleave planning and execution and incrementally update the heuristic values of the state space to improve the distance estimates to the moving target. Unfortunately, in high-dimensional planning problems, this process is computationally expensive which is why these approaches are typically used for two-dimensional grid problem such as those encountered in video games.
 
 \subsection{Global Control using Local Potential Functions}
-Finally, our notion of attractor states is similar (in spirit) to control-based methods that  ensure safe operation over local regions of the free configuration space~\cite{CRC03,CCR06,tedrake2010lqr}. Metaphorically they name these regions as ``funnels" that collapse a large set of input conditions to a single policy,
-These regions are then used within a high-level motion planner to compute collision-free paths. LQR-trees~\cite{tedrake2010lqr} computes local stability regions to build a sparse tree of LQR-stabilized trajectories. The union of these local regions covers the entire state space.
+Finally, our notion of ``attractor regions" is similar (in spirit) to control-based methods that  ensure safe operation over local regions of the free configuration space~\cite{CRC03,CCR06,tedrake2010lqr}. Metaphorically they name these regions as ``funnels" that collapse a large set of input conditions to a single policy.
+These regions are then used within a high-level motion planner to compute collision-free paths. For instance, LQR-trees~\cite{tedrake2010lqr} computes local stability regions to build a sparse tree of LQR-stabilized trajectories. The union of these local regions covers the entire state space ensuring that all initial conditions that are capable of reaching the goal will reach the goal.
 
-\subsection{Motion Planning for Conveyor Pickup Task}
+\subsection{Motion Planning for Conveyor-pickup Task}
 Existing work on picking moving objects has focused on different aspects of the problem ranging from closed-loop controls to object perception and pose estimation, motion planning and others~\cite{allen1993automated, han2019toward, stogl2017tracking, zhang2018gilbreth}. 
 %
-Here, we focus on motion-planning related work. Graph-searched based approaches have been used for the motion-planning problem~\cite{cowley2013perception, menon2014motion}. The former uses a kinodynamic motion planner to smoothly pick up moving objects i.e., without an impactful contact. A heuristic search-based motion planner that plans with dynamics and could generate optimal trajectories with respect to the time of execution was used. While this planner provides strong optimality guarantees, it is not real-time and thus cannot be used online.
+Here, we focus on motion-planning related work. Graph-searched based approaches have been used for the motion-planning problem of the conveyor-pickup task~\cite{cowley2013perception, menon2014motion}. The former uses a kinodynamic motion planner to smoothly pick up moving objects i.e., without an impactful contact. A heuristic search-based motion planner that plans with dynamics and could generate optimal trajectories with respect to the time of execution was used. While this planner provides strong optimality guarantees, it is not real-time and thus cannot be used online.
 %
 The latter work was demonstrated in the real world showing real-time planning capability. While the planner is fast, it does  pure kinematic planning and does not require collision checking with the target object. The approach plans to a pregrasp pose and relies on Cartesian-space controllers to perform the pick up. The usage of the Cartesian controller limits the types of objects that the robot can grasp.
 
-\ignore{
 \newpage
 \section{Constant-time Motion Planning (CTMP)}
 \label{sec:ctmp}
-In this thesis we introduce the concept of Constant-time Motion Planning (CTMP). We develop algorithms that will provably guarantee constant query-time complexity. Constant-time complexity implies that regardless of the problem size or the input size, the algorithm demands the same computation time.
+In this thesis we introduce the concept of Constant-time Motion Planning (CTMP). To this end we develop algorithms that provably guarantee constant query-time complexity in the worst case. Constant-time complexity implies that the algorithm's computation time is bounded independently of the size of its input.
 
-\subsection{Input size of the Algorithm}
-As described in section~\ref{sec:conveyor}, our approach operates in discretized search spaces. The size of the input to the query phase of our algorithm is determined by the size of the discretized operational space of the robot. 
-To prove that the algorithm has a constant time complexity, we need to show that its computation time is bounded and the bound is independent of the input size.
 %In our problem setting our input to the algorithm is the full configuration space of the robot~$\calC$. The size of~$\calC$ by definition is unbounded since it is a continuous space. We will also consider the case in section~\ref{sec:conveyor} where we consider a discretized search space as highlighted in section~\ref{sec:sbp}. In that case the input is finite is defined by the size of the underlying implicit graph~$\calG$. 
 
 \subsection{(Small) Constant-time Algorithm}
-More formally an algorithm with input size~$n$ has a constant time complexity if~$T(n)$ is bounded by a value that does not depend on~$n$.
-Note that the running time does not have to be independent of~$n$, but an upper bound for the running time has to be bounded independently of~$n$. In Big O notation, a constant-time algorithm has an asymptotic complexity of~$O(1)$. In the proposed constant-time algorithms we also aim that~$T(n)$ of the algorithm is small as to have real-time performance.
+Our approach operates in discretized search spaces as described in section~\ref{sec:sbp}. The size of the input to the query phase~$n$ of our algorithm is determined by the size of the discretized operational space of the robot. 
 
-\subsubsection{A Naive Constant-time Algorithm}
-Refering to the problem setting described in section~\ref{sec:approach}, given a goal region~$G$ with a finite set of goals, the naive approach would be to precompute and store paths to each goal in~$G$ in a preprocessing stage and use a hash table mapping goals to paths and use it to answer any query goal~$g \in G$ in the query stage. Under the assumption that there are no hash collisions, the hash lookup is considered a constant-time operation and hence the algorithm will have a constant-time complexity. However, this approach becomes intractable when the number of queries becomes large. This is because the memory requirement or the precomputation time becomes very large for computational resources.
+To prove that the algorithm has a constant-time complexity, we need to show that its computation time is bounded and the bound is independent of the input size. More formally an algorithm with input size~$n$ has a constant-time complexity if its processing time~$T(n)$ is bounded by a value that does not depend on~$n$.
+Note that the running time does not have to be independent of~$n$, but an upper bound for the running time has to be bounded independently of~$n$. In Big O notation, a constant-time algorithm has an asymptotic complexity denoted as~$O(1)$.
+
+In our work, besides assuring~$O(1)$ complexity, we also aim to achieve real-time behavior. In other words, we aim that~$T(n)$ of the algorithm is small.
+
+\subsection{CTMP for Repetitive Tasks}
+This thesis focusses on environments that involve repetitive tasks. In this section we provide sketches of a straw man approach and our approach for constant-time motion planning for repetitive tasks that will serve as the conceptual foundation for the following chapters.
+
+\subsubsection{A Straw Man Constant-time Algorithm}
+Refering to the problem setting described in section~\ref{sec:approach}, given a start~$\sStart$ and a goal region~$G$ with a finite set of goals, the naive approach would be to precompute and store paths to each goal in~$G$ in a preprocessing stage and use a hash table mapping goals to paths and use it to answer any query goal~$g \in G$ in the query stage.
+With perfect hashing~\cite{czech1997perfect}, the hash lookup is a constant-time operation and hence the algorithm will have a constant-time complexity. However, this approach becomes intractable when the number of queries becomes large. This is because the memory requirement or the precomputation time becomes very large for practical computational resources.
 
 \subsubsection{Proposed Approach}
-The naive approach puts all the computation burden on the proprocessing phase and requires minimum computation time but a large memory during the query phase. On the other end of the spectrum we can just plan from scratch online every time and eliminate the preprocessing stage, shifting all the burden to the query phase. This would require minimal memory but the high computational complexity. We propose a middle ground where we can balance the offline-online burden in such a way that we can provide provable (small) constant time planning guarantees. Instead of having to precompute paths to all the goals in~$G$, we propose compression schemes to precompute and store only a small set of representative paths that can be used in query phase in such a way that assures (small) constant time planning. In the following two sections we will theoretically show that our algorithms run in constant-time and experimentally show that the planning times are small.
-}
+The naive approach puts all the computation burden on the proprocessing phase and requires minimum computation time but a large memory during the query phase. On the other end of the spectrum we can just plan from scratch online every time and eliminate the preprocessing stage, shifting all the burden to the query phase. This would require minimal memory but large computational complexity. We propose a middle ground where we can balance the offline-online burden in such a way that we can provide provable (small) constant-time planning guarantees while still requiring a small memory footprint. Instead of having to precompute paths to all the goals in~$G$, we propose compression schemes to precompute and store only a small set of representative paths that can be used in query phase in such a way that assures (small) constant-time planning. In the following two chapters we will theoretically show that our algorithms run in constant-time. Additionally we experimentally show that the planning times are small.
+
+\subsection{CTMP algorithm}
+%In this thesis we propose CTMP algorithms for indefinite and finite planning horizons.
+%Indefinite horizon refers to planning from a start all the way to the goal. Finite or limited horizon planning as covered in section~\ref{rel:real} implies planning for a limited time horizon; it interleaves planning and execution and allocates a constant time budget for each planning cycle.
+%
+%We now define indefinite and finite-horizon planning algorithms under our notion of CTMP.
+
+We now formally define a CTMP algorithm.
+%\vspace{2mm}
+%\begin{definition}
+%An indefinite-horizon CTMP algorithm finds a full path from a start to goal in (small)~$O(1)$ time.
+%\end{definition}
+%
+%\vspace{2mm}
+%\begin{definition}
+%\label{ctmp:finite}
+%A finite-horizon CTMP algorithm requires (small)~$O(1)$ time delibration for each action, while assuring no state re-expansion or revisitation.
+%\end{definition}
+
+\vspace{2mm}
+\begin{definition}
+\label{ctmp:def}
+A CTMP algorithm requires (small)~$O(1)$ time delibration to plan the next action along a path from a start to goal, which is guaranteed to have no cycles
+\end{definition}
+
+Namely, a CTMP algorithm is guaranteed to plan the next action along the path from a start to goal in constant time. Additionally, it is assured that the complete path, if reconstructed does not contain cycles. As a corollary, a CTMP algorithm also has the following property:
+
+\vspace{2mm}
+\begin{property}
+\label{ctmp:prop}
+A CTMP algorithm requires~$O(l)$ time to find a full path from a start to goal, where~$l$ is the length of the path
+\end{property}
+
+Interestingly, we can use CTMP algorithms in two configurations; (1) When a robot interleaves planning and execution (2) When the robot requires full path (say for post-processing) from a start to goal before execution. For the former, each next action requires constant-time planning. Although the latter requires more delibration before the robot can start executing motion, the computation is only linear in the length of the path. Moreover, the path is guaranteed to have no cycles.
+%
+%Note the distinction that we make in Def.~\ref{ctmp:finite} between CTMP and real-time heuristic search algorithms~(section~\ref{rel:real}). Namely, we enforce additional requirements of not re-expanding or re-visiting a state during the planning and execution respectively.
+
+%In the following two chapters we will propose CTMP algorithms that respect at least one of the above two definitions.
 
 \newpage
-\section{CTMP in Static Environments}
+\section{CTMP for Static Environments}
+\label{chap:icaps}
 \subsection{Overview}
 %1. What is the problem?
-We consider the problem of planning robot motions for highly-repetitive tasks while ensuring bounds on the planning times. There exists manipulation domains where the planning takes non-trivial amount of time, despite the fact that the scenarios are well-structured. Specifically we consider the settings where the environment does not change, the start and goal in each task are similar, yet not identical to the start and goal in previous tasks.
+We consider the problem of planning robot motions for highly-repetitive tasks while ensuring constant query-time complexity. There exists manipulation domains where the planning takes non-trivial amount of time, despite the fact that the scenarios are well-structured. Specifically we consider the settings where the environment does not change, the start and goal in each task are similar, yet not identical to the start and goal in previous tasks.
 
 %2. Why is it relevant?
 As a running example, consider the problem of mail-sorting where a robot has to put envelopes into appropriate bins (see Fig.~\ref{fig:PR2}). The newly-inserted envelopes do not present any new clutter, and therefore the domain is really static. This domain is being actively pursued in both industry (see for example~\cite{DBot}) and in academia (e.g.,~\cite{hwang2015lazy}).
@@ -231,12 +285,12 @@ The configuration space of a robot is the $d$-dimensional space of all robot con
 Thus, we need to balance memory constraints while providing provable real-time query times.
 
 %4. What have others done?
-As detailed in Sec.~\ref{sec:rel}, there has been intensive work 
+As detailed in chapter.~\ref{sec:rel}, there has been intensive work 
 for fast online planning~\cite{LA18} and 
 for learning from experience in known environments~\cite{PCCL12,PDCL13,berenson2012robot,CSMOC15}.
 Similarly, compressing precomputed data structures in the context of motion-planning is a well-studied problem with efficient algorithms~\cite{SSAH14,DB14}.
 %5. What's missing?
-However, to the extent of our knowledge, there is no approach that can \emph{provably guarantee} that a solution will be found to \emph{any} query with bounds on planning time and using a small memory footprint.
+However, to the extent of our knowledge, there is no approach that can \emph{provably guarantee} that a solution will be found to \emph{any} query in constant-time and using a small memory footprint.
 
 %\vspace{8 mm}
 
@@ -257,7 +311,6 @@ We demonstrate a speedup of over tenfold in query time when compared to the PRM 
 %8. What are our contributions?
 %9. What are our limitations?
 
-In this section we propose 
 \begin{figure}[tb]
   \centering
     \includegraphics[width=0.6\textwidth]{pr2.png}
@@ -276,23 +329,24 @@ We then proceed (Sec.~\ref{subsec:alg}) to detail our algorithm and conclude wit
 
 \subsubsection{Problem formulation and assumptions}
 \label{sec:pdef}
-Let $\calX$ be the configuration space of a robot operating in a static environment containing obstacles.
+Let $\calC$ be the configuration space of a robot operating in a static environment containing obstacles.
 We say that a configuration is valid (invalid) if the robot, placed in that configuration does not (does) collide with obstacles, respectively.
-We are given in advance a start configuration~$\Sstart \in \calX$ and some goal region~$G \subset \calX$.
+We are given in advance a start configuration~$\Sstart \in \calC$ and some goal region~$G \subset \calC$.
 We emphasize that the goal region may contain invalid configurations.
 In the query phase we are given multiple queries $(\Sstart, s_{\text{goal}})$ where $s_{\rm goal} \in G$ is a valid configuration and for each query, we need to compute a collision-free path connecting $\Sstart$ to $s_{\text{goal}}$.
 
 Coming back to our motivating example of mail sorting---the start configuration would be some predefined configuration above the cart where the robot can pick up the envelopes from and the goal region would comprise of all possible placements of the robot's end effector in the cubbies. The environment is static as the only obstacles in the environment are the shelves and the cart which remain stationary in between queries.
 
-We discretize $\calX$ into a state lattice $\calS$ such that any state~$s \in \calS$ is connected to a set of successors and predecessors via a mapping Succs/Preds: $\calS \rightarrow 2^\calS$.
+We discretize $\calC$ into a state lattice $\calS$ such that any state~$s \in \calS$ is connected to a set of successors and predecessors via a mapping Succs/Preds: $\calS \rightarrow 2^\calS$.
 Define $G_\calS := \calS \cap G$ to be the states that reside in the goal region. Note that although our approach is applicable to general graphs (directed or undirected), to be able to reuse the planned path in the reverse direction (e.g. in our motivating example for the motion from the shelve to the start configuration) the graph needs to be undirected.
 We make the following assumptions:
 
-\begin{enumerate}[label={\textbf{A\arabic*}}]
-  \item \label{assum:1} $G_\calS$ is a relatively small subset of $S$. Namely, it is feasible to exhaustively iterate over all states in $G_\calS$.
+%\begin{enumerate}[label={\textbf{A\arabic*}}]
+\vspace{2mm}\begin{assumption} \label{asm:1:1} $G_\calS$ is a relatively small subset of $S$. Namely, it is feasible to exhaustively iterate over all states in $G_\calS$.
 However, storing a path from $\Sstart$ to each state in $G_\calS$ is infeasible.
+\end{assumption}
   
-  \item \label{assum:2} The planner has access to a heuristic function $h: \calS \times \calS \rightarrow \mathbb{R}$ which can estimate the distance between any two states in $G_\calS$. Moreover, 
+\vspace{2mm}\begin{assumption} \label{asm:1:2} The planner has access to a heuristic function $h: \calS \times \calS \rightarrow \mathbb{R}$ which can estimate the distance between any two states in $G_\calS$. Moreover, 
  \begin{itemize}
   \item The heuristic function should be \textit{weakly-monotone} with respect to $G_\calS$, meaning that $\forall s_1, s_2  \in G_\calS$ where $s_1 \neq s_2 $, it holds that,
   \begin{center}
@@ -307,17 +361,17 @@ However, storing a path from $\Sstart$ to each state in $G_\calS$ is infeasible.
  \end{itemize}
  Namely, for any distinct pair of states ($s_1, s_2$) in $G_\calS$, at least one of $s_1$'s predecessors has a heuristic value less than or equal to its heuristic value.
  Moreover, the predecessor with minimal heuristic value lies in the goal region.
+\end{assumption}
 
-
-  \item \label{assum:3} The planner has access to a tie-breaking rule that can be used to define a total order \footnote{A total order is a binary relation on some set which is anti-symmetric, transitive, and a convex relation.} over all states with the same heuristic value.
+\vspace{2mm}\begin{assumption} \label{asm:1:3} The planner has access to a tie-breaking rule that can be used to define a total order \footnote{A total order is a binary relation on some set which is anti-symmetric, transitive, and a convex relation.} over all states with the same heuristic value.
   % to a given state.
-  \end{enumerate}
+\end{assumption}
 
 These assumptions allow us to establish strong theoretical properties regarding the efficiency of our planner. Namely, that
 within a known bounded time, we can compute a collision-free path from $\Sstart$ to any state in $G_\calS$. 
 
 
-Assumption~\ref{assum:2} may seem too restrictive (especially convexity), imposing that the goal region cannot be of arbitrary structure. However, after we detail our algorithm (Sec.~\ref{subsec:alg}) and analyze its theoretical properties (Sec.~\ref{sec:analysis}), we sketch how we can relax this assumption to be less restrictive.
+Assumption~\ref{asm:1:2} may seem too restrictive (especially convexity), imposing that the goal region cannot be of arbitrary structure. However, after we detail our algorithm (Sec.~\ref{subsec:alg}) and analyze its theoretical properties (Sec.~\ref{sec:analysis}), we sketch how we can relax this assumption to be less restrictive.
 
 
  
@@ -333,9 +387,9 @@ Our algorithm relies heavily on the notion of a greedy search.  Thus, before we 
 \end{definition}
 Note that 
 if $h$ is weakly monotone with respect to $G_\calS$
-(Assumption~\ref{assum:2}) 
+(Assumption~\ref{asm:1:2}) 
 and we have some tie-breaking rule
-(Assumption~\ref{assum:3}), then every state has a greedy predecessor in the $G_\calS$ and it is unique.
+(Assumption~\ref{asm:1:3}), then every state has a greedy predecessor in the $G_\calS$ and it is unique.
 In the rest of the text, when we use the term greedy predecessor, we assume that it is unique and in $G_\calS$.
 
 \vspace{2mm}
@@ -345,7 +399,7 @@ In the rest of the text, when we use the term greedy predecessor, we assume that
 \end{definition}
 Note that we define the greedy search in terms of the predecessors and not the successors to account for the directionality of the graph. This will become more clear in Sec.~\ref{subsec:alg}.
 
-\textbf{Remark:} Now that we have the notion of greedy search, we can better explain our definition of convexity with respect to~$h$ (Assumption~\ref{assum:2});
+\textbf{Remark:} Now that we have the notion of greedy search, we can better explain our definition of convexity with respect to~$h$ (Assumption~\ref{asm:1:2});
 this assumption ensures that a greedy search between any pair of states lies within the goal region, analogously to the standard notion of a convex region where for every pair of points within the region, every point on the straight line segment that joins the pair of points is also within the region.
 
 Our key insight is to precompute in an offline phase subregions within the goal region where a greedy search to a certain (``attractor'') state is guaranteed to be collision free and use these subregions in the query phase.
@@ -593,7 +647,7 @@ Note that at no point  do we need to perform collision checking in the query pha
 \Procedure{FindGreedyPath}{$s_1, s_2$}
   \label{alg:3:greedy-call-start}
   \State $s_{\text{curr}} \leftarrow s_2$; \hspace{2mm} $\pi \leftarrow \emptyset$
-  \While{$s_{\text{curr}} \neq s_1$}
+  \While{$s_{\text{curr}} \neq s_1$} \label{alg:3:while}
     \State $\pi \leftarrow \pi \cdot s_{\text{curr}}$
     \Comment{append current state to path}
       \State $s_{\text{curr}} \leftarrow \argmin\limits_{s \in \text{Preds}(s_{\text{curr}})} h(s, s_1)$  \Comment{greedy predecessor}
@@ -662,7 +716,7 @@ This step reduces both the query complexity (see Sec.~\ref{sec:analysis}) as wel
 We know that in the query phase we have access to the precomputed library of paths~$\calL$, that stores paths from~$\sStart$ to all the attractors. Instead of computing the full path from~$\sStart$ from~\sGoal and then executing it, the robot can start executing the path~$\pi_i$ (path from~$\sStart$ to~$\sAttract$) and run Alg.~\ref{alg:1:attract} in parallel. If the execution time of path~$\pi_i$ is greater than that of running Alg.~\ref{alg:1:attract}, the planning time will reduce to merely the time it takes to identify the subregion~$\R_i$.
 
 \subsection{Analysis}
-\label{sec:analysis}
+\label{sec:analysis1}
 In this section we formally prove that 
 our algorithm is correct (Sec.~\ref{subsec:correct}) and 
 analyze its computational complexity, completeness and bound on solution quality (Sec.~\ref{subsec:complexity},~\ref{subsec:completeness} and ~\ref{subsec:quality} respectively).
@@ -688,7 +742,7 @@ The base of the induction is trivial as the first state added to $S_{\text{reach
 A state $s$ is added to $S_{\text{reachable}}$ only if its greedy predecessor is in $S_{\text{reachable}}$ (line~\ref{alg:2:greedy}) which by the induction hypothesis is reachable with respect to \sAttract.
 This implies by definition that $s$ is reachable with respect to \sAttract.
 %
-Note that this argument is true because the greedy predecessor of every state is unique (Assumption~\ref{assum:3}).
+Note that this argument is true because the greedy predecessor of every state is unique (Assumption~\ref{asm:1:3}).
 \end{proof}
 
 \begin{lemma}
@@ -700,15 +754,15 @@ A state $s$ is in $S_{\text{reachable}}$ iff $h(s, \sAttract) < r_i$.
 
 \begin{proof}
 Alg.~\ref{alg:2} orders the nodes to be inserted to $S_{\text{reachable}}$ according to $h(s, \sAttract)$ (line~\ref{alg:2:OPEN}).
-As our heuristic function is weakly monotonic (Assumption~\ref{assum:2}), the value of $r_i$ monotonically increases as the algorithm adds states to $S_{\text{reachable}}$ (line~\ref{alg:2:rad}).
+As our heuristic function is weakly monotonic (Assumption~\ref{asm:1:2}), the value of $r_i$ monotonically increases as the algorithm adds states to $S_{\text{reachable}}$ (line~\ref{alg:2:rad}).
 Thus, for every state $s \in S_{\text{reachable}}$, we have that $h(s, \sAttract) < r_i$.
 
 For the opposite direction, assume that there exists a state $s \notin S_{\text{reachable}}$ such that $h(s, \sAttract) < r_i$.
 This may be because  Alg.~\ref{alg:2} terminated due to a node $s'$ that was popped from the open list with 
 $h(s', \sAttract) \leq h(s, \sAttract)$.
-However, using the fact that our heuristic function is weakly monotonic (Assumption~\ref{assum:2}) we get a contradiction to the fact that $h(s, \sAttract) < r_i$.
+However, using the fact that our heuristic function is weakly monotonic (Assumption~\ref{asm:1:2}) we get a contradiction to the fact that $h(s, \sAttract) < r_i$.
 Alternatively, this may be because we prune away states that are in $G_\calS$  (Alg.~\ref{alg:2} line~\ref{alg:2:prun}).
-However, using the fact that our goal region is convex with respect to $h$ (Assumption~~\ref{assum:2}), this cannot hold.
+However, using the fact that our goal region is convex with respect to $h$ (Assumption~~\ref{asm:1:2}), this cannot hold.
 \end{proof}
 
 \begin{lemma}
@@ -730,7 +784,7 @@ Thus, if $s\in S_{\text{reachable}}$ is valid, the greedy search with respect to
 
 \begin{lemma}
 \label{lemma:coverage}
-At the end of Alg.~\ref{alg:1}, every state $s \in G_\calS$ is covered by some subregion $R \in \calR$.
+At the end of Alg.~\ref{alg:1}, every state $s \in G_\calS$ is covered by at least one subregion $R \in \calR$.
 \end{lemma}
 \begin{proof}
 Assume that this does not hold and let $s \in G_\calS$ be a state that is not covered by any subregion but has a neighbor (valid or invalid) that is covered.
@@ -750,38 +804,102 @@ From the above we can immediately deduce the following corollary:
 
 
 \textbf{Remark}
-We can relax Assumption~\ref{assum:2} in two ways.
+We can relax Assumption~\ref{asm:1:2} in two ways.
 The first is by explicitly tracking states not in the goal region instead of pruning them away (Alg.~\ref{alg:2} line~\ref{alg:2:prun}).
-Unfortunately, this may require the algorithm to store many states not in $G_\calS$  which may be impractical (recall that Assumption~\ref{assum:1} only states that we can exhaustively store in memory the states in the goal region).
-An alternative, more practical way, to relax Assumption~\ref{assum:2}  is by terminating the search when we  encounter a state not in the goal region.
+Unfortunately, this may require the algorithm to store many states not in $G_\calS$  which may be impractical (recall that Assumption~\ref{asm:1:1} only states that we can exhaustively store in memory the states in the goal region).
+An alternative, more practical way, to relax Assumption~\ref{asm:1:2}  is by terminating the search when we  encounter a state not in the goal region.
 This may cause the algorithm to generate much more subregions (with smaller radii) which may increase the memory footprint and the preprocessing times.
 
 
-\subsubsection{Time Complexity of Query Phase}
+\subsubsection{Complexity}
+In this section we will do an asymptotic analysis of the time and memory complexities of our algorithm for the worst-case.
+
+The complexity analysis makes the following global assumptions.
+\vspace{2mm}\begin{assumption}
+\label{asm:1:4} $|\calR| \ll n_{G_{\calS}}$ where~$n_{G_{\calS}}$ is the total number of goals in~$G_\calS$
+\end{assumption}
+\vspace{2mm}\begin{assumption}
+\label{asm:1:5} $G_\calS$ is fragmented such that $|\calR|$ is upper-bounded by a constant
+\end{assumption}
+%\vspace{2mm}\begin{assumption}
+%\label{assum:8} The time it takes to expand a state~(single iteration of loop at Alg.~\ref{alg:3}, line~\ref{alg:3:while}) is less than the time it takes for a robot to execute one action.
+%\end{assumption}
+
 \label{subsec:complexity}
+\paragraph{Time Complexity (Query phase)}
+We define the variable~$\calD$ as depth (maximal number of expansions of a greedy search) of the largest subregion. We can measure the depth of each subregion in Alg.~\ref{alg:2} by keeping track of the depth of each expanded state from the root i.e., $\sAttract$.
+%
+\vspace{2mm}
+\begin{lemma}
+\label{lemma:unboundedD}
+Given the number of subregions~$|\calR|$ and the depth of the largest subregion~$\calD$, full path can be found in~$O(\calD)$ time
+\end{lemma}
+
+\begin{proof}
 The query time comprises of 
 (i)~finding the containing subregion $R_i$
-(ii)~running the greedy search to $\sAttract$
-and
-(iii)~lookup operations from preprocessed data.
+(ii)~running the greedy search to $\sAttract$.
 Step~(i) requires iterating over all subregions (in the worst case) which takes $O(|\calR|)$ steps while 
-step~(ii) requires expanding the states along the path from $\sGoal$ to $\sAttract$ which requires~$O(\calD)$ expansions where $\calD$ is the depth (maximal number of expansions of a greedy search) of the deepest subregion. 
+step~(ii) requires expanding the states along the path from $\sGoal$ to $\sAttract$ which requires~$O(\calD)$ expansions.
 For each expansion we need to find the greedy predecessor, considering at most $b$ predecessors, where $b$ is the maximal branching factor of our graph.
-We can measure the depth of each subregion in Alg.~\ref{alg:2} by keeping track of the depth of each expanded state from the root i.e., $\sAttract$. We assume that step~(iii) is constant-time operation. Hence, overall the query phase takes $O(|\calR| + \calD \cdot b)$ operations. The maximal query time can also be empirically profiled after the preprocessing phase.
+Hence, overall the query phase takes $O(|\calR| + \calD \cdot b)$ operations. Since~$|\calR|$ is upper bounded by a constant~(from assumption~\ref{asm:1:5}) and~$b$ is a constant factor, the time complexity thus becomes~$O(\calD)$.
+\end{proof}
 
+Note that we can also bound the number of expansions required for the query phase by bounding the maximum depth of the subregions~$\calD$. We can do that by terminating Alg.~\ref{alg:2} when the $R_i$ reaches the depth bound or if the existing termination condition (line~\ref{alg:2:terminate}) is satisfied. Having said that, this will come at the price of increasing the number of subregions and the assumption~\ref{asm:1:5} will also not hold anymore. To give an intuition, we can draw an analogy with the sphere packing problem~\cite{hales1992sphere}; for a required volume to be covered, if the radii of the spheres is fixed, then the number of spheres needed to cover the volume will not be bounded by a constant but will be a function of the size of the volume.
+
+\vspace{2mm}
+\begin{lemma}
+\label{lemma:OrderR}
+	Given the number of subregions~$|\calR|$ and bounded~$\calD$, full path can be found in~$O(\calR)$ time
+\end{lemma}
+
+Now we consider a special case for which the algorithm has~$O(1)$ complexity.
+
+\vspace{2mm}
+\begin{lemma}
+\label{lemma:o1}
+	For the case when ~$|\pi_g| \leq c*|\pi_i|$, where~$c \geq 1$ is a constant integer, each action requires~$O(1)$ time delibration
+\end{lemma}
+
+\begin{proof}
+	Here $|\cdot|$ denotes the length of the paths. This lemma can be trivally proved from assumptions~\ref{asm:1:5} and by interleaving planning and execution. From assumption~\ref{asm:1:5}, the time required to find the containing subregion~$R_i$ is bounded by a constant. Once~$R_i$ is found, the robot can find the greedy path~$\pi_g$ while it executes~$\pi_i$ by interleaving planning and execution.
+	Since~$|\pi_g|$ is bounded by ~$c*|\pi_i|$, expanding~$c$ states~($O(1)$ operation) for each step traversal along~$|\pi_i|$, the greedy search will find~$\pi_g$ by the time robot arrives at~$\sAttract$.	
+%	
+%If~$|\pi_i| > |\pi_g|$ and the assumption~\ref{assum:8} holds, by the time the robot reaches the~$\sAttract$,~$\pi_g$ will be computed and can be executed by the robot.
+\end{proof}
+
+
+Lemma~\ref{lemma:greedy} assures that the greedy path~$\pi_g$ does not contain cycles, otherwise the greedy search would be incomplete. Hence we have the following corollary:
+\vspace{2mm}
+\begin{cor}
+	By Def.~\ref{ctmp:def} and from lemmas~\ref{lemma:o1} and~\ref{lemma:greedy}, the algorithm is a CTMP algorithm.
+\end{cor}
 %
-\textbf{Remark:}
-We make an assumption that~$|\calR|$ is bounded by a constant for certain fragmentation of the goal region. With that assumption and because~$b$ is a constant, the time complexity of the query phase becomes~$O(\calD)$ since~$\calD$ is unbounded.
-%
-Note that we can also bound the number of expansions required for the query phase by bounding the maximum depth of the subregions~$\calD$. We can do that by terminating Alg.~\ref{alg:2} when the $R_i$ reaches the maximum depth or if the existing termination condition (line~\ref{alg:2:terminate}) is satisfied. Having said that, this will come at the price of increasing the number of subregions. Moreover, by doing so we can no more make the aforementioned assumption about the bound on~$|\calR|$. For an intuition, we can make an analogy with the sphere packing problem~\cite{hales1992sphere}; For a required volume to be covered, if the radii of the spheres is fixed, then the number of spheres needed to cover the volume will not be bounded by a constant but will be a function of the size of the volume. By bounding~$\calD$ therefore, the complexity becomes~$O(|\calR|)$. This analysis leads to two  configurations of the query phase the choice among which can be made by doing an empirical analysis.
-
-
 %\textbf{Constant-time Complexity}
 %We need to show that $O(|\calR| + \calD \cdot b) \rightarrow O(1)$. While~$\calD$ and~$b$ are constants,~$|\calR|$ is not a constant and does not have a bound and so the complexity of the query phase as is is~$O(|\calR|$ which is linear in~$|\calR|$.
 %Here we propose a modification or extension of the full algorithm (both preprocessing and query phases) which is detailed in section~\ref{sec:extension} which will make the complexity constant time. The extension allows us to specify a constant upper bound on~$|\calR|$.  
 %Now recall the definition of the constant-time algorithm from section~\ref{sec:ctmp}. Irrespective of the size of input to the algorithm, since ~$|\calR|$ has a constant upper bound and $\calD$ and~$b$ are constants, the query phase has constant-time complexity i.e.~$O(1)$.
-
+%
 %Note that in~$O(|\calR| + \calD \cdot b)$,~$\calD$ and~$b$ are trivially bounded; both are constants. The third term~$|\calR|$ however depends on goal region~$G_\calS$. Roughly speaking,~$|\calR|$ depends on three things~(1) how cluttered~$G_\calS$ is with obstacles, the more cluttered it is the more subregions we will get~(2) the size of~$G_\calS$; a bigger goal region will render more subregions and~(3) the parameter~$\calD$. We make the assumption that for a choice of~$\calD$~(large enough), for certain degree of obstacle clutter in C-space~(less enough) and by our original problem formulation that the goal region is a small subset of the C-space, the upper bound on~$|\calR|$ is bounded independently of the size of~$G_\calS$. Under this analysis we can conclude that the algorithm has a constant time complexity i.e~$O(1)$.
+%
+\paragraph{Space Complexity}
+This section analyses the worst-case space complexity of the metadata generated after the preprocessing phase that is then used in the query phase.
+\vspace{2mm}
+\begin{lemma}
+	Given the number of subregions~$|\calR|$ and unbounded~$\calD$, the algorithm requires~$O(|\pi_{\text{max}}|)$ space.
+\end{lemma}
+\begin{proof}
+	The preprocessing phase generates metadata of size~$O(|\pi_{\text{max}}| \cdot |\calR|)$ where $|\pi_{\text{max}}|$ is the length of the longest precomputed path in~$\calL$. Since~$\calR$ is upper bounded by a constant~(assumption~\ref{asm:1:5}) and also because~$|\calR| \ll n$~(assumption~\ref{asm:1:4}) the algorithm requires~$O(|\pi_{\text{max}}|)$ space.
+\end{proof}
+
+\vspace{2mm}
+\begin{lemma}
+	Given the number of subregions~$|\calR|$ and bounded~$\calD$, the algorithm requires~$O(|\pi_{\text{max}}| \cdot |\calR|)$ space.
+\end{lemma}
+\begin{proof}
+	Enforcing a bound on~$\calD$ breaks assumption~\ref{asm:1:5} as explained earlier in the analysis. This introduces~$|\calR|$ as a factor in the space complexity.
+\end{proof}
+
 
 \subsubsection{Algorithm Completeness}
 \label{subsec:completeness}
@@ -795,144 +913,144 @@ Let the function $c(\cdot)$ denote the cost of a path and $c^*(\cdot)$ denote th
  % \end{center}
 where $c(\pi_g)$ is the cost of the greedy path from the attractor to the goal state.
 
-\ignore{
-\subsection{Algorithm Extension}
-\label{sec:extension}
-In section~\ref{sec:analysis}, we enforced a bound on the number of subregions to guarantee~$O(1)$ complexity. If we do so Alg.~\ref{alg:1} may terminate without covering the~$G$ fully.
-The key idea of the following algorithm extension is to change the method of finding the attractor given a goal from geometric checks~(using radii of subregions) to a hash lookup which is a constant time operation. For doing so, the algorithm needs to pay an extra price in terms of memory, since now it has to store the goals in~$G_\calS$ and associated attractors in a lookup table. The new method differs both in preprocessing and query phases and is explained in this section.
-
-\subsubsection{Preprocessing Phase and Reachabilty Search}
-In case the upper bound on the number of subregions is reached in Alg.~\ref{alg:1} before termination, the algorithm switches to Alg.~\ref{alg:grp2}. The key difference is that instead of computing new geometric subregions~$R_i$, the algorithm maintains a lookup table~$\calM$ mapping the goals to their corresponding attractors computed during the reachability search. The modified reachability search is algorithm is detailed in Alg.~\ref{alg:reach2}. The two main differences in the reachability search are that OPEN need not be a priority queue; it can be an unordered queue and the termination condition that was there in Alg.~\ref{alg:2} is removed.
-
-\subsubsection{Query phase}
-
-
-%% Main Alg
-
-\begin{algorithm}[t]
-%\footnotesize
-\hspace*{\algorithmicindent} \textbf{Inputs:} $G_\calS$, $\Sstart$, $\calP$
-\Comment{goal region, start state and a planner} 
-
-\hspace*{\algorithmicindent} \textbf{Outputs:} 
-$\calL$,
-$\calM$
-%$R_i = (\sAttract, r_i)$, $\pi_i$,
-\Comment{Library of paths to $\Sstart$ and a lookup table}
-\caption{Goal Region Preprocessing}\label{alg:grp2}
-\begin{algorithmic}[1]
-\Procedure{PreprocessRegion}{$G_\calS$}
-  \State $V \leftarrow$\textsc{ GetAllValidStates}($G_\calS$)
-  \State $ i \leftarrow 0$
-       \hspace{2mm} 
-       $\calL = \emptyset$
-       \hspace{2mm} 
-       $\calM = \emptyset$
-       
-  \vspace{2mm}
-    %\While {$V$ and $I$ are not empty}
-        \While {$V$ is not empty}
-          \State $s \leftarrow V.\text{pop}()$ %\label{alg:1:pop}
-            %\If {$s$ is not covered}  %\label{alg:1:discard}
-           % \Comment{$s$ is not covered}
-        \State $\sAttract \leftarrow s$               
-        %\label{alg:1:attract} 
-                \State $\pi_i$ = $\calP.$\textsc{PlanPath}($\Sstart, \sAttract$); %\label{alg:1:pp}
-                \hspace{2mm }
-                $\calL \leftarrow \calL \cup \{ \pi_i \}$  %\label{alg:1:path}
-                \State $S_{\text{reachable}} \leftarrow$ \textsc{ComputeReachability}($\sAttract$) %\label{alg:1:cr}
-                \State insert lookup enteries $S_{\text{reachable}} \rightarrow \sAttract$ in~$\calM$
-                \State $V \leftarrow V \backslash S_{\text{reachable}}$;
-                \hspace{2mm} $ i \leftarrow i+1$
-
-        \EndWhile
-
-  \vspace{2mm}
-
-  \State \Return $\calL, \calM$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{algorithm}[t]
-%\footnotesize
-\caption{Reachability Search}\label{alg:reach2}
-
-\begin{algorithmic}[1]
-\Procedure{ComputeReachability}{$\sAttract$}
-%\Procedure{ComputeReachability}{$\sAttract, r_{\text{max}}$}
-\State $S_{\text{reachable}} \leftarrow \{\sAttract\}$ \Comment{reachable set} %\label{alg:2:reachable}
-\State OPEN $\leftarrow \{$Succs($\sAttract$)$\}$  %\Comment{key: $h(s,\sAttract)$}% \label{alg:2:OPEN}
-\State CLOSED $\leftarrow \emptyset$
-\State $r_i \leftarrow 0$
-
-%\While {$r_i \leq r_{\text{max}}$}
-\While{OPEN$\neq \emptyset$}
-    \State $s \leftarrow$ OPEN.pop()
-    \State insert $s$ in CLOSED
-    \State $s'_g \leftarrow \argmin\limits_{s' \in \text{Preds}(s)} h(s', \sAttract)$ 
-%    \State $s'_g \leftarrow$ GreedySucc($s$)
-  %\label{alg:2:greedy} 
- \Comment{greedy predecessor}
- % acc. to some tie-breaking criteria}
-    \If {$s'_g$ $\in$ $S_{\text{reachable}}$ and Valid(edge(s,$s'_g$))} % \label{alg:2:crit}
-        \State $S_{\text{reachable}} \leftarrow S_{\text{reachable}} \cup \{s\}$  \Comment{$s$ is greedy}% \label{alg:2:set}
-    \EndIf
-    \For {each $s' \in \text{Succs}(s) \cap G_\calS$}% \label{alg:2:prun}
-        \If {$s' \notin$ CLOSED}
-            \State insert $s'$ in OPEN with priority $h(s', \sAttract)$
-        \EndIf
-    \EndFor
-\EndWhile
-%\State $r_i \leftarrow h(s, \sAttract) + \epsilon$    \Comment{$\epsilon$ is a small positive constant}
-\State \Return $S_{\text{reachable}}$
-
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{algorithm}[t]
-\hspace*{\algorithmicindent} \textbf{Inputs:} $G_\calS$, $\calM$, $\calL$
-
-\hspace*{\algorithmicindent} \textbf{Output:} $\pi$	\Comment{full path from \sStart to \sGoal}
-%\footnotesize
-\caption{Query}\label{alg:3}
-
-\begin{algorithmic}[1]
-
-%\Procedure{FindGreedyPath}{$s_1, s_2$}
-%  \label{alg:3:greedy-call-start}
-%  \State $s_{\text{curr}} \leftarrow s_2$; \hspace{2mm} $\pi \leftarrow \emptyset$
-%  \While{$s_{\text{curr}} \neq s_1$}
-%    \State $\pi \leftarrow \pi \cdot s_{\text{curr}}$
-%    \Comment{append current state to path}
-%      \State $s_{\text{curr}} \leftarrow \argmin\limits_{s \in \text{Preds}(s_{\text{curr}})} h(s, s_1)$  \Comment{greedy predecessor}
-%    \EndWhile
-%    \State \Return \textsc{Reverse} ($\pi$)   \Comment{reverse to get a path from $s_1$ to $s_2$}
-%\EndProcedure
-%\label{alg:3:greedy-call-end}
+%\ignore{
+%\subsection{Algorithm Extension}
+%\label{sec:extension}
+%In section~\ref{sec:analysis}, we enforced a bound on the number of subregions to guarantee~$O(1)$ complexity. If we do so Alg.~\ref{alg:1} may terminate without covering the~$G$ fully.
+%The key idea of the following algorithm extension is to change the method of finding the attractor given a goal from geometric checks~(using radii of subregions) to a hash lookup which is a constant time operation. For doing so, the algorithm needs to pay an extra price in terms of memory, since now it has to store the goals in~$G_\calS$ and associated attractors in a lookup table. The new method differs both in preprocessing and query phases and is explained in this section.
 %
-%\vspace{2mm}
-
-\Procedure{ComputePath}{$\sGoal$}
- % \For {each $R_i \in \calR$}
-    %\If {$h(s_{\text{goal}}, \sAttract) < r_i$}
-    %\Comment{$R_i$ covers $\sGoal$}
-    \State $\sAttract \leftarrow \calM$.\textsc{LookupAttractor}($\sGoal$)
-    %\label{alg:3:covers}
-      \State $\pi_g \leftarrow$ \textsc{FindGreedyPath} ($\sAttract, \sGoal$)
-     % \label{alg:3:greedy-call}
-      \State \Return $\pi_i \cdot \pi_g$  \Comment{append $\pi_g$ to~$\pi_i \in \calL$}
-     % \label{alg:3:return}
-    %\EndIf
-  %\EndFor
-
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
-}
+%\subsubsection{Preprocessing Phase and Reachabilty Search}
+%In case the upper bound on the number of subregions is reached in Alg.~\ref{alg:1} before termination, the algorithm switches to Alg.~\ref{alg:grp2}. The key difference is that instead of computing new geometric subregions~$R_i$, the algorithm maintains a lookup table~$\calM$ mapping the goals to their corresponding attractors computed during the reachability search. The modified reachability search is algorithm is detailed in Alg.~\ref{alg:reach2}. The two main differences in the reachability search are that OPEN need not be a priority queue; it can be an unordered queue and the termination condition that was there in Alg.~\ref{alg:2} is removed.
+%
+%\subsubsection{Query phase}
+%
+%
+%%% Main Alg
+%
+%\begin{algorithm}[t]
+%%\footnotesize
+%\hspace*{\algorithmicindent} \textbf{Inputs:} $G_\calS$, $\Sstart$, $\calP$
+%\Comment{goal region, start state and a planner} 
+%
+%\hspace*{\algorithmicindent} \textbf{Outputs:} 
+%$\calL$,
+%$\calM$
+%%$R_i = (\sAttract, r_i)$, $\pi_i$,
+%\Comment{Library of paths to $\Sstart$ and a lookup table}
+%\caption{Goal Region Preprocessing}\label{alg:grp2}
+%\begin{algorithmic}[1]
+%\Procedure{PreprocessRegion}{$G_\calS$}
+%  \State $V \leftarrow$\textsc{ GetAllValidStates}($G_\calS$)
+%  \State $ i \leftarrow 0$
+%       \hspace{2mm} 
+%       $\calL = \emptyset$
+%       \hspace{2mm} 
+%       $\calM = \emptyset$
+%       
+%  \vspace{2mm}
+%    %\While {$V$ and $I$ are not empty}
+%        \While {$V$ is not empty}
+%          \State $s \leftarrow V.\text{pop}()$ %\label{alg:1:pop}
+%            %\If {$s$ is not covered}  %\label{alg:1:discard}
+%           % \Comment{$s$ is not covered}
+%        \State $\sAttract \leftarrow s$               
+%        %\label{alg:1:attract} 
+%                \State $\pi_i$ = $\calP.$\textsc{PlanPath}($\Sstart, \sAttract$); %\label{alg:1:pp}
+%                \hspace{2mm }
+%                $\calL \leftarrow \calL \cup \{ \pi_i \}$  %\label{alg:1:path}
+%                \State $S_{\text{reachable}} \leftarrow$ \textsc{ComputeReachability}($\sAttract$) %\label{alg:1:cr}
+%                \State insert lookup enteries $S_{\text{reachable}} \rightarrow \sAttract$ in~$\calM$
+%                \State $V \leftarrow V \backslash S_{\text{reachable}}$;
+%                \hspace{2mm} $ i \leftarrow i+1$
+%
+%        \EndWhile
+%
+%  \vspace{2mm}
+%
+%  \State \Return $\calL, \calM$
+%\EndProcedure
+%\end{algorithmic}
+%\end{algorithm}
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\begin{algorithm}[t]
+%%\footnotesize
+%\caption{Reachability Search}\label{alg:reach2}
+%
+%\begin{algorithmic}[1]
+%\Procedure{ComputeReachability}{$\sAttract$}
+%%\Procedure{ComputeReachability}{$\sAttract, r_{\text{max}}$}
+%\State $S_{\text{reachable}} \leftarrow \{\sAttract\}$ \Comment{reachable set} %\label{alg:2:reachable}
+%\State OPEN $\leftarrow \{$Succs($\sAttract$)$\}$  %\Comment{key: $h(s,\sAttract)$}% \label{alg:2:OPEN}
+%\State CLOSED $\leftarrow \emptyset$
+%\State $r_i \leftarrow 0$
+%
+%%\While {$r_i \leq r_{\text{max}}$}
+%\While{OPEN$\neq \emptyset$}
+%    \State $s \leftarrow$ OPEN.pop()
+%    \State insert $s$ in CLOSED
+%    \State $s'_g \leftarrow \argmin\limits_{s' \in \text{Preds}(s)} h(s', \sAttract)$ 
+%%    \State $s'_g \leftarrow$ GreedySucc($s$)
+%  %\label{alg:2:greedy} 
+% \Comment{greedy predecessor}
+% % acc. to some tie-breaking criteria}
+%    \If {$s'_g$ $\in$ $S_{\text{reachable}}$ and Valid(edge(s,$s'_g$))} % \label{alg:2:crit}
+%        \State $S_{\text{reachable}} \leftarrow S_{\text{reachable}} \cup \{s\}$  \Comment{$s$ is greedy}% \label{alg:2:set}
+%    \EndIf
+%    \For {each $s' \in \text{Succs}(s) \cap G_\calS$}% \label{alg:2:prun}
+%        \If {$s' \notin$ CLOSED}
+%            \State insert $s'$ in OPEN with priority $h(s', \sAttract)$
+%        \EndIf
+%    \EndFor
+%\EndWhile
+%%\State $r_i \leftarrow h(s, \sAttract) + \epsilon$    \Comment{$\epsilon$ is a small positive constant}
+%\State \Return $S_{\text{reachable}}$
+%
+%\EndProcedure
+%\end{algorithmic}
+%\end{algorithm}
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\begin{algorithm}[t]
+%\hspace*{\algorithmicindent} \textbf{Inputs:} $G_\calS$, $\calM$, $\calL$
+%
+%\hspace*{\algorithmicindent} \textbf{Output:} $\pi$	\Comment{full path from \sStart to \sGoal}
+%%\footnotesize
+%\caption{Query}\label{alg:3}
+%
+%\begin{algorithmic}[1]
+%
+%%\Procedure{FindGreedyPath}{$s_1, s_2$}
+%%  \label{alg:3:greedy-call-start}
+%%  \State $s_{\text{curr}} \leftarrow s_2$; \hspace{2mm} $\pi \leftarrow \emptyset$
+%%  \While{$s_{\text{curr}} \neq s_1$}
+%%    \State $\pi \leftarrow \pi \cdot s_{\text{curr}}$
+%%    \Comment{append current state to path}
+%%      \State $s_{\text{curr}} \leftarrow \argmin\limits_{s \in \text{Preds}(s_{\text{curr}})} h(s, s_1)$  \Comment{greedy predecessor}
+%%    \EndWhile
+%%    \State \Return \textsc{Reverse} ($\pi$)   \Comment{reverse to get a path from $s_1$ to $s_2$}
+%%\EndProcedure
+%%\label{alg:3:greedy-call-end}
+%%
+%%\vspace{2mm}
+%
+%\Procedure{ComputePath}{$\sGoal$}
+% % \For {each $R_i \in \calR$}
+%    %\If {$h(s_{\text{goal}}, \sAttract) < r_i$}
+%    %\Comment{$R_i$ covers $\sGoal$}
+%    \State $\sAttract \leftarrow \calM$.\textsc{LookupAttractor}($\sGoal$)
+%    %\label{alg:3:covers}
+%      \State $\pi_g \leftarrow$ \textsc{FindGreedyPath} ($\sAttract, \sGoal$)
+%     % \label{alg:3:greedy-call}
+%      \State \Return $\pi_i \cdot \pi_g$  \Comment{append $\pi_g$ to~$\pi_i \in \calL$}
+%     % \label{alg:3:return}
+%    %\EndIf
+%  %\EndFor
+%
+%\EndProcedure
+%\end{algorithmic}
+%\end{algorithm}
+%}
 
 \subsection{Experimental Results}
 \label{sec:eval}
@@ -943,7 +1061,7 @@ We evaluated our algorithm on the PR2 robot for a single-arm (7-DOF) motion-plan
 
 The search is done on an implicit graph $G_\calS$ constructed using $\textit{motion primitives}$ which are small kinematically feasible motions. We define the primitives in the task-space respresentation as small motions for the robot end effector in position axes ($\textit{x, y, z}$) and orientation axes of Euler angles ($\textit{roll, pitch, yaw}$), and a joint-angle motion for the redundant joint of the 7-DOF arm. 
 The heurstic function is the Euclidean distance in these seven dimensions. The discretization we use for the graph $G_\calS$ is 2~cm for the position axes, 10 degrees for the Euler axes and 5 degrees for the redundant joint. 
-For this domain, we keep the $\textit{pitch}$ and $\textit{roll}$ of the end effector fixed and allow motion primitives along the remaining five dimensions i.e. $\textit{x, y, z, yaw}$ and the reduntant joint angle. We also limit the $\textit{yaw}$ to be between -30 and 30 degrees. Note that the specification of the $G_\calS$ is purely task specific and we exploit the task constraints to limit the size of $G_\calS$ which makes our preprocessing step tractable (Assumption~\ref{assum:1}).
+For this domain, we keep the $\textit{pitch}$ and $\textit{roll}$ of the end effector fixed and allow motion primitives along the remaining five dimensions i.e. $\textit{x, y, z, yaw}$ and the reduntant joint angle. We also limit the $\textit{yaw}$ to be between -30 and 30 degrees. Note that the specification of the $G_\calS$ is purely task specific and we exploit the task constraints to limit the size of $G_\calS$ which makes our preprocessing step tractable (Assumption~\ref{asm:1:1}).
 
 We compared our approach with different single- and multi-query planners in terms of planning times, success rates and memory consumption (see Table~\ref{tab:stats}) for 200 uniformly sampled goal states from $G$. Among the multi-query planners, we implemented PRM, a multi-query version of RRT which we name MQ-RRT and the E-graph planner. 
 For MQ-RRT, we precompute an RRT tree rooted at  $\Sstart$ offline (similar to PRM) and query it by trying to connect $\sGoal$ to the nearest nodes of the precomputed tree. We use the same connection strategy for MQ-RRT as the one that the asymptotically-optimal version of PRM uses\footnote{In order for the quality of paths obtained the PRM to converge to the quality of the optimal solution, a query should be connected to its $k$ nearest neighbors where 
@@ -1027,7 +1145,7 @@ We compare our results with Weighted A* (WA*)algorithm. The results are summariz
 % \vspace{-6mm}
 \end{figure}
 
-\begin{table*}[t]
+\begin{table*}[ht]
 \centering
      \resizebox{0.7\columnwidth}{!}{%
     % \resizebox{1.4\textwidth}{!}{\begin{minipage}{\textwidth}
@@ -1044,15 +1162,15 @@ We compare our results with Weighted A* (WA*)algorithm. The results are summariz
 % \vspace{-6mm}
 \end{table*}
 
-As this algorithm is only applicable to static (known) environments, we only preprocessed it with collision checking against the walls of the truck and with self collision checking and not with the boxes inside the truck. We also tested our planner in a simulated real world scenario~(see Fig.\ref{fig:gmt_sim}) in conjunction with the WA* planner. For each query, we first ran our planner and validated the computed path against non-static obstacles i.e the boxes. We employed WA* as a fallback planner in case the first path is invalid. We observed that for all the queries ran for this scene, the fallback planner was never invoked. This experiment gave us an interesting use case for our planner to be employed in conjunction with conventional planners in the environments that are partially static.
+As this algorithm is only applicable to static (known) environments, we only preprocessed it with collision checking against the walls of the truck and with self collision checking and not with the boxes inside the truck. We also tested our planner in a simulated real world scenario~(see Fig.~\ref{fig:gmt_sim}) in conjunction with the WA* planner. For each query, we first ran our planner and validated the computed path against non-static obstacles i.e the boxes. We employed WA* as a fallback planner in case the first path is invalid. We observed that for all the queries ran for this scene, the fallback planner was never invoked. This experiment gave us an interesting use case for our planner to be employed in conjunction with conventional planners in the environments that are partially static.
 
-\subsection{Constant-time Variant}
-In this section we introduce a constant-time variant of our algorithm. We make the following high level modifications to the algorithm:
+\subsection{Algorithm Variant}
+In this section we introduce a new variant of our algorithm and discuss its properties. The variant provides stronger constant-time guarantee for the case where the robot interleaves planning and execution. Specifically, it provides the same guarantee as lemma~\ref{lemma:o1} but without the included condition. We make the following high-level modifications to the previous algorithm to construct the new variant. 
 
-\begin{enumerate}
-\item \label{item:flip} Flip the problem definition described in section~\ref{sec:pdef}. Namely instead of have a fixed start and a goal region, we have a fixed goal~$\sGoal$ and a start region~$S$~(see Fig.~\ref{fig:approach_flip}).
-\item \label{item:bound} Remove the bound~$\calD$ on the depth of the subregions.
-\item \label{item:interleave} Interleave planning and execution
+\begin{enumerate}[label={\textbf{M\arabic*}},leftmargin=0.75cm]
+\item \label{mod:flip} Flip the problem definition described in section~\ref{sec:pdef}. Namely instead of have a fixed start and a goal region, we have a fixed goal~$\sGoal$ and a start region~$S$~(see Fig.~\ref{fig:approach_flip}).
+\item \label{mod:interleave} Interleave planning and execution and expand a constant number of states per action execution.
+%\item \label{item:bound} Remove the bound~$\calD$ on the depth of the subregions.
 \end{enumerate}
 
 \begin{figure}
@@ -1069,13 +1187,32 @@ In this section we introduce a constant-time variant of our algorithm. We make t
 % \vspace{-6mm}
 \end{figure}
 
-From~\ref{item:bound}, we can assume that there exists an upper bound on the number of subregions~$|\calR|$ in~$G$~(see section~\ref{subsec:complexity}). However from~\ref{item:bound} we no more have a bound on the number of states expanded in the query phase. The time complexity now becomes linear in the number of expansions from being linear in~$|\calR|$. Now by doing~\ref{item:interleave}, in the classical real-time planning fashion, we make the algorithm complexity constant time by doing limited horizon planning~\cite{KL06,KS09,K90}. Doing so does not affect the completeness guarantee and will follow the previous algorithm analysis. Once the robot reaches~$\sAttract$, it can then continue to follow the pre-stored path~$\pi_i$. By all three modifications, we can conclude that this variant has a complexity of~$O(1)$.
+The modifications result in the following lemma:
+\vspace{2mm}
+\begin{lemma}
+\label{lemma:var:o1}
+	Given the number of subregions~$|\calR|$ and the depth of the largest subregion~$\calD$, each action requires~$O(1)$ time delibration.
+\end{lemma}
 
-Note that flipping the problem definition~(\ref{item:flip}) will change the set of domains that our approach is applicable to. The experiments and evaluation of this algorithm variant is outside the scope of this thesis and left as future work.
+\begin{proof}
+We consider the algorithm setting where~$|\calR|$ is bounded~(Assumption~\ref{asm:1:5}) but~$\calD$ is unbounded. From lemma~\ref{lemma:unboundedD} thereby, the query phase can find path in~$O(|\calR|)$ time.
+%
+However by modification~\ref{mod:interleave}, by interleaving planning and execution, the algorithm requires~$O(1)$ planning time per action.
+%The completeness guarantee follows from section~\ref{sec:analysis} and by the construction of the algorithm, it is guaranteed that a state is never re-expanded or re-visited by the robot.
+Once the robot reaches~$\sAttract$, it can then continue to follow the pre-stored path~$\pi_i$. 
+\end{proof}
+
+Lemma~\ref{lemma:greedy} assures that the greedy path~$\pi_g$ does not contain cycles, otherwise the greedy search would be incomplete. Hence we have the following corollary:
+
+\begin{cor}
+	By Def.~\ref{ctmp:def} and from lemmas~\ref{lemma:var:o1} and~\ref{lemma:greedy}, the algorithm variant is a CTMP algorithm.
+\end{cor}
+
+Note that flipping the problem definition~(\ref{mod:flip}) will change the set of domains that our approach is applicable to. The experimental evaluation of this algorithm variant is outside the scope of this thesis and left as future work.
 
 \newpage
-\section{CTMP to Pickup Moving Objects off a Conveyor}
-\label{sec:conveyor}
+\section{CTMP for Conveyor-pickup Task}
+\label{sec:rss}
 \subsection{Overview}
 %% motivation
 Conveyor belts are widely used in automated distribution, warehousing, as well as for manufacturing and production facilities. In the modern times robotic manipulators are being deployed extensively at the conveyor belts for automation and faster operations~\cite{zhang2018gilbreth}. In order to maintain a high-distribution throughput, manipulators must pick up moving objects without having to stop the conveyor for every grasp. In this work, we consider the problem of motion planning for grasping moving objects off a conveyor. An object in motion imposes a requirement that it should be picked up in a short window of time. The motion planner for the arm, therefore, must compute a path within a bounded time frame to be able to successfully perform this task.
@@ -1105,7 +1242,7 @@ Furthermore, the planning problem is challenging because the motion planner has 
 Motivated by these challenges, we propose a planning framework that leverages offline preprocessing to provide bounds on the planning time when the planner is invoked online. Our key insight is that in our domain the manipulation task is highly repetitive---even for different object poses, the computed paths are quite similar and can be efficiently reused to speed up online planning. Based on this insight, we derive a method that precomputes a representative set of paths offline with some auxiliary datastructures and uses them online to plan in constant time. Here, we assume that the models of the target objects are known. Namely, the planner is provided with the geometric model of the target object apriori. To the best of our knowledge, our approach is the first to provide provable constant-time planning guarantees on generating motions all the way to the goal for dynamic environments.
 
 %
-We experimentally show that constant-time planning and replanning capability is necessary for a successful conveyor pickup task. Specifically if we only perform one-time planning, (namely, either following the plan for the initial noisy pose estimate or from a delayed but accurate pose estimate) we frequently fail to pick the object.
+We experimentally show that constant-time planning and replanning capability is necessary for a successful conveyor-pickup task. Specifically if we only perform one-time planning, (namely, either following the plan for the initial noisy pose estimate or from a delayed but accurate pose estimate) we frequently fail to pick the object.
 \begin{figure}[t]
     \centering
     \begin{subfigure}{.49\textwidth}
@@ -1160,12 +1297,14 @@ Roughly speaking, the objective, following the set of assumptions we will shortl
 %More specifically, the perception system is setup such that it sends updated pose estimates on the fly as the object moves along the conveyor belt and as the robot approaches the object.   
 To formalize this idea, let us introduce the notion of a \emph{reachable} state:
 
+\vspace{2mm}
 \begin{definition}
     A goal pose $g \in \Gfull$ is said to be \emph{reachable} from a state $s$ if there exists a path from $s$ to $g$ and it can be computed in finite time.
 \end{definition}
 
 Given a state $s$ we denote the set of all goals that are reachable from $s$ as $G^{\rm reach}(s)$ and we say that $G^{\rm reach}(s)$ is \emph{reachable} from $s$.
 
+\vspace{2mm}
 \begin{definition}
     A reachable pose $g \in \Gfull$ is said to be \emph{covered} by a state $s$ if 
     the system can plan a path from $s$ to $g$ within time~\Tbound.
@@ -1183,11 +1322,11 @@ We are now ready to state the assumptions for which we can solve the problem def
 %\end{definition}
 
 We make the following assumptions about the system.
-\begin{enumerate}[label={\textbf{A\arabic*}},leftmargin=0.75cm]
-    % \item \label{assum:1} The goal set \Gfull is reachable from the start state~\Shome. Namely,  $G^{\rm reach}(\Shome) = \Gfull$.
+%\begin{enumerate}[label={\textbf{A\arabic*}},leftmargin=0.75cm]
+    % \item \label{asm:1:2} The goal set \Gfull is reachable from the start state~\Shome. Namely,  $G^{\rm reach}(\Shome) = \Gfull$.
     
 \ignore{
-    \item \label{assum:2} Given a path 
+    \item \label{asm:2:2} Given a path 
     $\Pi = \{s_0, \ldots, s_k \}$ 
     s.t. $s_0 = \Shome$ and $s_k \in \Gfull$, 
     we have that $G^{\rm reach}(s_{i+1}) \subset G^{\rm reach}(s_{i})$.
@@ -1195,28 +1334,30 @@ We make the following assumptions about the system.
     \os{Oren - Didn't we agree that this is not an assumption but a property?}
 }
 
-%    \item \label{assum:3} \Gfull would accommodate for an error $\epsilon$ in the initial pose estimate $g_{\textrm{init}}$ of the perception system. Each subsequent estimate $g_{\textrm{next}}$ will be within the $\epsilon$ window around $g_{\textrm{init}}$ (in retrospect because the conveyor is moving).
- 
-    \item \label{assum:4} There exists a replan cutoff time \Trc from when the robot starts moving, after which the planner does not replan and continues to execute the last planned path.
+%    \item \label{assum:2:1} \Gfull would accommodate for an error $\epsilon$ in the initial pose estimate $g_{\textrm{init}}$ of the perception system. Each subsequent estimate $g_{\textrm{next}}$ will be within the $\epsilon$ window around $g_{\textrm{init}}$ (in retrospect because the conveyor is moving).
+\vspace{2mm}
+\begin{assumption} \label{assum:2:2} There exists a replan cutoff time \Trc from when the robot starts moving, after which the planner does not replan and continues to execute the last planned path.
+\end{assumption}
+\vspace{2mm}
+\begin{assumption} \label{asassum:2:3} If the robot starts moving at $t = 0$ then for any time $t < \Trc$, the environment is static. Namely, objects on~$\calB$ cannot collide with $\calR$ during that time.
+\end{assumption}
+\vspace{2mm}
+\begin{assumption} \label{assum:2:1} Given an initial goal pose $g_{\textrm{init}} \in \Gfull$ by $\calP$, any subsequent pose $g_{\textrm{new}} \in \Gfull$ is at most $\varepsilon_\calP$ distance away from $g_{\textrm{init}}$ (after accounting for the fact that the object moved along $\calB$).
+\end{assumption}    
 
-    \item \label{assum:5} If the robot starts moving at $t = 0$ then for any time $t < \Trc$, the environment is static. Namely, objects on~$\calB$ cannot collide with $\calR$ during that time.
-    
-    \item \label{assum:3} Given an initial goal pose $g_{\textrm{init}} \in \Gfull$ by $\calP$, any subsequent pose $g_{\textrm{new}} \in \Gfull$ is at most $\varepsilon_\calP$ distance away from $g_{\textrm{init}}$ (after accounting for the fact that the object moved along $\calB$).
-    
+%\end{enumerate}
 
-\end{enumerate}
-
-Assumptions~\ref{assum:4}-\ref{assum:5} enforce a requirement that $\calP$ must provide an accurate estimate $g$ while $o$ is at a safe distance from $\calR$.
+Assumptions~\ref{assum:2:2}-\ref{asassum:2:3} enforce a requirement that $\calP$ must provide an accurate estimate $g$ while $o$ is at a safe distance from $\calR$.
 %
-Assumption~\ref{assum:3} corresponds to the error tolerance of the perception system. This is explained in detail in Sec.~\ref{sec:eval} and in Fig.~\ref{fig:pe}
-% Assumption~\ref{assum:1} corresponds to properties of the environment \emph{without} taking the objects on the conveyor belt into account 
+Assumption~\ref{assum:2:1} corresponds to the error tolerance of the perception system. This is explained in detail in Sec.~\ref{sec:eval} and in Fig.~\ref{fig:pe}
+% Assumption~\ref{asm:1:2} corresponds to properties of the environment \emph{without} taking the objects on the conveyor belt into account 
 % while
 
 
-% Assumptions~\ref{assum:3}-\ref{assum:5} correspond to properties of the environment that account for the perception system and the objects on the conveyor belt.
+% Assumptions~\ref{assum:2:1}-\ref{asassum:2:3} correspond to properties of the environment that account for the perception system and the objects on the conveyor belt.
 
 
-Our approach for bounded-time planning relies on a \emph{preprocessing} stage that allows to efficiently compute paths in a \emph{query} stage to any goal state (under Assumptions~\ref{assum:4}-\ref{assum:3}). 
+Our approach for bounded-time planning relies on a \emph{preprocessing} stage that allows to efficiently compute paths in a \emph{query} stage to any goal state (under Assumptions~\ref{assum:2:2}-\ref{assum:2:1}). 
 %
 Before we describe our approach, we start by describing a \naive method that solves the aforementioned problem but requires a prohibitive amount of memory.
 %
@@ -1252,12 +1393,12 @@ This can be seen as a warmup before describing our algorithm which exhibits the 
 
 We divide the preprocessing stage into two steps.
 In the first step, we compute from \Shome a path $\Pi_g$ to every reachable $g \in \Gfull$. 
-%(such a path exists following \ref{assum:1}).
+%(such a path exists following \ref{asm:1:2}).
 . Thus, all goal states are covered by \Shome and this allows us to start executing a path once $\calP$ gives its initial pose estimate.
 However, we need to allow for updated pose estimations while executing~$\Pi_g$. 
 
 %
-Following \ref{assum:4} and \ref{assum:5}, this only needs to be done up until time~\Trc.
+Following \ref{assum:2:2} and \ref{asassum:2:3}, this only needs to be done up until time~\Trc.
 Thus, we discretize each path such that consecutive states along the path are no more than $\delta _t$ time apart. As we will see, this will allow the system to start executing a new path within $\Tbound + \delta_t$ after a new pose estimation is obtained from $\calP$.
 %
 We call all states that are less than \Trc time from \Shome \emph{replanable states}.
@@ -1326,7 +1467,7 @@ The dynamic primitives are generated by using a Jacobian pseudo inverse-based co
 The velocity of the end effector is computed such that the end-effector minimizes the distance to the grasp pose. Once the gripper encloses the object, it moves along with the object until the gripper is closed.
 Additional details omitted due to lack of space. 
 
-\textbf{Motion planner.}
+\textbf{Graph search}
 The states and the transitions implicitly define a graph $\calG = (S,E)$ where $S$ is the set of all states and~$E$ is the set of all transitions defined by the motion primitives. We use Weighted \astar (\wastar)~\cite{pohl1970heuristic} to find a path in $\calG$ from a given state~$s$ to a goal state $g$. 
 \wastar is a suboptimal heursitic search algorithm that allows a tradeoff between optimality and greediness by inflating the heuristic function by a given weight~$w$. 
 The search is guided by an efficient and fast-to-compute heuristic function which in our case has two components.
@@ -1414,7 +1555,7 @@ We are finally ready to describe our algorithm describing first the preprocessin
     \label{fig:crp}
     \vspace{-5mm}
 \end{figure*}
-Our preproccesing stage starts by sampling a goal state~$g_1 \in \Gfull$ and computing a root path~$\Pi_1$ from~$\Shome$ to~$g_1$. We then associate with~$\Pi_1$ all goal states~$G_1 \subset \Gfull$ such that~$\Pi_1$ can be used as an experience in reaching any state in $g_1' \in G_1$ within~\Tbound
+Our preprocessing stage starts by sampling a goal state~$g_1 \in \Gfull$ and computing a root path~$\Pi_1$ from~$\Shome$ to~$g_1$. We then associate with~$\Pi_1$ all goal states~$G_1 \subset \Gfull$ such that~$\Pi_1$ can be used as an experience in reaching any state in $g_1' \in G_1$ within~\Tbound
 Thus, all goal states in~$G_1$ are covered by~\Shome.
 %
 We then repeat this process but instead of sampling  a goal state from \Gfull, we sample from $\Gfull \setminus \Gcov$, where~\Gcov is the set of goal states already covered by \Shome.
@@ -1723,16 +1864,58 @@ For pseudocode describing our approach see~\ref{alg:query}.
 
 
 \subsection{Analysis}
+\newpage
+\subsubsection{Time-bound}
+We want to highlight an important distinction between the time bounds for roadmap-based methods or search-based methods and our approach. For our approach, the time bound~($\Tbound$) is not dependent on the abstraction used for motion planning (e.g a roadmap or a grid structure etc.) but is a user-specified bound which is a critical requirement for the conveyor-pickup task.~$\Tbound$ however, has a lower bound because of some required constant-time operations like hash table lookups and latching.
+
+The existing methods, even if bounded in time (w.r.t their respective abstractions) cannot guarantee to find a path within a user-specified time bound.
+
+
+
+\subsubsection{Completeness}
+\begin{lemma}[Completeness]
+\label{lemma:completeness}
+Let $s$ be a state that $\calR$ is at in the query phase and $g\in \Gfull$ is a goal state.
+If~$g$ is reachable from a state $s'$ that is (i)~reachable from $s$ and (ii)~is \Tbound away from $s$ then the planner will compute a path to $g$.
+\end{lemma}
+\begin{proof}
+To prove this lemma, we need to show that if~$g$ is reachable from~$s'$, it is ``covered" by~$s'$ in Alg. 7.
+
+We know that if~$g$ is covered by a state~$s$ on a root path~$\Pi_i$, it is also covered by all states before~$s$ on~$\Pi_i$. Hence, to show that~$g$ is covered by~$s'$, we can either show that it is covered by~$s'$ directly or it is covered via a state after~$s'$ on~$\Pi_i$. If either of these holds true, the loop at Alg. 8, line 7 will not terminate without returning the path. (Here Alg. 8 is called for~$(g, \pi_i,s')$).
+
+%Consider an iteration of loop at Alg. 7, line 7. The algorithm maintains the invariant that~$Guncov_i$ for~$\Pi_i$ is initialized with the reachable states of~$\sStart$ and therefore contains the reachable states for all states along~$\Pi_i$ (including~$g$).
+%
+Say~$s'$ lies on the root path~$\Pi_i$. To process~$\Pi_i$, Alg. 7 starts at the state at~$t_{rc} (\geq t(s') > t(\sStart))$ and loops backwards on~$\pi_{\text{curr}}$ until it reaches~$\sStart$ which is the first state on~$\Pi_i$ (Loop at line. 9). Consider the case when~$g$ was not covered via any of the states after~$s'$ on~$\pi_{\text{curr}}$. Then the iteration for which~$s = s'$ will cover~$g$ either by latching or by calling Preprocess(). The coverage is guaranteed by the call to Preprocess (if not covered via latching) because the ComputeRootPaths() function (called inside Preprocess()), by construction, guarantees coverage of all reachable states.
+\end{proof}
+
+\subsubsection{Time Complexity (Query Phase)}
+In this section we present an asymptotic analysis of the time and space complexity of our algorithm for the worst-case.
+
+\textbf{Assumption:}
+The analysis makes the assumption that for each start~$\Sstart$ and goal region~$\Guncov$,~$k \ll n_{\text{goal}}$ where~$k$ is the number of root paths computed by Alg.~\ref{alg:step1} for~$\Guncov$ containing~$n_{goal}$ goals.
+
 
 \label{para:time}
 In this section we analyse the worst-case time complexity of the query phase.
-\paragraph{Time Complexity (Query Phase)}
-    The number of times the algorithm queries for a root path (namely, computing $\calM()$ is bounded by $n_{\textrm{steps}} = \Trc/\delta_t$ which is the maximum number of time steps from $t = 0$ to $\Trc$ and is a constant.
+
+\begin{lemma}
+\label{lemma:o1_full}
+	The algorithm can find full path from start to goal in~$O(1)$ time
+\end{lemma}
+\begin{proof}
+	The number of times the algorithm queries for a root path (namely, computing $\calM()$ is bounded by $n_{\textrm{steps}} = \Trc/\delta_t$ which is the maximum number of time steps from $t = 0$ to $\Trc$ and is a constant for a given~$\delta_t$.
 Quering a root path requires a hash table lookup. Standard hash tables have~$O(n)$ worst-case complexity. In case of a static input set (which holds true in our case), we can leverage perfect hashing~\cite{czech1997perfect} to achieve~$O(1)$ lookup complexity.
     The number of times the algorithm will attempt to latch on to a root path (namely, a call to \textsc{CanLatch}  which is a constant-time operation) is also bounded by $n_{\textrm{steps}}$. Finally, Alg.~\ref{alg:query} calls the \textsc{Plan} method only once.
     Since we are using a deterministic planner, the computation time is constant.
-    Hence the overall time complexity of the query phase is constant i.e~$O(1)$
+    Hence the overall time complexity of the query phase is constant i.e~$O(1)$.
+\end{proof}
 
+As the algorithm finds full path in~$O(1)$ time~(which is a stronger property), it can find the next action along the full path in~$O(1)$ time. Hence we have the following corolary:
+
+\vspace{2mm}
+\begin{cor}
+	By Def.~\ref{ctmp:def} and from lemma~\ref{lemma:o1_full}, the algorithm is a CTMP algorithm.
+\end{cor}
 %
 %\paragraph{Ammortized:} It is important to mention that the worst-case complexity for our algorithm is too pessimistic, since the hash tables have~$O(n)$ complexity when all the elements hash to the same bucket which is very unlikely if we choose a good hash function. The ammortized complexity of hash lookups, however is~$O(1)$. Since we have already showed that the other operations in the query phase are constant time, the overall ammortized complexity of query phase is~$O(1)$.
 
@@ -1781,7 +1964,7 @@ If the robot did not yet reach $s_i$ then it can reach $g_j$ by
 We term the process we just described of moving from one root path to another as ``latching'' on to a new root path.
 
 Let $s_{\Pi_i, t}$ be the state that is $t$ time from \Shome on path $\Pi_i$.
-If a collision-free path existed from $s_{\Pi_i, \Trc}$ to $s_{\Pi_j, \Trc+\delta_t}$ for every $i,j$ then we could latch on from any root path to any other root path. Moreover, following Assumption~\ref{assum:4}, $\Trc$ is the last time that the perception could update the goal location so no other replanning would be required.
+If a collision-free path existed from $s_{\Pi_i, \Trc}$ to $s_{\Pi_j, \Trc+\delta_t}$ for every $i,j$ then we could latch on from any root path to any other root path. Moreover, following Assumption~\ref{assum:2:2}, $\Trc$ is the last time that the perception could update the goal location so no other replanning would be required.
 %
 Unfortunately, this may not be the case.
 %
@@ -1801,6 +1984,41 @@ More formally, for each root path~$\Pi_i$, we start by considering the last repl
 If this is the case we know that any goal state in $G_j$ can be
 }
 
+\subsubsection{Space Complexity}
+The space complexity analysis is done for the worst case. Although the preprocessing algorithm computes paths backwards for the replanable states i.e starting from the states at~$t_{rc}$, for the purpose of analysis we will follow the straw man approach~(detailed in section~\ref{subsec:strawman})) of considering replannable states in the forward order. The worst case complexity in both cases is the same.
+
+\vspace{2mm}
+\begin{lemma}
+	The algorithm requires~$O(|\pi_{\text{max}}|.k_{\text{max}}^{n_{\text{steps}}})$ space
+\end{lemma}
+\begin{proof}
+Let~$k_{\text{max}}$ be the upper bound on the number of paths required to cover~$\Gfull$ from any state the robot can be at and~$k_{\text{max}} \ll n_{\text{goal}}$ (i.e our original assumption). First, the algorithm stores~$k_{\text{max}}$ paths~(worst case) from~$\sStart$ to~$\Gfull$ consuming~$O(|\pi_{\text{max}}|.k)$ space where~$|\pi_{\text{max}}|$ is the maximum length of a path. Second, for each of the~$k_{\text{max}}$ paths, from the first replannable state it finds~$k_{\text{max}}$ paths consuming a commulative~$O(|\pi_{\text{max}}|.k_{\text{max}}^2)$ space. Similarly for all replannable states at~$t=t_{rc}$ it takes~$O(|\pi_{\text{max}}|.k_{\text{max}}^{n_{\text{steps}}})$ space. Adding the space required for replannable states at each time step gives~$O(|\pi_{\text{max}}|.k + O(|\pi_{\text{max}}|.k_{\text{max}}^2 + ... +O(|\pi_{\text{max}}|.k_{\text{max}}^{n_{\text{steps}}})$ complexity. For Big O notation we can ignore the lower exponent terms. Hence the final space complexity is~$O(|\pi_{\text{max}}|.k_{\text{max}}^{n_{\text{steps}}})$
+\end{proof}
+
+Now we will analyse the space complexity for two special cases:
+
+\begin{enumerate}[label={\textbf{C\arabic*}},leftmargin=0.75cm]
+\item \label{c1} When the latching operation is always successful (Alg.~\ref{alg:preprocess} line~\ref{alg:preprocess:line:latch1b})
+\item \label{c2} For all replannable states at~$t_{rc}$, the call to Alg.~\ref{alg:preprocess} returns~$G_i^{\textrm{uncov}} = \emptyset$
+
+\end{enumerate}
+The analysis is based on Alg.~\ref{alg:preprocess}
+
+\vspace{2mm}
+\begin{lemma}
+	For case~\ref{c1}, the algorithm requires~$O(|\pi_{\text{max}}|.k)$ space
+\end{lemma}
+In this case the algorithm only computes~$k$ paths from~$\sStart = \Shome$ to~$\Gfull$.
+
+\vspace{2mm}
+\begin{lemma}
+	For case~\ref{c2}, the algorithm requires~$O(|\pi_{\text{max}}|.k^2)$ space
+\end{lemma}
+\begin{proof}
+	For this case in addition to $O(|\pi_{\text{max}}|.k)$ space as required by case~\ref{c1}, the algorithm needs to compute~$k$ paths from each replannable state at~$t=t_{rc}$. Since there are~$k$ such states, it requires~$O(|\pi_{\text{max}}|.k^2)$ space. For big O notation we can ignore the first term and the space complexity is given as~$O(|\pi_{\text{max}}|.k^2)$.
+\end{proof}
+
+The two special cases give a intuitive measure of the amount of memory and precomputaiton we save by the compression schemes that we utilise in preprocessing.
 
 \subsection{Experimental Results}
 \label{sec:eval}
@@ -1911,7 +2129,7 @@ We select $\Gfull$ such that $\varepsilon_\calP = 0.5$ cm, dimension along $y$-a
 
 In the example depicted in Fig.~\ref{fig:pe}, the thick and the thin solid rectangles show the ground truth and estimated poses, respectively at two time instances in the life time of the object.
 %
-The first plan is generated for the pose shown at $x_{\textrm{exec}}$. During execution, the robot receives an improved estimate and has to replan for it. At this point we back project this new estimate in time using the known speed of the conveyor and the time duration between the two estimates. This back-projected pose (shown as the dotted rectangle) is then picked as the new goal for replanning. Recall that under the assumption ~\ref{assum:3} the back projected pose will always lie inside \Gfull.
+The first plan is generated for the pose shown at $x_{\textrm{exec}}$. During execution, the robot receives an improved estimate and has to replan for it. At this point we back project this new estimate in time using the known speed of the conveyor and the time duration between the two estimates. This back-projected pose (shown as the dotted rectangle) is then picked as the new goal for replanning. Recall that under the assumption ~\ref{assum:2:1} the back projected pose will always lie inside \Gfull.
 %
 %Recall that we assume that the new estimate will be within the $\pm \varepsilon_\calP$ window around \Xexec, it will always lie within \Gfull. 
 %As \Gfull contains all $y$ and $\theta$ values (up to our discretization), our system can handle the errors along those dimensions.
@@ -2014,7 +2232,7 @@ If the planner fails to generate the plan within this time, then the robot misse
 %
 We label a run as a ``Pickup success" if the planner successfully replans once after the object crosses the 1.0m mark. The mark is the mean of accurate perception range that was determined experimentally and used in the robot experiments as described in Section \ref{sec:robot_results}.
 %
-The key takeaway from our experiments (Table~\ref{tab:sim_results}) is that having a known time bound on the query time is vital to the success of the conveyor pickup task.
+The key takeaway from our experiments (Table~\ref{tab:sim_results}) is that having a known time bound on the query time is vital to the success of the conveyor-pickup task.
 
 Our method shows the highest pickup success rate, planning success rate (success rate over all planning queries) and an order of magnitude lower planning times compared to the other methods. 
 The planning success rate being lower than 100\% can be attributed to the fact that some goals were unreachable during the runs. 
@@ -2087,7 +2305,7 @@ Path cost [s]                         & 10.11        & 8.19          & 8.28     
 
 \newpage
 \section{Proposed Work}
-In the remainder of this thesis we aim to broaden the applicability of CTMP to semi-structured environments. So far we have developed algorithms for fully static environments with known obstacles and a dynamic environment with a known dynamics model i.e the geometric and motion models of the object in the scene were known. Next, we want to consider environments in which the geometric models will be known but the location or motion model of objects in the scene could be unknown apriori. At the same time, we aim to provide strong guarantees on the planning times.
+In the remainder of this thesis we aim to broaden the applicability of CTMP to semi-structured environments. So far we have developed algorithms for fully static environments with known obstacles and a dynamic environment with a known dynamics model i.e the geometric and motion models of the object in the scene were known. Next, we want to consider environments in which the geometric models will be known but the location or motion model of objects in the scene could be unknown apriori. At the same time, we aim to provide strong guarantees on the planning times. Lastly, we also propose to scale up the capability of the conveyor-pickup task to use multiple arms simultaneously picking up different objects.
 
 \subsection{CTMP with Movable Objects in Static Environments}
 Environments like homes are considered semi-structured; Consider a kitchen scenario where most of the obstacles are static like kitchen counters, cabinets, stove etc. However, the movable (non-static) items e.g the daily consumbles like a sugar box, a jam jar or the kitchen utensils may be found at random locations specially when the kitchen is used by humans alongside.
@@ -2122,10 +2340,26 @@ Following are the research questions that we will have to investigate.
 \end{itemize}
 
 \subsection{Conveyor Pickup Task with Multiple Robot Arms}
-The algorithm proposed in chapter~\ref{sec:conveyor} considered one object at a time in the workspace of the robot. Consider a scenario where there are multiple robots working at a conveyor and performing a sorting task. Namely, each robot is looking for a specific object and dropping off in a separate bin. Now because all the robots are working at the same conveyor belt, they have to pick their assigned objects while avoiding objects assigned to other robots. For each robot, these other objects would be considered as obstacles. Since these obstacles are moving, it makes the planning problem even more challenging.
+The algorithm proposed in chapter~\ref{sec:rss} considered one object at a time in the workspace of the robot. Consider a scenario where there are multiple robots working at a conveyor and performing a sorting task. Namely, each robot is looking for a specific object and dropping off in a separate bin. Now because all the robots are working at the same conveyor belt, they have to pick their assigned objects while avoiding objects assigned to other robots. For each robot, these other objects would be considered as obstacles. Since these obstacles are moving, it makes the planning problem even more challenging.
 
-\subsection{Timeline}
-
+\subsection{Schedule of Proposed Work}
+\begin{itemize}
+\item Summer 2020
+	\begin{itemize}
+	\item Formulate and implement an algorithm for semi-static environments
+	\item Investigate the assumptions needed to provide CTMP guarantees
+	\end{itemize}
+\item Fall 2020
+	\begin{itemize}
+	\item Extend the capability of the conveyor-pickup task to use multiple arms simultaneously grasping multiple objects
+	\item Demonstrate the framework on the PR2 robot with two arms
+	\end{itemize}
+\item Spring 2021
+	\begin{itemize}
+	\item Do a more rigorous empirical analysis of the planning time bounds
+	\item Write and defend thesis
+	\end{itemize}
+\end{itemize}
 
 
 
