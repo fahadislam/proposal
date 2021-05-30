@@ -3424,77 +3424,99 @@ In our analysis, we assume that the error is direction invariant for all $SE(3)$
 \label{fig:shield_frames}
 \end{figure}
 
-We denote the error in each dimension as $\delta x,\delta y, \delta z,\delta roll,\delta pitch,\delta yaw$. These notations can be seen as representing either of the two types of errors, the planning and the tracking errors. The two errors are additive so the overall cell reduction is computed by the summation of both.
+We denote the error in each dimension as $\Delta x,\Delta y, \Delta z,\Delta roll,\Delta pitch,\Delta yaw$. These notations can be seen as representing either of the two types of errors, the planning and the tracking errors. The two errors are additive so the overall cell reduction is computed by the summation of both.
 %
-We geometrically analyze the magnitude of cell size reduction needed to account for each of these errors. We constrain the cells to be remain uniform and square in shape. The original size of cell assuming zero errors is $L \times L$ and we represent the new cell size after the cell size reduction as $L' \times L'$ where $L' < L$. For each $SE(3)$ dimension, $L'$ is computed as a function of $L$ and the magnitude of error in that dimension. In each case the analysis is provided for a single tunnel as an example. However the analysis generalizes to all the tunnels.
+We geometrically analyze the magnitude of cell size reduction needed to account for each of these errors. We constrain the cells to be remain uniform and square in shape. The original size of cell assuming zero errors is $L \times L$ and we represent the new cell size after the cell size reduction as $L' \times L'$ where $L' < L$.
+%
+We define some parameters for the tunnel. The width $W$ of the tunnel is measured orthogonal its centerline. We also define the the tunnel's pitch and yaw angles. We denote both by $\theta$ in the analysis. The roll angle is fixed for all the tunnels.
+%
+For each $SE(3)$ dimension, $L'$ is computed as a function of $L$ and the magnitude of error in that dimension.
+
+In each case the analysis is provided for a single tunnel as an example. However the analysis generalizes to all the tunnels.
 %
 
 \subsubsection{Tolerance in $y$ and $z$ dimensions}
-To analyse the affect of $y,z$ position errors consider Fig.~\ref{shield_yz} which shows the front view of a tunnel. The blue square shows the original cell size $L \times L$ and the dashed square shows the new cell after accounting for the position errors. The red squares show the poses of \calS at tolerance limits in one direction both for $y$ and $z$ dimensions (The same magnitude of tolerance exists for the opposite direction). For simplicity, we keep the cell square-shaped and therefore pick tolerances such that $\delta y = \delta z$.
+The effect of $\Delta y$ and $\Delta z$ can be analysed jointly. Fig.~\ref{fig:shield_yz} shows a cross-section of a tunnel parallel to the $D_o$'s side. The blue square shows the original cell of size $L \times L$ and the dashed square shows the new cell of size $L' \times L'$ after accounting for the position errors. The red squares show the poses of \calS at tolerance limits in one direction both for $y$ and $z$ dimensions (The same magnitude of tolerance exists for the opposite direction). Because we constrain the cells to be square-shaped, we therefore have the constraint that $\Delta y = \Delta z$. This constraint can be lifted, however, we don't see a benefit in doing so.
+
 \begin{figure}[ht]
 \centering
-\includegraphics[width=\columnwidth]{shield_yz}
-\caption{Reduction in cell size as a function of $y,z$ position tolerances}
+\includegraphics[width=0.8\columnwidth]{shield_yz}
+\caption{Reduction in cell size as a function of position errors $\Delta y, \Delta z$}
 \label{fig:shield_yz}
 \end{figure}
 
 \subsubsection{Tolerance in $x$ dimension}
-The reduction in cell size required for the $x$ position tolerance is analysed geometrically in Fig.~\ref{fig:shield5}. For the trivial case where the tunnel angle $\theta$ (pitch or yaw) is 0 degrees, there is no effect of the $x$ tolerance on the cell size. 
-For the case where the tunnel angle is non-zero, there is an allowable tolerance which is computed as a function of $\theta$ and the original dimension $L$ of the cell (see Fig.~\ref{fig:shield5}~\subref{fig:shield5a}). Namely if the tolerance is always under the quantity $0.5L(1 -sin \theta) / sin \theta)$, no cell size reduction is required.
-If the tolerance is beyond this allowable tolerance by a surplass amount $\delta x$, then the cell size needs to be reduced by the same amount. Fig.~\ref{fig:shield5}~\subref{fig:shield5b} shows the reduced cell size and the resultant tunnel.
+The reduction in cell size required for the error $\Delta x$ is analyzed in Fig.~\ref{fig:shield_x}. The figure shows the top view of the domes. For the trivial case where the tunnel's yaw angle $\theta$ (pitch or yaw) is 0 degrees, there is no effect of the $\Delta x$ on the cell size. 
+For the case where the tunnel angle is non-zero, there is an allowable error which is computed as a function of $\theta$ and the original dimension $L$ of the cell (see Fig.~\ref{fig:shield_x}~\subref{fig:shield_xa}). Namely if the error is always under the quantity $0.5L(1 -sin \theta) / sin \theta)$, no cell size reduction is required.
+If the tolerance is beyond this allowable error by a surplass amount $\delta x$, then the cell size needs to be reduced by the same amount. Fig.~\ref{fig:shield_x}~\subref{fig:shield_xb} shows the reduced cell size and the resultant tunnel. The expression for $L'$ as a function of $L$ and $\Delta x$ is
 
-\begin{figure}[t]
+\begin{equation} \label{eq1}
+\begin{split}
+L' & = L - 2 \delta x \\
+   & = min(L, L - 2(\frac{\Delta x sin \theta} {0.5L (1 - sin \theta)})
+\end{split}
+\end{equation}
+
+where $\theta$ is the tunnel's yaw angle. We take the $min$ because we only decrease the cell size if needed.
+
+The Fig.~\ref{fig:shield_x} can also be seen as the side view of the domes. In that case $\theta$ corresponds to the pitch angle of the tunnel and the same analysis holds for the computation of $L'$.
+%
+Since we constrain the cell to remain square-shaped, we take the minimum value of $L'$ values computed 1) as a function of tunnel yaw angle (top view analysis) and 2) as a function of tunnel pitch angle (side view analysis).
+
+\begin{figure}[ht]
     \centering
     \begin{subfigure}{0.48\textwidth}
     %   \centering
         \includegraphics[width=\textwidth]{shield_x_1}
         \caption{}
-        \label{fig:shield5a}
+        \label{fig:shield_xa}
     \end{subfigure} 
     \begin{subfigure}{0.48\textwidth}
     %   \centering
         \includegraphics[width=\textwidth]{shield_x_2}
         \caption{}
-        \label{fig:shield5b}
+        \label{fig:shield_xb}
     \end{subfigure}
     \caption{
-    Reduction of cell size as a function of $x$ position tolerance 
-     (\subref{fig:shield5a})~Allowable translation in $x$ with no cell size reduction.
+    Reduction of cell size as a function of $\Delta x$
+     (\subref{fig:shield_xa})~Allowable error $\Delta x$ with no cell size reduction.
     %
-    (\subref{fig:shield5b})~Cell size reduction for the $x$ position tolerance that is beyond the allowable tolerance shown in Fig.~\subref{fig:shield5a}.
+    (\subref{fig:shield_xb})~Cell size reduction for the $\Delta x$ that is beyond the allowable error shown in Fig.~\subref{fig:shield_xa}.
     %
     }
-\label{fig:shield5}
+\label{fig:shield_x}
 \end{figure}
 
 \subsubsection{Tolerance in pitch and yaw angle}
-Let $L \times L$  be the size of the shield. The amount of reduction in the cell size as a function of $L$ and the tolerance $\theta$ in the pose of \calS is geometrically analysed in Fig.~\ref{fig:shield1}. The figure shows a 2D view showing parallel walls of the two domes $D_o$ and $D_i$. We pick the pair of cells that form a horizontal tunnel.
-The width $W$ of such a tunnel is equal to the dimension $L$ of the cell. For the orientation of \calS perpendicular to the axis of the tunnel, \calS completely blocks it. For any non-zero angle $\theta$ which \calS makes from the perpendicular, \calS leaves openings on both sides of the tunnel.
-We show the calculated reduction in $L$ to account for the tolerance $\theta$ in $\calS$'s orientation. It is interesting to note that the diagram can be interpreted both as the side view or the top view of the domes.
-In the case of side view $\theta$ corresponds to the tolerance in the $pitch$ angle of \calS whereas for the top view it corresponds to the tolerance in the $yaw$ angle.
+Fig.~\ref{fig:shield_py} can be seen as the top view or the side view of the domes. It shows the analysis of the magnitude of reduction in the cell size as a function of $L$ and yaw error $\Delta yaw$ if seen as top view, or pitch error $\Delta pitch$ if seen as side view. We use a generic variable $\phi$ to represent either of these errors.
+We pick a horizontal tunnel for this analysis that is the tunnel whose pitch (or yaw) angle is zero.
+The width $W$ of such a tunnel is equal to the dimension $L$ of the cell. For the orientation of \calS perpendicular to the axis of the tunnel, \calS completely blocks it. For any non-zero error $\phi$ which \calS makes from the perpendicular, \calS leaves openings on both sides of the tunnel.
+We show the calculated reduction in $L$ to account for the error $\phi$ in $\calS$'s orientation.
 
-\begin{figure}[bt]
+\begin{figure}[ht]
 \centering
-\includegraphics[width=\columnwidth]{shield_drawing1}
-\caption{Geometric calculation of the required reduction in the cell size $L$ for a given goal angular tolerance $\theta$ for the shield's pose in 2D.}
-\label{fig:shield1}
+\includegraphics[width=\columnwidth]{shield_py}
+\caption{Geometric calculation of the required reduction in the cell size $L$ for a given error $\phi$ in \calS's orientation. Here $\phi$ can be interpreted as $\Delta yaw$ or $\Delta pitch$ errors}
+\label{fig:shield_py}
 \end{figure}
 
-\begin{figure}[bt]
-\centering
-\includegraphics[width=0.6\columnwidth]{shield_drawing2}
-\caption{An example where the the tunnel is non-horizontal and thus its width $W$ is less than the cell size $L$}
-\label{fig:shield2}
-\end{figure}
+While we present the analysis for a horizontal tunnel, the reduction needed for a non-horizontal tunnel is smaller than a horizontal tunnel. This is because for a non-horizontal tunnel $W < L$. Therefore the presented analysis shows the worst case reduction.
+
+%\begin{figure}[bt]
+%\centering
+%\includegraphics[width=0.6\columnwidth]{shield_drawing2}
+%\caption{An example where the the tunnel is non-horizontal and thus its width $W$ is less than the cell size $L$}
+%\label{fig:shield2}
+%\end{figure}
 
 \subsubsection{Tolerance in roll angle}
-We now analyse the required reduction in the cell size to account for the goal tolerance in the $roll$ angle. Fig.~\ref{fig:shield3} shows the reduced cell as a function of the roll angle $\theta$. The cell dimension shrinks by a factor of $(sin \theta + cos \theta)^{-1}$. Intuitively, as the roll tolerance increases, the resultant cell size (shown as dashed square) first decreases and then starts to increase back after 45 degrees. Note that the effect of roll tolerance is much more compared to the pitch and yaw tolerances.
+We now analyse the required reduction in the cell size to account for the error $\Delta roll$. Fig.~\ref{fig:shield_r} shows the reduced cell size as a function of the $L$ and $\phi$ where $\phi$ denotes $\Delta roll$. The cell dimension shrinks by a factor of $(sin \phi + cos \phi)^{-1}$. To give an intuition for the effect of $\Delta roll$, as its value increases, the resultant cell size (shown as dashed square) first decreases and then starts to increase back after 45 degrees. Note that the effect of $\Delta roll$ on the cell size is much more compared to the $\Delta yaw$ and $\Delta pitch$.
 
 \begin{figure}[bt]
 \centering
-\includegraphics[width=\columnwidth]{shield_roll}
-\caption{Geometric calculation of the required reduction in the cell size $L$ for a given goal angular tolerance $\theta$ for the shield's pose in 2D.}
-\label{fig:shield3}
+\includegraphics[width=\columnwidth]{shield_r}
+\caption{Geometric calculation of the required reduction in the cell size $L$ for a given roll error $\phi = \Delta roll$ in the \calS's pose.}
+\label{fig:shield_r}
 \end{figure}
 
 \newpage
