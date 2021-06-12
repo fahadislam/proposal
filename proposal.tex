@@ -73,7 +73,7 @@ for the degree of}\\
 \textit{Doctor of Philosophy in Robotics.}\\
 \\
 \\
-Copyright~$\copyright$ 2020 Fahad Islam. All rights reserved.
+Copyright~$\copyright$ 2021 Fahad Islam. All rights reserved.
 }
 
 \input{macros1.tex}
@@ -103,77 +103,116 @@ Copyright~$\copyright$ 2020 Fahad Islam. All rights reserved.
 %\vspace{10mm}
 %Copyright~$\copyright$ 2020 Fahad Islam. All rights reserved.
 %\end{center}
-%\newpage
 
+\newpage
+\begin{center}
+\textit{To my mother}
+\end{center}
+\newpage
+
+\newpage
 \begin{abstract}
-In manufacturing and warehouse scenarios, robots often perform recurring manipulation tasks in structured environments. Fast and reliable motion planning is one of the key elements that ensure efficient operations in such environments. A very common example scenario is of manipulators working at conveyor belts, where they have limited time to pick moving objects and if the planner exceeds a certain time threshold, they would fail to pick the objects up. Similar scenarios are encountered in automated assembly lines. Such time-critical applications spur the need for planners which are \emph{guaranteed} to be fast. To this end we introduce and formalize the concept of Constant-time Motion Planning (CTMP); namely, the ability to provably guarantee to generate a motion plan within a (small) constant time. We then develop several algorithms that fall into the class of CTMP algorithms.
+In manufacturing and warehouse scenarios, robots often operate in semi-structured environments. In these environments, the robots perform recurring manipulation tasks with no or little changes in the their surroundings.
+Fast and reliable motion planning is one of the key elements that ensure efficient operations in such environments. A very common example scenario is of manipulators working at conveyor belts, where they have limited time to pick moving objects and if the planner exceeds a certain time threshold, they would fail to pick the objects up. Similar scenarios are encountered in automated assembly lines. Such time-critical applications spur the need for planners which are \emph{guaranteed} to be fast. To this end we introduce and formalize the concept of Constant-time Motion Planning (CTMP); namely, the ability to provably guarantee to generate a motion plan within a (small) constant time. We then develop several algorithms that fall into the class of CTMP algorithms.
 
-Specifically, up to now we have developed constant-time motion planning algorithms for two domains; (1) Manipulation for repetitive tasks in static environments (2) Manipulation for the task of picking up moving objects (of known models) off a conveyor belt. For the latter, the robot typically perceives a rough pose estimate viewing from a distance, but it must start moving early on (relying on that rough estimate) to be able to reach the object in time and then adjust its motion in real time as it gets improved estimates.
-Our key insight is that since these domains are fairly repetitive, the space in which the robot operates is a very small subset of its configuration space, which allows us to preprocess it exhaustively. The preprocessing step generates a representative set of paths that can be used by search at query time in a way that assures small constant-time planning.
+In this thesis we have developed constant-time motion planning algorithms for four semi-structured domains; (1) Manipulation for repetitive tasks in static environments (2) Manipulation for repetitive tasks in semi-static environments (3) Manipulation for the task of picking up moving objects (of known models) off a conveyor belt (4) Manipulation for the task of protecting a robot with a shield from incoming attack.
+Domain (1) assumes that the environment occupancy remains purely static during robot's operation.
+Domain (2) relaxes the purely-static assumption by allowing a fixed number of movable obstacles that may get displaced during operation.
+Domains (3) and (4) have dynamic environments. In these domains, the robot typically perceives a rough pose estimate viewing from a distance, but it must start moving early on (relying on that rough estimate) and then adjust its motion in real time as it gets improved estimates to be able to reach the object in time.
+
+Our key insight is that in these semi-structured domains, the space in which the robot operates is a very small subset of its configuration space which allows us to preprocess it exhaustively. The preprocessing step generates a representative set of paths that can be used by search at query time in a way that assures small constant-time planning.
 %
-For the former domain, we evaluate our algorithm for a mail sorting task in simulation on PR2 and also test the algorithm on a real truck-unloading robot. For the latter domain, we perform real robot experiments on PR2 working at a conveyor belt.
+For domain (1), we evaluate our algorithm for a mail sorting task in simulation on PR2 and also test the algorithm on a real truck-unloading robot. For domain (2), we perform simulation and real-robot experiments on Franka arm for a pick and place task in a kitchen environment. For domain (3) we perform real-robot experiments on PR2 working at a conveyor belt. Finally, for domain (4) we perform simulation and real-robot experiments on PR2 shielding itself from incoming attack.
 
-For the remainder of this thesis we propose the following work. First, we propose to further study and formalize what CTMP implies in practice and what underlying assumptions it entails. Second, we propose to extend our  planning framework to semi-static environments (i.e. containing some movable obstacles). Third, we aim to boost the capability of the conveyor pick-up task by having multiple robot arms simultaneously picking up objects, while still maintaining constant-time planning guarantees.
+%For the remainder of this thesis we propose the following work. First, we propose to further study and formalize what CTMP implies in practice and what underlying assumptions it entails. Second, we propose to extend our  planning framework to semi-static environments (i.e. containing some movable obstacles). Third, we aim to boost the capability of the conveyor pick-up task by having multiple robot arms simultaneously picking up objects, while still maintaining constant-time planning guarantees.
 
-%For the remainder of this thesis we propose the following work. First, we propose to further study and formally define what constant-time planning implies in practice and what underlying assumptions it entails. Second, we propose to extend our  planning framework to semi-static environments (containting some movable obstacles). Third, we aim to boost the capability of the conveyor pick-up task by having multiple robot arms simultaneously picking up objects, while still maintaining strong theoretical guarantees on the planning side.
-%This introduces new algorithmic challenges including decision making about which object to assign to which arm and motion synchronization between the arms.
+
 \end{abstract}
 \newpage
+
+\chapter*{Acknowledgements}
+First and foremost, I would like to thank my advisor Max Likhachev. You invested your trust in me and gave me the opportunity to work under your supervision. 
+You helped me grow as an independent researcher and taught me how to approach and think about challenging research problems.
+You are unique in your advising style. You pushed me to be productive without having to make my PhD extra stressful. You taught me how to better handle failures with a constructive and more positive approach. Your research advice has always proven beneficial for me and your vision and insights were critical to the formation of my thesis work.
+
+I would like to thank my distinguised committee members, Siddhartha Srinivasa, Oren Salzman, Chris Atkeson and Oliver Kroemer. Your insights and criticism were invaluable to my thesis work. A special thanks to Sidd who strengthened my foundations in the field of Motion Planning by his exceptional teaching skills. I want to thank Oren Salzman for being a great mentor and an invaluable collaborator in most of my thesis work.
+
+I would like to thank my undergraduate project advisor and my boss (when I was a Lecturer at NUST university). He was my first inspiration in the field of robotics. I was very fortunate to work in his lab during my undergraduate degree. He pursuaded me to work on novel problems and to publish.
+I started my research in motion planning under his supervision.
+
+
+I would like to thank all my labmates who I have had the pleasure to work with or bounce off research ideas during the course of my PhD and also my Masters degree (especially Andrew Dornbush, Venkatraman Narayanan, Michael Phillips, Sameer Bardapurkar, Karthik Vijayakumar, Anirudh Vemula, Soonkyum Kim, Aditya Agarwal, Yash Oza and Yupeng Han). A special thanks to Andrew Dornbush who I collaborated with on several projects. It has always been a pleasure working with him and I got to learn a lot in his company. He helped me polish my software engineering skills. I excessively used his authored software libraries in my research projects. He was an immense help throughout my PhD.
+
+I would like to thank my partner Sara Hassan Soomro for being a constant support throughout my PhD journey. Despite my long working hours and unbalanced schedule, you have always been very understanding and cooperative. Thank you for giving me comfort and support in my stressed times. You taught me how to balance work and life. Thank you for raising my kids with the best of your abilities. I could not have completed my PhD without you and you truly deserve equal credit for it.
+
+I would like to thank my siblings, Maria, Saad and Zahra for their love and encouragement, especially my big brother, Saad. You have always been my go-to person for every decision that I have to make no matter big or small. You are the first person that I call in the time of need, difficulty, or to share a success or failure news. Thank you brother for always being there for me.
+
+My biggest thanks goes to my mother. Throughout my life, you have been a constant source of love, care, support and motivation. You instilled in me the importance of education and always pushed me to achieve excellence. Despite being a single parent and having limited financial resources, you took care of all my wants and wishes. You brought me up with high moral values and principles and ingrained in me a strong sense of responsibility. I can never pay back in the least for whatever you have done for me. Finally, I want to thank my deceased father who set the foundations right for the family and before leaving, left us with enough resources to lead a respectable life.
 
 \tableofcontents
 \newpage
 
 \chapter{Introduction}
 \section{Motivation}
-In industrial settings such as manufacturing and warehouse environments, the robots typically operate in structured environments and perform repetitive tasks. Despite significant advancements in the field of motion planning in the past several decades, a large percentage of warehousing and manufacturing industry still uses robots that run hardcoded routines to perform very specific tasks. The lack of penetration of modern motion planning algorithms at scale can be attributed to the fact that the industry needs systems which are \emph{guaranteed} to be fast and reliable, even at the cost of flexibility that these systems could potentially provide.
+In industrial settings such as manufacturing and warehouse environments, the robots typically operate in semi-structured environments and perform repetitive tasks. Despite significant advancements in the field of motion planning in the past several decades, a large percentage of warehousing and manufacturing industry still uses robots that run hardcoded routines to perform very specific tasks. The lack of penetration of modern motion planning algorithms at scale can be attributed to the fact that the industry needs systems which are \emph{guaranteed} to be fast and reliable, even at the cost of flexibility that these systems could potentially provide.
 
 In warehouses, robots are widely deployed at fast moving conveyor belts to perform repetitive pick and place or sorting tasks, which gives them a very short time budget to plan their motion. Failing to plan within that time, a robot would skip objects and affect the throughput of the system. Similarly in assembly lines where multiple robots operate in their respective work stations, an overhead caused by the motion planner at one station can slow down the entire chain. This thesis focuses on such time critical applications and introduces the notion of (small) Constant-time Motion Planning (CTMP). CTMP implies generating motion plans in provably-bounded short planning times.
 
 This thesis is motivated by the following key observations from the aforementioned domains; (1) The tasks are highly repetitious (2) The  environments are fairly structured. (1) gives us an insight that the operational space of the robot is a very small as compared to its full C-space and (2) implies that the environment model is known in advance. These two aspects allow us to fully preprocess the part of the C-space that the robot operates in while accounting for the known objects that exist in its surroundings.
 
-A naive way of providing constant-time guarantees would be to precompute paths for all possible start and goal states that the planner could be queried for and use a simple hash lookup at query time (assuming the lookup time is constant). However, as the set of start or goal states increase, this approach quickly becomes intractable, memory and precomputation time-wise. Our method provides a compression scheme and precomputes only a small set of representative paths which can still ``cover" the robot's operational space. Namely, using this set of paths, at query time, our method can solve any query within the robot's operational space in constant time.
+A naive way of providing constant-time guarantees would be to precompute paths for all possible planning problems that the planner could be queried for and use a simple hash lookup at query time (assuming the lookup time is constant). However, as the set of possible planning problems increase, this approach quickly becomes intractable, memory and precomputation time-wise. Our method provides a compression scheme and precomputes only a small set of representative paths which can still ``cover" the space of all the planning problems that the robot may encounter. Namely, using this set of paths, at query time, our method can solve any query within the robot's operational space in constant time.
 
 \section{Approach}
 \label{sec:approach}
-So far, we have developed CTMP algorithms for two domains.
+So far, we have developed CTMP algorithms for four domains.
 \subsection{Manipulation for repetitive tasks in static environments}
 In this work, we consider the specific case where the start state is fixed and there exists a ``goal region" which contains all possible goals. Consider for example, a typical mailroom scenario where the robot has to pick up mail from a fixed location and sort them in cubby shelves. The start corresponds to the pickup location for the packages and the goal region corresponds to all possible goal poses within the cubby shelves. Note that the cubbies reduce the robot's operational space drastically which makes the preprocessing tractable for our method.
 
 Our key insight is that given an ``attractor state'' in the goal region, typically there is a large region of states around it for which a greedy search (a search following an attractive potential function) towards the attractor state is collision free. We show that such so called ``attractor regions" can be efficiently computed by using dynamic programming.
 Importantly, the runtime-complexity of such a greedy search is bounded and there is no need to perform computationally-complex collision-detection operations. 
 This insight allows us to generate in an offline phase a small set of these attractor regions together with a path between each attractor state and the start, ensuring that together these attractor regions completely cover the full goal region.
-In the query phase, a path is generated by performing a greedy search from the goal to an attractor state (the one which contains the goal) followed by the precomputed path from the start. The approach is described in detail in chapter~\ref{chap:icaps}.
+In the query phase, a path is generated by performing a greedy search from the goal to an attractor state (the one which contains the goal) followed by the precomputed path from the start. The approach is described in detail in Chapter~\ref{chap:icaps}.
+
+
+\subsection{Manipulation for repetitive tasks in semi-static environments}
+In many applications, including logistics and manufacturing, robot manipulators operate in semi-static environments alongside humans or other robots. These environments are largely static, but they may contain some movable obstacles that the robot must avoid.
+Consider for example a kitchen scenario where the robot has to pick up a bowl placed anywhere on a tabletop while avoiding collisions with a pitcher which is placed closeby. While the table and large portion of free space above the table has static occupancy, the pitcher may be placed anywhere near the bowl. We say that the pitcher in this example is a \emph{movable} obstacle. Even for a discrete set of possible positions of the pitcher, the number of all possible planning problems can grow very large and exponentially with the number of movable obstacles.
+Manipulation tasks in these applications are often highly repetitive, but require fast and reliable motion planning capabilities, often under strict time constraints. Existing preprocessing-based approaches are beneficial when the environments static, but their performance degrades in the presence of movable obstacles, since these are not modelled a priori.
+
+We propose a novel preprocessing-based method called Alternative Paths Planner (APP) that provides provably fixed-time planning guarantees in semi-structured environments. Our key insight is that for a given start and goal, a small number of \emph{disjoint} alternative paths would suffice for any configuration of the movable obstacles. APP attempts to plan a set of such alternative paths offline such that, for any configuration of the movable obstacles, at least one of the paths from this set is collision-free. During online execution, a collision-free path can be looked up efficiently within a few microseconds. The approach is described in detail in Chapter~\ref{chap:icra}.
 
 \subsection{Manipulation for picking up moving objects off a conveyor belt}
 In this domain, the robot's task is to reliably and safely pickup objects coming on a conveyor belt. We will refer to this problem as ``conveyor-pickup task". We assume that the geometric models of the target objects are known in advance. The success of manipulation tasks relies heavily on the accuracy of the perception system which often is noisy, especially if the target objects are perceived from a distance. For fast moving conveyor belts, the robot cannot wait for a perfect estimate before it starts execution. In order to be able to reach the object in time it must start moving early on (relying on the initial noisy estimates) and adjust its motion on-the-fly in response to the pose updates from perception. We developed an approach that meets these requirements by providing provable constant-time planning and replanning guarantees.
 
-Again, with the same insight, in the first step we precompute a small set of paths from a fixed start (say drop off location) that can cover the goal region which in this domain is defined in the space of object poses. The goal can be any arbitrary object pose~$(x,y,yaw)$ of the objects. In the second step, we uniformly discretize these paths in time to get a set of states that we call ``replannable'' states. To handle pose updates online, we may need to replan from any of these states to all the goals in the goal region. The algorithm then goes back to the first step treating all the replannable states as new starts and this recursive process continues until all replannable states are taken care of. While the approach has exponential complexity in the number of timesteps from the start to the goal, we drastically save on computation and memory by reusing the first set of paths (from the drop off location to the goal region). Our algorithm guarantees that for any replannable state and a goal, a plan is be computed in constant time. Experimentally we observe that the robot fails most of the time without replanning i.e. in case it relies on the first estimate or if it waits for an accurate estimate before starting planning. The details of the framework is provided in chapter~\ref{chap:rss}.
+Again, with the same insight, in the first step we precompute a small set of paths from a fixed start (say drop off location) that can cover the goal region which in this domain is defined in the space of object poses. The goal can be any arbitrary object pose~$(x,y,yaw)$ of the objects. In the second step, we uniformly discretize these paths in time to get a set of states that we call ``replannable'' states. To handle pose updates online, we may need to replan from any of these states to all the goals in the goal region. The algorithm then goes back to the first step treating all the replannable states as new starts and this recursive process continues until all replannable states are taken care of. While the approach has exponential complexity in the number of timesteps from the start to the goal, we drastically save on computation and memory by reusing the first set of paths (from the drop off location to the goal region). Our algorithm guarantees that for any replannable state and a goal, a plan is be computed in constant time. Experimentally we observe that the robot fails most of the time without replanning i.e. in case it relies on the first estimate or if it waits for an accurate estimate before starting planning. The details of the framework is provided in Chapter~\ref{chap:rss}.
 
-\subsection{Manipulation for repetitive tasks in semi-static environments}
-In many applications, including logistics and manufacturing, robot manipulators operate in semi-static environments alongside humans or other robots. These environments are largely static, but they may contain some movable obstacles that the robot must avoid. Manipulation tasks in these applications are often highly repetitive, but require fast and reliable motion planning capabilities, often under strict time constraints. Existing preprocessing-based approaches are beneficial when the environments are highly-structured, but their performance degrades in the presence of movable obstacles, since these are not modelled a priori.
+\subsection{Manipulation for protecting a robot with a shield from incoming attack}
+In this domain the robot's task is to protect its body from incoming attacks that is rocks or other objects being thrown at it. We call this problem "robot-shielding task". The robot is armed with a shield that can be used to block such objects. For this task we assume that the environment occupancy (except for the attack itself) is static.
+The robot relies on an onboard perception system to detect and estimate the motion of the incoming attack. Similar to the set up in the conveyor-pickup task, the perception system sends noisy estimates when the object is seen from a distance and then sends improved estimates as the objects get closer. The robot, therefore, has to adjust its motion on the fly to successfully intercept the object in time. We adapt the CTMP approach designed for the conveyor-pick task for the robot-shielding task.
 
-We propose a novel preprocessing-based method called Alternative Paths Planner (APP) that provides provably fixed-time planning guarantees in semi-structured environments. Our key insight is that for a given start and goal, a small number of \emph{disjoint} alternative paths would suffice for any configuration of the movable obstacles. APP attempts to plan a set of such alternative paths offline such that, for any configuration of the movable obstacles, at least one of the paths from this set is collision-free. During online execution, a collision-free path can be looked up efficiently within a few microseconds. 
+We use the same insight of precomputing a minimalistic set of paths which for this task would be used to intercept all possible attacks. To do so we construct two imaginary domes around the body of the robot, an inner dome tightly covering the robot and an outer dome at the maximum reachability of the robot. The robot must intercept the attack within the space between these two domes.
+We discretize these domes into cells of sizes comparable to the size of the robot's shield. We then compute a path for each pair of cells (with one cell from the outer dome and once cell from the inner dome). This path must block all attacks that may enter from the outer dome cell and reach the inner dome cell. At query time, these paths can be looked up in constant time and executed to intercept potentially all possible attacks.
+Similar to the conveyor-pick task, more paths are computed for replannable state to enable constant-time replanning.
 
-\subsection{Manipulation for protecting against attacks using a shield}
 
 \section{Expected Contribution}
 To summarize, we make the following contributions in this thesis.
 \begin{itemize}
 	\item Introduce and formalize the concept of Constant-time Motion Planning (CTMP)
 	\item Develop CTMP algorithm for domains with repetitive manipulation tasks in static environments
-	\item Develop CTMP algorithm for the conveyor-pickup task
 	\item Develop CTMP algorithm for domains with repetitive manipulation tasks in semi-static environments
+	\item Develop CTMP algorithm for the conveyor-pickup task
 	\item Develop CTMP algorithm for robot-shielding task
 \end{itemize}
 
 \newpage
 \chapter{Background}
 \section{Configuration Space and Motion Planning}
-Motion planning algorithms operate in the state space often also referred to as the \emph{configuration space} (C-space) or~$\calC$~\cite{lozano1990spatial}. In this space a state or a configuration of the robot can be uniquely represented as a point which makes it convenient for the motion planners to operate. It can be the~($x,y$) position of the robot or~($x,y,yaw$) if the orientation also matters. For a robot arm the configuration can be composed of all the joint positions. If planning with dynamics, the velocities and times may also be added to the configuration. Similarly higher order derivatives can also be added as per the requirements of the domain. The number of variables in the configuration represents the \emph{dimension} of the C-space. For example, for a 7DoF robot arm, for only considering the joint positions, the dimension of the C-space is seven. The free space~$\Cfree$ contains all the configurations which are valid with respect to some state validity criterion such as violation of obstacle collision constraints or kinematic constraints etc. The obstacle space~$\Cobs$ contains all the configurations which are invalid and so~$\Cobs = \calC \backslash \Cfree$.
+Motion planning algorithms operate in the state space often also referred to as the \emph{configuration space} (C-space) or~$\calC$~\cite{lozano1990spatial}. In this space a state or a configuration of the robot can be uniquely represented as a point which makes it convenient for the motion planners to operate. It can be the~($x,y$) position of the robot or~($x,y,yaw$) if the orientation also matters. For a robot arm the configuration can be composed of all the joint positions. If planning with dynamics, the velocities and times may also be added to the configuration. Similarly higher-order derivatives can also be added as per the requirements of the domain. The number of variables in the configuration represents the \emph{dimension} of the C-space. For example, for a 7 DoF (Degrees of Freedom) robot arm, for only considering the joint positions, the dimension of the C-space is seven. The free space~$\Cfree$ contains all the configurations which are valid with respect to some state validity criterion such as violation of obstacle collision constraints or kinematic constraints etc. The obstacle space~$\Cobs$ contains all the configurations which are invalid and so~$\Cobs = \calC \backslash \Cfree$.
 
 For the general motion planning problem we define a start configuration~$\Sstart$ and a goal set~$\Sgoal$. The goal can be under-specified as the pose of the robot end-effector or the pose of the target object. For instance, given a target object that the robot needs to grasp, the goal can be the grasp pose (i.e. position and orientation of the end-effector) or it can be even more under-specified as the pose of the object, giving the flexiblity to select different grasp poses. The motion planning problem is defined as finding a continuous path~$\tau : [0:1] \rightarrow \Cfree$ s.t. $\tau(0) = \Sstart$ and $\tau(1) \in \Sgoal $. Typically in practice most motion planning algorithms find a path of the form~$[s_0, s_1, s_2,...,s_n] \in \Cfree$ s.t. $s_0 = \Sstart$ and $s_n \in \Sgoal$ assuming that the consecutive states i.e $s_i, s_{i+1}$ can be connected via some simple interpolation scheme.
 
-Computing~$\Cfree$ is extremely hard, specially in higher dimensions. Instead of doing that, most motion planners generally sample in~$\Cfree$ and use a collision checker to identify the validity of a configuration. These planners typically sample states in~$\Cfree$ using rejection sampling, connect those samples to construct a graph (or a tree) and then use graph search to find the path from a start to goal. These algorithms are called sampling-based algorithms. A motion planner is referred to as \emph{complete} if it guarantees to find a path if one exists, and otherwise returns failure. Sampling-based planners are \emph{probablisitically complete}, meaning that in the limit of the number of samples they are guaranteed to find a solution if one exists.
+Computing~$\Cfree$ is extremely hard, specially in higher dimensions~\cite{halperin2017algorithmic}. Instead of doing that, most motion planners generally sample in~$\Cfree$ and use a collision checker to identify the validity of a configuration. These planners typically sample states in~$\Cfree$ using rejection sampling, connect those samples to construct a graph (or a tree) and then use graph search to find the path from a start to goal. These algorithms are called sampling-based algorithms~\cite{salzman2019sampling}. A motion planner is referred to as \emph{complete} if it guarantees to find a path if one exists, and otherwise returns failure. Sampling-based planners are typically \emph{probablisitically complete}, meaning that in the limit of the number of samples they are guaranteed to find a solution if one exists.
 
 \section{C-space representation for Search-based Planning}
 \label{sec:sbp}
@@ -186,8 +225,8 @@ The general motion planning problem was shown by Reif to be PSPACE-hard~\cite{re
 
 The dimension~$d$ of the C-space is the most crucial element in determining the complexity of the motion planning problem. It has been shown that for the general motion planning problem the computational complexity grows exponentially with~$d$~\cite{chazelle1991singly}.
 
-The exact motion planning algorithms do not scale to more complex problems as they make certain limiting assumptions about the geometry of the robot and the obstacles. In contrast, the modern approaches use approximations of the general motion planning problem by relaxing the completeness guarantees. For example the sampling-based algorithms approximate the problem structure via random sampling in the C-space and so they relax the completeness guarantee to probabilistic completeness. Search-based algorithms approximate the problem via space discretization with a certain resolution, hence they are resolution complete.
-Since the exact methods are no more used in modern days, the computational complexity analysis for the general motion planning problem is of less relevance now and the analysis for the approximate methods is based on the underlying approximation. For instance, for sampling-based methods the complexity is analysed in the number of samples and for search-based methods it is analysed in the size of the grid or the lattice structure.
+The exact motion planning algorithms do not scale to more complex problems as they make certain limiting assumptions about the geometry of the robot and the obstacles. In contrast, the modern approaches use approximations of the general motion planning problem by relaxing the completeness guarantees. For example, sampling-based algorithms approximate the problem structure via random sampling in the C-space and so they relax the completeness guarantee to probabilistic completeness. Search-based algorithms approximate the problem via space discretization with a certain resolution, hence they are resolution complete.
+Since the exact methods are no more used in modern days, the computational complexity analysis for the general motion planning problem is of less practical relevance now and the analysis for the approximate methods is based on the underlying approximation. For instance, for sampling-based methods the complexity is analysed in the number of samples and for search-based methods it is analysed in the size of the grid or the lattice structure.
 
 
 \newpage
@@ -198,7 +237,7 @@ Our approach leverages preprocessing in order to speed up online planning. In th
 \section{Preprocessing-based Methods}
 Preprocessing-based motion planners often prove beneficial for real-time planning. They analyse the configuration space offline to generate some auxiliary information that can be used online to speed up planning. 
 
-The most reknowned example is the Probablistic Roadmap Method (PRM)~\cite{kavraki1996probabilistic}. They have a preprocessing and a query phase. In the preprocessing phase a roadmap is constructed in $\Cfree$ by randomly sampling valid states in the C-space and connecting them to their neighboring states if the edges making the connections are valid. In the query phase the start and goal states are connected to their neighboring states in the roadmap (if valid connections are possible) and then any search algorithm like A* search is used to find the path. PRM methods are categorized as multi-query methods meaning that once the roadmap is constructed it can be used to answer multiple queries for the same environment. Query times can be significantly sped up by further preprocessing the roadmaps using landmarks~\cite{paden2017landmark}. Recently,the repetition roadmap~\cite{LA18} was suggested as a way to extend the PRM for the case of multiple highly-similar scenarios. Some of these methods have been integrated with sparse motion-planning roadmaps (see e.g.,~\cite{SSAH14,DB14}) to reduce the memory footprint of the algorithm. All these methods only provide probablistic completeness guarantees.
+The most reknowned example is the Probablistic Roadmap Method (PRM)~\cite{kavraki1996probabilistic}. They have a preprocessing and a query phase. In the preprocessing phase a roadmap is constructed in $\Cfree$ by randomly sampling valid states in the C-space and connecting them to their neighboring states if the edges making the connections are valid. In the query phase the start and goal states are connected to their neighboring states in the roadmap (if valid connections are possible) and then any search algorithm like A* search is used to find the path. PRM methods are categorized as multi-query methods meaning that once the roadmap is constructed it can be used to answer multiple queries for the same environment. Query times can be significantly sped up by further preprocessing the roadmaps using landmarks~\cite{paden2017landmark}. Some of these methods have been integrated with sparse motion-planning roadmaps (see e.g.,~\cite{SSAH14,DB14}) to reduce the memory footprint of the algorithm. All these methods only provide probablistic completeness guarantees.
 
 Our work bares resemblance to previous work on 
 subgoal graphs~\cite{UK17,UK18}.
@@ -206,24 +245,37 @@ Subgoal graphs is a search-based method that preprocesses the entire C-space to 
 
 While all these preprocessing-based approaches speedup planning times compared to planning from scratch by using the preprocessed information, they do not provide constant-time bounds on the planning times.
 
+\subsection{Preprocessing-based methods for semi-static environments}
+While roadmap-based approaches such as PRM are more applicable to static environments, several extensions have been proposed to adapt to semi-static environments in which the environment occupancy may change partially across different planning tasks. LazyPRM~\cite{kavraki2000path} constructs a roadmap without edge validation and defers the edge validations to the query stage to handle any changes in the environment. With information about static obstacles, edge evaluations can be performed against the static occupancy to shift some burden to the preprocessing stage.
+In~\cite{leven2002framework}, a mapping from workspace cells to the roadmap is maintain to perform necessary repair operations on the roadmap to handle environment changes.
+In~\cite{voss2015heuristic}, a collections of diverse short paths are computed for the same query by simulating obstacles in the precomputed roadmap. Our proposed method for semi-static environments bears close resemblance to this method. Several other methods have also explored the problem of finding collection of diverse paths~\cite{palmieri2016fast, liu2017finding, vadlamudi2016combinatorial}
+
+Recently,the repetition roadmap~\cite{LA18} was suggested as a way to extend the PRM for the case of multiple highly-similar scenarios by maintaining an abstract probabilistic representation of the roadmap.
+
+While all these methods attemp to balance offline and online processing load, their performance degrades when the preprocessed information gets invalidated by the changes in the environment.
+
+
 \section{Motion Planning with Reuse}
 An effective approach to speed up planning is to precompute a set of complete paths into a library and given a query, attempt to match complete paths from the library to the new query~\cite{berenson2012robot,jetchev2013fast}.
 Using paths from previous search episodes (also known as using experience) has also been an active line of work~\cite{PCCL12,PDCL13,BAG12,CSMOC15}. E-graphs method~\cite{PCCL12} computes a heuristic function to guide the search in such a way as to reuse search efforts from previously generated paths. The Lightning framework~\cite{BAG12} runs two modules in parallel, a module that runs the planner from scratch and a module that retrieves and repairs path stored in a library. The Thunder framework~\cite{CSMOC15} also leverages previous experiences and the experiences are generated using probabilistic sampling. The experiences are stored as sparse roadmap spanner~(SPARS). 
 
-These methods also provide significant speedups in planning times. Our method borrows some techniques from these methods but in a way by which we can provide constant-time planning guarantees which these algorithms do not offer.
+These methods also provide significant speedups in planning times, however, their performance also degrades as the environment becomes more dynamic. Our method borrows some techniques from these methods but in a way by which we can provide constant-time planning guarantees which these algorithms do not offer.
 
 \section{Real-time Motion Planning}
 \label{rel:real}
 There is a family of real-time search algorithms that provide constant-time guarantees~\cite{KL06,KS09,K90,bjornsson2009tba}.
-	To provide guarantees on planning time the search only looks at a finite horizon, generating a partial plan, and interleaves planning and execution. In planning cycles, the robot may re-expand states multiple times. In addition, during execution, the robot is likely to visit the same states multiple times before it reaches the goal which can result in highly suboptimal behavior specially in higher dimensional problems. These algorithms run repeated A* searches and update the heuristic values in the local search spaces while maintaining the admissibility of the heuristics. The heuristics get more informed as the search is run repeatedly. By doing so they provide completeness guarantees, meaning that the robot will eventually arrive at the goal.
+	To provide guarantees on planning time the search only looks at a finite horizon, generating a partial plan, and interleaves planning and execution. In planning cycles, the robot may re-expand states multiple times. In addition, during execution, the robot is likely to visit the same states multiple times before it reaches the goal which can result in highly suboptimal behavior specially in higher dimensional problems. These algorithms run repeated A* searches and update the heuristic values in the local search spaces while maintaining the admissibility of the heuristics. The heuristics get more informed as the search is run repeatedly. By doing so, they provide completeness guarantees, meaning that the robot will eventually arrive at the goal.
 
 In contrast to these algorithms, our methods either plan for indefinite horizons i.e. all the way from the start to the goal while providing constant-time planning guarantees or do limited horizon planning (interleaving planning and execution) in constant-time while assuring that the executed path, if reconstructed would not contain any cycle.
 
 Artificial potential field methods can also be used for real-time behavior~\cite{warren1989global,vadakkepat2000evolutionary}. However these methods are incomplete and can get trapped in local minima.
 
 \section{Global Control using Local Potential Functions}
-Finally, our notion of ``attractor regions" which we touched upon in section~\ref{sec:approach}, is similar (in spirit) to control-based methods that  ensure safe operation over local regions of the free configuration space~\cite{CRC03,CCR06,tedrake2010lqr}. Metaphorically they name these regions as ``funnels" that collapse a large set of input conditions to a single policy.
-These regions are then used within a high-level motion planner to compute collision-free trajectories. For instance, LQR-trees~\cite{tedrake2010lqr} computes local stability regions to build a sparse tree of LQR-stabilized trajectories. The union of these local regions covers the entire state space ensuring that all initial conditions that are capable of reaching the goal will reach the goal.
+Finally, our notion of ``attractor regions" which we touched upon in section~\ref{sec:approach}, is similar (in spirit) to control-based methods that  ensure safe operation over local regions of the free configuration space~\cite{CRC03,CCR06,atkeson2008random,tedrake2010lqr, majumdar2017funnel}. Metaphorically they name these regions as ``funnels" that collapse a large set of input conditions to a single policy.
+These regions are then used within a high-level motion planner to compute collision-free trajectories. For instance, LQR-trees~\cite{tedrake2010lqr} method computes local stability regions to build a sparse tree of LQR-stabilized trajectories. The union of these local regions covers the entire state space ensuring that all initial conditions that are capable of reaching the goal will reach the goal.
+Guided policy search~\cite{levine2013guided} uses sampled trajectories to guide a global policy.
+In~\cite{koditschek1987exact}, a class of potential functions is constructed to provide guidance for the robot navigation problem for static environments.
+Our work draws inspiration from all these methods.
 
 
 \section{Motion Planning for Conveyor-pickup Task}
@@ -317,13 +369,13 @@ A goal $g \in G$ is said to be reachable from a state \Sstart if~$~\calP$ can fi
 \vspace{2mm}
 \begin{definition}[Coverage]
 \label{def:covered}
-    A reachable goal $g \in G$ is said to be covered by the CTMP algorithm for a state \Sstart if (in the query phase) it can plan from \Sstart to $g$ while satisfying Def.~\ref{ctmp:def}.
+    A reachable goal $g \in G$ is said to be covered by the CTMP algorithm for a state \Sstart if for each query, it guarantees to return the next action along a path from \Sstart to $g$ with no cycles.
 \end{definition}
 
 \vspace{2mm}
 \begin{definition}[CTMP-Completeness]
 \label{def:complete}
-    An algorithm \algname{ALG} is said to be CTMP-complete if it covers all the reachable goals $g \in G$ for \Sstart and guarantees to compute paths with no cycles.
+    An algorithm \algname{ALG} is said to be CTMP-complete if it covers all the reachable goals $g \in G$ for \Sstart.
 \end{definition}
 
 A CTMP-algorithm provides a planning time bound reduction of ~$T_\calP : \Tbound$, where ~$\Tbound \ll T_\textrm{\calP}$, while still guaranteeing a success rate no worse than what \calP would provide with a time bound of $T_\calP$.
@@ -342,13 +394,13 @@ We analyse the CTMP-Complete algorithms for the worst-case complexity. To that e
 \vspace{2mm}
 \begin{property}
 \label{ctmp:prop1}
-A CTMP algorithm requires~$O(1)$ time to plan the next action along a path from $\sStart$ to $g$
+A CTMP algorithm requires~$O(1)$ time to return the next action along a path from $\sStart$ to $g$
 \end{property}
 
 \vspace{2mm}
 \begin{property}
 \label{ctmp:prop2}
-A CTMP algorithm requires~$O(l)$ time to find a full path from $\sStart$ to $g$, where~$l$ is the length of the full path
+A CTMP algorithm requires~$O(l)$ time to return a full path from $\sStart$ to $g$, where~$l$ is the length of the full path
 \end{property}
 
 Resultantly, we can use CTMP algorithms in two modes; (1) if a robot interleaves planning and execution, (2) if the robot requires full path from $\sStart$ to $g$ before execution (e.g. for post-processing). For the former, each next action requires constant-time planning. Although the latter requires more delibration before the robot can start executing motion, the computation is only linear in the length of the path. Moreover, the path is guaranteed to have no cycles.
@@ -363,7 +415,7 @@ The concept of non-stop execution is an important use case for CTMP-Complete alg
 A CTMP-Complete algorithm can be used for non-stop execution under the condition~$\Tconst < \Texec$ where~$\Texec$ is the duration of execution of the partial path, given that the planning and execution are parallelized. 
 \end{definition}
 %
-In the following two chapters, we describe two specific instances of the CTMP-Complete algorithms that we developed in this thesis so far.
+In the following chapters, we describe several instances of the CTMP-Complete algorithms that we developed for different domains and tasks in this thesis.
 
 \newpage
 \chapter{CTMP for Static Environments}
@@ -877,13 +929,55 @@ This may cause the algorithm to generate much more subregions (with smaller radi
 \subsection{Complexity}
 In this section we will do an asymptotic analysis of the time and memory complexities of our algorithm for the worst-case.
 
-The complexity analysis makes the following global assumptions.
+The complexity analysis makes the following assumption.
+%\vspace{2mm}\begin{assumption}
+%\label{asm:1:4} $|\calR| \ll n_{G_{\calS}}$ where~$n_{G_{\calS}}$ is the total number of goals in~$G_\calS$
+%\end{assumption}
 \vspace{2mm}\begin{assumption}
-\label{asm:1:4} $|\calR| \ll n_{G_{\calS}}$ where~$n_{G_{\calS}}$ is the total number of goals in~$G_\calS$
+%\label{asm:1:5} The obstacle clutter in $G_\calS$ is such that $|\calR|$ is upper-bounded by a constant
+\label{asm:1:5} The volume $V$ of goal region $G$ is upper bounded by a constant
 \end{assumption}
-\vspace{2mm}\begin{assumption}
-\label{asm:1:5} $G_\calS$ is fragmented such that $|\calR|$ is upper-bounded by a constant
-\end{assumption}
+%\vspace{2mm}\begin{assumption}
+%\label{asm:1:6} The volume of smallest attractor region is $J$
+%\end{assumption}
+
+The assumption~\ref{asm:1:5} is drawn from our premise that we deal with repetitive tasks which are constrained to only reaching a fixed subset of the configuration space. First we analyze the upper bound on $|\calR|$ and prove that under these assumptions $|\calR|$ is bounded by a constant. Next we analyze the time and space complexity of our algorithm.
+
+\subsubsection{Upper-bound on $|\calR|$}
+The problem of covering an n-dimensional volume with n-dimensional equal spheres has been studied in computational geometry~\cite{cover_spheres1, cover_spheres2}.
+Our problem of covering the goal region $G$ with attractor regions can be seen as a similar problem, under the condition that the attractor heuristic function $h(\cdot)$ is euclidean distance.
+
+Let $V$ be the volume of the n-dimensional space and $m$ be the number of spheres each of volume $J$, then the density of coverage $\rho$ is given by $mJ/V$, that is the summation of volumes of all spheres to that of the n-dimensional space.
+In~\cite{cover_spheres2}, a lower bound on the density of coverage that ensures complete coverage was computed, that is 
+$$
+\rho_{\textrm{min}} = \frac{n}{e\sqrt{e}}
+$$
+
+This lower bound can be used to compute the minimum number of spheres $m$ needed to cover the volume $V$, that is
+$$
+m \leq \rho_{\textrm{min}}\frac{V}{J}
+$$
+
+Note that this bound assumes optimal positioning of the spheres.
+
+Applying this result to our problem setup, we have the following lemma.
+
+\vspace{2mm}
+\begin{lemma}
+\label{lemma:density}
+Let $J$ be the volume of the smallest attractor region. Assuming optimal positioning of the attractors, the number of attractor regions $|\calR|$ needed to fully cover an n-dimensional goal region of volume V is upper bounded by $\rho_{\textrm{min}} \frac{V}{J}$, where $\rho_{\textrm{min}}$ is the lower bound on the coverage density.
+\end{lemma}
+
+With assumption~\ref{asm:1:5} and from lemma~\ref{lemma:density} we have that
+
+\vspace{2mm}
+\begin{lemma}
+\label{lemma:upper_bound}
+$|\calR|$ is upper-bounded by a constant
+\end{lemma} 
+
+Namely, for a fixed-size $G$, $|\calR|$ is upper-bounded by a constant.
+%First we analyze the worst-case complexity of 
 %\vspace{2mm}\begin{assumption}
 %\label{assum:8} The time it takes to expand a state~(single iteration of loop at Alg.~\ref{alg:3}, line~\ref{alg:3:while}) is less than the time it takes for a robot to execute one action.
 %\end{assumption}
@@ -905,31 +999,33 @@ The query time comprises of
 Step~(i) requires iterating over all subregions (in the worst case) which takes $O(|\calR|)$ steps while 
 step~(ii) requires expanding the states along the path from $\sGoal$ to $\sAttract$ which requires~$O(\calD)$ expansions.
 For each expansion we need to find the greedy predecessor, considering at most $b$ predecessors, where $b$ is the maximal branching factor of our graph.
-Hence, overall the query phase takes $O(|\calR| + \calD \cdot b)$ operations. Since~$|\calR|$ is upper bounded by a constant~(from assumption~\ref{asm:1:5}) and~$b$ is a constant factor, the time complexity thus becomes~$O(\calD)$.
+Hence, overall the query phase takes $O(|\calR| + \calD \cdot b)$ operations. Since~$|\calR|$ is upper bounded by a constant~(from lemma~\ref{lemma:upper_bound}) and~$b$ is a constant factor, the time complexity thus becomes~$O(\calD)$.
 \end{proof}
 
-Note that we can also bound the number of expansions required for the query phase by bounding the maximum depth of the subregions~$\calD$. We can do that by terminating Alg.~\ref{alg:2} when the $R_i$ reaches the depth bound or if the existing termination condition (line~\ref{alg:2:terminate}) is satisfied. Having said that, this will come at the price of increasing the number of subregions and the assumption~\ref{asm:1:5} will also not hold anymore. To give an intuition, we can draw an analogy with the sphere packing problem~\cite{hales1992sphere}; for a required volume to be covered, if the radii of the spheres is fixed, then the number of spheres needed to cover the volume will not be bounded by a constant but will be a function of the size of the volume.
+Note that we can also bound the number of expansions required for the query phase by bounding the maximum depth of the subregions~$\calD$ by a constant. We can do that by terminating Alg.~\ref{alg:2} when $R_i$ reaches the depth bound or if the existing termination condition (line~\ref{alg:2:terminate}) is satisfied. However, this comes at the price of increasing the number of subregions.
+%and the assumption~\ref{asm:1:5} will also not hold anymore.
+%To give an intuition, we can draw an analogy with the sphere packing problem~\cite{hales1992sphere}; for a required volume to be covered, if the radii of the spheres is fixed, then the number of spheres needed to cover the volume will not be bounded by a constant but will be a function of the size of the volume.
 
 \vspace{2mm}
 \begin{lemma}
 \label{lemma:OrderR}
-	Given the number of subregions~$|\calR|$ and bounded~$\calD$, full path can be found in~$O(|\calR|)$ time
+	Given the number of subregions~$|\calR|$ and bounded~$\calD$, full path can be found in~$O(1)$ time.
 \end{lemma}
 
-Now we consider a special case for which the algorithm has~$O(1)$ complexity.
+%Now we consider a special case for which the algorithm has~$O(1)$ complexity.
+%
+%\vspace{2mm}
+%\begin{lemma}
+%\label{lemma:o1}
+%	For the case when ~$|\pi_g| \leq c \cdot |\pi_i|$, where~$c \geq 1$ is a constant integer, each action requires~$O(1)$ time delibration
+%\end{lemma}
 
-\vspace{2mm}
-\begin{lemma}
-\label{lemma:o1}
-	For the case when ~$|\pi_g| \leq c*|\pi_i|$, where~$c \geq 1$ is a constant integer, each action requires~$O(1)$ time delibration
-\end{lemma}
-
-\begin{proof}
-	Here $|\cdot|$ denotes the length of the paths. This lemma can be trivally proved from assumptions~\ref{asm:1:5} and by interleaving planning and execution. From assumption~\ref{asm:1:5}, the time required to find the containing subregion~$R_i$ is bounded by a constant. Once~$R_i$ is found, the robot can find the greedy path~$\pi_g$ while it executes~$\pi_i$ by interleaving planning and execution.
-	Since~$|\pi_g|$ is bounded by ~$c*|\pi_i|$, expanding~$c$ states~($O(1)$ operation) for each step traversal along~$|\pi_i|$, the greedy search will find~$\pi_g$ by the time robot arrives at~$\sAttract$.	
-%	
-%If~$|\pi_i| > |\pi_g|$ and the assumption~\ref{assum:8} holds, by the time the robot reaches the~$\sAttract$,~$\pi_g$ will be computed and can be executed by the robot.
-\end{proof}
+%\begin{proof}
+%	Here $|\cdot|$ denotes the length of the paths. This lemma can be trivally proved from assumptions~\ref{asm:1:5} and by interleaving planning and execution. From assumption~\ref{asm:1:5}, the time required to find the containing subregion~$R_i$ is bounded by a constant. Once~$R_i$ is found, the robot can find the greedy path~$\pi_g$ while it executes~$\pi_i$ by interleaving planning and execution.
+%	Since~$|\pi_g|$ is bounded by ~$c*|\pi_i|$, expanding~$c$ states~($O(1)$ operation) for each step traversal along~$|\pi_i|$, the greedy search will find~$\pi_g$ by the time robot arrives at~$\sAttract$.	
+%%	
+%%If~$|\pi_i| > |\pi_g|$ and the assumption~\ref{assum:8} holds, by the time the robot reaches the~$\sAttract$,~$\pi_g$ will be computed and can be executed by the robot.
+%\end{proof}
 
 %
 %\textbf{Constant-time Complexity}
@@ -943,27 +1039,28 @@ Now we consider a special case for which the algorithm has~$O(1)$ complexity.
 This section analyses the worst-case space complexity of the metadata generated after the preprocessing phase that is then used in the query phase.
 \vspace{2mm}
 \begin{lemma}
-	Given the number of subregions~$|\calR|$ and unbounded~$\calD$, the algorithm requires~$O(|\pi_{\text{max}}|)$ space.
+	Let $|\pi_{\text{max}}|$ be the length of the longest precomputed path in~$\calL$. Given the number of subregions~$|\calR|$, the algorithm requires~$O(|\pi_{\text{max}}|)$ space.
 \end{lemma}
 \begin{proof}
-	The preprocessing phase generates metadata of size~$O(|\pi_{\text{max}}| \cdot |\calR|)$ where $|\pi_{\text{max}}|$ is the length of the longest precomputed path in~$\calL$. Since~$\calR$ is upper bounded by a constant~(assumption~\ref{asm:1:5}) and also because~$|\calR| \ll n$~(assumption~\ref{asm:1:4}) the algorithm requires~$O(|\pi_{\text{max}}|)$ space.
+	The preprocessing phase generates metadata of size~$O(|\pi_{\text{max}}| \cdot |\calR|)$ where $|\pi_{\text{max}}|$ is the length of the longest precomputed path in~$\calL$. Since~$|\calR|$ is upper bounded by a constant~(see lemma~\ref{lemma:upper_bound})the algorithm requires~$O(|\pi_{\text{max}}|)$ space.
 \end{proof}
 
-\vspace{2mm}
-\begin{lemma}
-	Given the number of subregions~$|\calR|$ and bounded~$\calD$, the algorithm requires~$O(|\pi_{\text{max}}| \cdot |\calR|)$ space.
-\end{lemma}
-\begin{proof}
-	Enforcing a bound on~$\calD$ breaks assumption~\ref{asm:1:5} as explained earlier in the analysis. This introduces~$|\calR|$ as a factor in the space complexity.
-\end{proof}
+%\vspace{2mm}
+%\begin{lemma}
+%	Given the number of subregions~$|\calR|$ and bounded~$\calD$, the algorithm requires~$O(|\pi_{\text{max}}| \cdot |\calR|)$ space.
+%\end{lemma}
+%\begin{proof}
+%	Enforcing a bound on~$\calD$ breaks assumption~\ref{asm:1:5} as explained earlier in the analysis. This introduces~$|\calR|$ as a factor in the space complexity.
+%\end{proof}
 
 %$\Tbound$ and ~$T_\textrm{const}$
 \subsection{CTMP-Completeness}
-We now analyse the algorithm under the CTMP-Completeness criteria described in chapter~\ref{sec:ctmp} for the special case of Lemma~\ref{lemma:o1}. Since the algorithm requires~$O(1)$ time to plan the next action, $T_\textrm{const}$ is constant-time bounded and can be deduced from the empirical analysis of the algorithm.
+From lemma~\ref{lemma:coverage}, we have that all reachable goals $g \in G$ are covered by the algorithm.
+%We now analyse the algorithm under the CTMP-Completeness criteria described in Chapter~\ref{sec:ctmp} for the special case of Lemma~\ref{lemma:o1}. Since the algorithm requires~$O(1)$ time to plan the next action, $T_\textrm{const}$ is constant-time bounded and can be deduced from the empirical analysis of the algorithm.
+%%
+%The constant~$c$ can be deduced from the specified time budget~$\Tbound (> T_\textrm{const})$. The larger the~$\Tbound$, the larger the number of actions $c$, that the algorithm can plan per action execution.
 %
-The constant~$c$ can be deduced from the specified time budget~$\Tbound (> T_\textrm{const})$. The larger the~$\Tbound$, the larger the number of actions $c$, that the algorithm can plan per action execution.
-%
-Furthermore, Lemma~\ref{lemma:greedy} assures that the greedy path~$\pi_g$ does not contain cycles, otherwise the greedy search would be incomplete. Hence from lemmas~\ref{lemma:o1} and~\ref{lemma:greedy} and by Definition.~\ref{def:complete} we have the following theorem.
+Furthermore, lemma~\ref{lemma:greedy} ensures that the greedy path~$\pi_g$ does not contain cycles, otherwise the greedy search would be incomplete. Hence from lemmas~\ref{lemma:coverage} and~\ref{lemma:greedy} and by CTMP-completeness defined in Chapter~\ref{sec:ctmp} (see ~Def.\ref{def:complete}) we have the following theorem.
 
 \vspace{2mm}
 \begin{theorem}
@@ -971,7 +1068,7 @@ Furthermore, Lemma~\ref{lemma:greedy} assures that the greedy path~$\pi_g$ does 
 %	By Def.~\ref{ctmp:def} and from lemmas~\ref{lemma:o1} and~\ref{lemma:greedy}, the algorithm is a CTMP algorithm.
 \end{theorem}
 
-We also have the following corollary.
+As is algorithm is CTMP-Complete, we also have the following corollary.
 
 \vspace{2mm}
 \begin{cor}
@@ -1320,7 +1417,7 @@ However by modification~\ref{mod:interleave}, by interleaving planning and execu
 Once the robot reaches~$\sAttract$, it can then continue to follow the pre-stored path~$\pi_i$. 
 \end{proof}
 
-\textbf{CTMP Criteria:} We now analyse the algorithm variant under the CTMP criteria described in chapter~\ref{sec:ctmp}. Since the algorithm requires~$O(1)$ time to plan the next action, $T_\textrm{const} (< \Tbound)$ is constant-time bounded.
+\textbf{CTMP Criteria:} We now analyse the algorithm variant under the CTMP criteria described in Chapter~\ref{sec:ctmp}. Since the algorithm requires~$O(1)$ time to plan the next action, $T_\textrm{const} (< \Tbound)$ is constant-time bounded.
 %
 Furthermore, Lemma~\ref{lemma:greedy} assures that the greedy path~$\pi_g$ does not contain cycles, otherwise the greedy search would be incomplete. Hence from lemmas~\ref{lemma:var:o1} and~\ref{lemma:greedy} and by Def.~\ref{def:complete} we have the following theorem:
 
@@ -1338,6 +1435,677 @@ We also have the following corollary.
 \end{cor}
 
 Note that flipping the problem definition~(\ref{mod:flip}) will change the set of domains that our approach is applicable to. The experimental evaluation of this algorithm variant is outside the scope of this thesis and left as future work.
+
+\newpage
+\chapter{CTMP for Semi-static Environments}
+\label{chap:icra}
+\section{Overview}
+%% motivate the need of planners for semi-static environments
+In a wide range of environments, be it warehouses, factories or homes, robots share their workspace with humans or other robots. While the obstacle occupancy in such environments is largely fixed or static, yet small regions within these environments may vary in occupancy during operation. We categorise such environments as \emph{semi-structured}. Additionally in these applications robots are often performing repetitive tasks and require fast and reliable motion planning capabilities.
+
+%% use example
+Consider the scenario in Fig.~\ref{fig:cover}. The robot must grasp the bowl while avoiding the pitchers, table and walls.
+%Most of the environment (e.g. table, walls, free space above the table etc.) can be assumed to be known, and since the task of picking up an object from a tabletop is repetitive, some information from previous similar planning queries can be re-used to speedup planning.
+Most of the environment (e.g. table, walls, free space above the table etc.) can be assumed to be known, and since the task is repetitive some information from previous planning queries can be re-used to speedup planning.
+ %More commonly used planning algorithms such as RRTs neither exploit the distinction between static and movable obstacles, nor do they take advantage of the repetitive nature of planning problems to speedup planning. 
+Commonly used algorithms such as RRTs~\cite{kuffner2000rrt} neither exploit the distinction between static and movable obstacles nor take advantage of the repetitive nature of planning problems to speedup planning. 
+
+%% existing approaches
+%Preprocessing based methods like PRMs, precompute roadmaps to speedup online planning. They
+Roadmap-based methods like PRMs are either limited to fully static environments or incur considerable overheads in repair operations which they require to handle movable obstacles.
+In~\cite{voss2015heuristic}, a diverse set of short paths are computed by simulating obstacles in the environment. Paths are found by running graph search on different versions of the roadmaps. Our approach bears close resemblence to this method.
+
+While there exists several algorithms that use information from previous similar planning episodes such as Lightning~\cite{berenson2012robot}, E-graphs~\cite{Phillips-RSS-12} etc., their performance also degrades when the past information is invalidated by the changes in the environment. All these methods therefore can not provide fixed-time planning guarantees. 
+
+%% my prior work
+Recently, provably fixed-time motion planning approaches have been proposed for repetitive tasks in fully known environments~\cite{islam2019provable},~\cite{islam2020provably}. They precompute library of paths using the known models of obstacles and other task-specific information. These approaches have been used before for mail-sorting~\cite{islam2019provable} and for grasping objects moving down a conveyor belt~\cite{islam2020provably}. They, however, are also not designed to handle movable obstacles.
+
+\begin{figure}[bt]
+\centering
+\includegraphics[width=\columnwidth]{figs/cover.jpg}
+\caption{Semi-structured tabletop manipulation scenario --- The robot must grasp the bowl while avoiding pitchers and the table itself; the pitchers and bowl may be at any position. The Alternate Paths Planner (APP) guarantees to find solution for any configuration within few microseconds.}
+\label{fig:cover}
+\vskip -0.5cm
+\end{figure}
+
+%% our contribution
+%In this work we aim to extend these recent approaches to be able to handle movable obstacles while still provably fixed-time planning guarantees.
+In this work we extend these approaches to handle movable obstacles while still guaranteeing provably fixed-time planning.
+%key idea of our approach is to generate multiple alternative paths for each planning problem, such that for any configuration of movable obstacles, one of these alternative paths is guaranteed to be traversable.
+The key idea is to generate multiple alternative paths for each planning problem, such that for any configuration of movable obstacles, one path is guaranteed to be traversable.
+One approach to achieve this is to enforce %a constraint
+that these paths are \emph{disjoint}: they are separated enough that no single obstacle configuration can intersect two paths simultaneously.
+To get the aforementioned guarantee, $n$ movable obstacles require generating only $n+1$ fully disjoint paths.
+%However, if $n+1$ disjoint paths cannot be found for the given problem, our approach uses more preprocessing and finds additional paths to provide the guarantee.
+However, if $n+1$ disjoint paths cannot be found for the given problem, we find additional additional paths partially-overlapping paths to provide the same guarantee.
+%We make some simplistic assumptions about the geometry of movable obstacles to provide strong guarantees on the planning time.
+We call this approach \emph{Alternative Paths Planner (APP)}
+
+%APP can be applied to many performance critical real-world robotics use cases such as mail-sorting, conveyor-belt picking, and shelving. 
+APP can be applied to performance-critical real-world use cases such as mail-sorting, conveyor-belt picking, and shelving. 
+For scenarios with multiple movable obstacles, we demonstrate microsecond-scale lookup times and achieve a 100\% success rate. We include experimental results from three domains, compare with state-of-the-art existing approaches and validate our approach with a real-world case study. 
+
+\section{Algorithmic Framework}
+%\subsection{Problem Setup and Assumptions}
+\label{subsec:setup}
+%Let \calX be the configuration space of the robot. Let $\Sstart \in \calX$ be a fixed start configuration of the robot and \calG be the goal region. 
+Let \calX be the configuration space of the robot, $\Sstart \in \calX$ be a fixed start configuration of the robot, and \calG be the goal region. 
+%\calG could be defined in the configuration space \calX i.e $\calG \subset \calX$ 
+\calG could be defined in the configuration space \calX (i.e $\calG \subset \calX$) or it could be under-defined, e.g., as the position in $\mathbb{R}^3$ or pose in $SE(3)$ of a target object or the robot end-effector. \calG is discretized to have a finite set of goals $G$. 
+
+Let \calW be a 3D semi-static world in which the robot operates. \calW contains a fixed set of movable obstacles $\calO = \{o_1, o_2, o_3,...,o_n\}$, that occupy $\calW_\calO \subset \calW$, and can be displaced in between different planning queries. A movable obstacle $o_i$ can attain any configuration within a space $\calQ(o_i)$ which is discretized into a set of configurations $Q(o_i)$. Additionally, \calW has a partial occupancy $\calW_S$, which is static i.e $\calW_S = \calW \backslash \calW_\calO$. The motion planning problem is to find a collision-free path for the robot operating in \calW from \Sstart to any goal $g \in G$.
+
+% \begin{assumption}
+% \label{assum:1}
+% We assume that all obstacles $o_i \in \calO$ are identical in geometry.
+% \end{assumption}
+
+\subsection{Approach}
+%In this work, we aim to develop an algorithm that can provide provable bounds on the planning time for each planning query.
+In this work, we describe an algorithm that provides provable bounds on the planning time for each planning query, where these bounds are small enough to guarantee real-time performance.
+%Furthermore we want the bounds to be small to guarantee real-time performance.
+%Before we describe our approach, we begin by briefly describing a strawman algorithm which solves the aforementioned problem with the provable bounded-time guarantee but is practically prohibitive due to its memory and computational requirements.
+We begin by briefly describing a strawman algorithm which solves the aforementioned problem with the provable bounded-time guarantee but is practically prohibitive due to its memory and computational requirements.
+%This will also prepare the ground to describe our method which also provides bounded-time guarantee but with minimal memory and computational load.
+
+
+\subsubsection{Strawman Algorithm}
+Assume that we have access to a motion planner \calP that can be used offline to find feasible paths for the given planning problems. The naive approach
+%of providing bounded-time guarantee
+is to precompute and store paths for all possible planning problems using \calP %owing to the problem setup described in Sec.~\ref{subsec:setup},
+offline in a preprocessing stage.
+%, and at 
+%Then, at query time a lookup table is used to answer any query in bounded time. Specifically, it requires computing the lookup table
+At query time, a lookup table can answer any query in bounded time. Specifically, we precompute the lookup table
+$$
+\calM : G \times Q(o_1) \times Q(o_2) \times ... \times Q(o_n) \rightarrow \{\pi_1, \pi_2,\pi_3,...\}
+$$
+
+\noindent that maps every configuration of goal and the $n$ obstacles to a unique path $\pi_i$ resulting in $|G|.|Q(o_1)|.|Q(o_2)|....|Q(o_n)|$ paths. Assuming that each object $o_i$ can be in the same set of configurations in $\calW$, the space complexity then is $O(|G|.|Q(o_i)|^{n})$ which is exponential in the number of movable objects in \calO.
+%This complexity clearly is severely restrictive in practice.
+
+\subsubsection{Proposed Approach}
+While the strawman algorithm provides bounded-time guarantees, its memory and precomputation load is prohibitive for practical purposes. To this end we propose an algorithm that can provide bounded-time guarantees but requires significantly smaller resources in practice.
+
+Our key idea is that, for the given \Sstart and $g$, instead of precomputing path for every possible configuration of obstacles \calO, our algorithm systematically precomputes a small set of paths $\Pi_g$ from \Sstart to $g$ with the guarantee that for any possible configuration of \calO in \calW, at least one path $\pi \in \Pi_g$ will be collision free. At query time, this path can be looked up efficiently in provably bounded time.
+
+\subsection{Algorithm Overview}
+Before we describe the approach, we introduce some terminology.
+
+\begin{definition}[Envelope]
+\label{def:envp}
+For a path $\pi$, an envelope is a set of all obstacle configurations $e_\pi \subset Q(o_1) \cup Q(o_2) \cup...\cup Q(o_n)$, that collide with any robot state $s \in \pi$, except \Sstart, and are not within $\epsilon$ distance of $\textsc{Proj}(g)$
+\end{definition}
+
+\noindent where $\textsc{Proj}(g)$ is the projection of $g$ in $\mathbb{R}^3$ and $\epsilon$ is in Euclidean space. Fig.~\ref{fig:envp} illustrates an envelope with a simple example.
+The implementation details of envelope construction for the manipulation domain are discussed in Sec.~\ref{sec:impl_details}
+
+\begin{figure}[bt]
+\centering
+% \includegraphics[width=\columnwidth]{figs/envp.pdf}
+\includegraphics[width=\columnwidth]{figs/envp_grid.pdf}
+\caption{Depiction of an envelope for a single movable obstacle $o$: the blue rectangles represent the robot states in $SE(2)$ along the path $\pi$, the red circle is the movable obstacle $o$ that can have any position in $Q(o) \in \mathbb{R}^2$ and the small circles show positions $q(o)$ for which $o$ collides with $\pi$ and thus constitute the envelope $e_\pi$}
+\label{fig:envp}
+% \vskip -0.5cm
+\end{figure}
+
+\begin{definition}[Disjoint paths]
+\label{def:disjointness}
+The paths $\pi_1,\pi_2,...,\pi_n$ are disjoint if their corresponding envelopes $e_{\pi_1},e_{\pi_2},...e_{\pi_n}$ are disjoint sets.
+\end{definition}
+
+%For simplicity, consider a simple planning problem of finding a collision-free path from \Sstart to a goal $g \in G$ in the presence of a single movable obstacle $o$ and some static occupancy $\calW_S$.
+Consider finding a collision-free path from \Sstart to a goal $g \in G$ in the presence of a single movable obstacle $o$ and some static occupancy $\calW_S$.
+We first find a path $\pi_1$ from \Sstart to $g$ using \calP while avoiding collisions with only $\calW_S$.
+Next we construct an envelope $e_{\pi_1}$ around $\pi_1$, where $e_{\pi_1}$ (by Def.~\ref{def:envp}) is the set of all configurations that $o$ can take that invalidate $\pi_1$.
+If $e_{\pi_1}$ is non-empty, we attempt to find a second path $\pi_2$ that avoids collisions with $\calW_S$ as well as with the occupancy of $e_{\pi_1}$.
+%This gives us two disjoint paths $\pi_1$ and $\pi_2$ (since $e_{\pi_2}$ and $e_{\pi_1}$ would be disjoint by Def.~\ref{def:disjointness}).
+This gives us two disjoint paths $\pi_1$ and $\pi_2$, by Def.~\ref{def:disjointness}.
+%These two paths constitute the minimal set of paths with the guarantee that for any configuration $q(o) \in Q(o)$, one of these two paths will be collision free.
+These two paths constitute the minimal set of paths with the guarantee that for any configuration $q(o) \in Q(o)$, one path will be collision free.
+%At query time given any configuration $q(o)$, we can check if it lies within $e_{\pi_1}$ or not and based on that, use the path $\pi_2$ or $\pi_1$ respectively. By storing envelopes as sets implemented using hash tables, we can check it in constant time~\cite{czech1997perfect}.
+At query time given any configuration $q(o)$, we can check if it lies within $e_{\pi_1}$ or not and use the path $\pi_2$ or $\pi_1$ respectively. By storing envelopes as sets implemented using hash tables, we can check it in constant time~\cite{czech1997perfect}. Note that if $e_{\pi_1}$ is empty, we only require a single path $\pi_1$.
+
+\textbf{Extending to $n$ movable obstacles:} A single movable obstacle, requires at most two disjoint paths. Extending to $n$ objects would require at most $n+1$ disjoint paths. Therefore, for the scenarios in which the required number of disjoint paths exists and \calP can find them within a given allowed planning time, the computational complexity of the preprocessing phase grows linearly with number of movable obstacles i.e $O(|\calO|)$.
+If \calP fails to find the required number of disjoint paths, however,
+%which is possible if the paths do not exist or \calP cannot find them in a finite preprocessing time,
+then this method is incomplete as is, and it would require more preprocessing efforts to find more paths to satisfy the criterion that for any possible configuration of the set of obstacles \calO, at least one of the paths from the set is guaranteed to be collision free. %The following section discusses the details of the complete preprocessing and query algorithms.
+
+\subsection{Algorithm Details}
+%We now describe the two phases of our algorithm, i.e., the preprocessing and the query phases.
+We now describe the two phases of our algorithm: the preprocessing and the query phases.
+
+\subsubsection{Preprocessing}
+The preprocessing algorithm is described in Alg.~\ref{alg1} and is illustrated in Fig.~\ref{fig:illustration}. It starts with finding the first collision-free path $\pi_1$ from \Sstart to the given goal $g \in G$ in $\calW_S$. For each computed path $\pi_j$, the algorithm maintains the set of envelopes $\calE_{\pi_j}$ that were avoided while computing $\pi_j$. For the first path $\pi_1$, the set $\calE_{\pi_1}$ is empty since \calP only considers $\calW_S$ for this step. The algorithm then runs a loop for $n=|\calO|$ iterations, attempting to find $n$ more mutually disjoint paths (loop at line~\ref{alg1:l1}). Another loop at line~\ref{alg1:l2} is needed for the case when $n+1$ disjoint paths do not exist and therefore, more than one paths are computed in a single iteration of loop at line~\ref{alg1:l1}.
+In every iteration of the loop at line~\ref{alg1:l2}, the algorithm first constructs the envelope $e_{\pi_j}$ around the path $\pi_j$ found in the previous iteration of loop at line~\ref{alg1:l1}. Next, $\pi_j'$ is computed while avoiding collisions with the occupancy of the set of envelopes $\calE_{\pi_j}'$, which is the union of $e_{\pi_j}$ and the envelopes in $\calE_{\pi_j}$. $\calE_{\pi_j}'$ thus constitutes the set of avoided envelopes for $\pi_j'.$
+
+For the case when \calP fails to find the disjoint path at any iteration of loop at line~\ref{alg1:l1}, the algorithm bisects one of the envelopes (line~\ref{alg1:bisect} and Alg.~\ref{alg2}) that \calP attempted to avoid, resulting in two sets of envelopes (each one containing a bisected envelope along with the remaining envelopes). \calP then tries to find paths around the occupancy of envelopes in each of the two sets independently. Note that this process (Alg.~\ref{alg2}) repeats recursively until either \calP successfully finds paths around all the newly created sets of envelopes or until further recursion is not possible. The latter occurs in the worst case, when the algorithm recurses down to the deepest level, where each envelope contains individual obstacle configurations. Owing to the structure of these envelopes, we implement them as binary-trees. Because of this envelope bisection, the algorithm may compute more than one path in a single iteration of loop at line~\ref{alg1:l1}. It therefore maintains a set of paths $\Pi_i$ for each iteration and attempts to compute disjoint paths for all paths $\pi_j \in \Pi_i$ in the following iteration.
+
+The preprocessing algorithm (Alg.~\ref{alg1}) returns a database of paths $\Pi_g = \Pi_1 \cup \Pi_2 \cup ... \cup \Pi_{n+1}$ from \Sstart to a goal $g$ with the guarantee that for any possible configuration of obstacles \calO, one of the paths $\pi \in \Pi_g$ is collision free. To cover the full goal region $G$, Alg~\ref{alg1} is called for each $g \in G$ in the preprocessing phase.
+
+\begin{figure*}[t]
+    \centering
+    \begin{subfigure}{0.48\textwidth}
+    %   \centering
+        \includegraphics[width=\textwidth]{2.pdf}
+        \caption{}
+        \label{fig:p1}
+    \end{subfigure} 
+    \begin{subfigure}{0.48\textwidth}
+    %   \centering
+        \includegraphics[width=\textwidth]{3.pdf}
+        \caption{}
+        \label{fig:p2}
+    \end{subfigure}
+    \begin{subfigure}{0.48\textwidth}
+    %   \centering
+        \includegraphics[width=\textwidth]{4.pdf}
+        \caption{}
+        \label{fig:p3}
+    \end{subfigure}
+    \begin{subfigure}{0.48\textwidth}
+    %   \centering
+        \includegraphics[width=\textwidth]{5.pdf}
+        \caption{}
+        \label{fig:p4}
+    \end{subfigure}
+        \begin{subfigure}{0.48\textwidth}
+    %   \centering
+        \includegraphics[width=\textwidth]{6.pdf}
+        \caption{}
+        \label{fig:p5}
+    \end{subfigure}
+        \begin{subfigure}{0.48\textwidth}
+    %   \centering
+        \includegraphics[width=\textwidth]{7.pdf}
+        \caption{}
+        \label{fig:p6}
+    \end{subfigure}
+        \begin{subfigure}{0.48\textwidth}
+    %   \centering
+        \includegraphics[width=\textwidth]{8.pdf}
+        \caption{}
+        \label{fig:p7}
+    \end{subfigure}
+        \begin{subfigure}{0.48\textwidth}
+    %   \centering
+        \includegraphics[width=\textwidth]{9.pdf}
+        \caption{}
+        \label{fig:p8}
+    \end{subfigure}
+    \caption{
+    Illustration of preprocessing steps in a 2D environment with two movable obstacles $\{o_1,o_2\} \in \calO$ for a point robot. APP plans a set of paths from \Sstart to $g$ such that for any configuration of $o_1,o_2$ at least one of the paths from the set is collision free. Static obstacles $\calW_S$ are shown in green and $o_1,o_2$ are depicted as circles. The dotted region depicts $\calQ(o_i)$ (identical for $o_1,o_2$). Namely, $o_1,o_2$ are confined within the dotted region.
+     (\subref{fig:p1})~APP finds the first path $\pi_1$ avoiding $\calW_S$ only
+    %
+    (\subref{fig:p2})~Constructs envelope $e_{\pi_1}$ around $\pi_1$. The dark shaded region shows $e_{\pi_1}$ and the light region shows its occupancy.
+    %
+    (\subref{fig:p3})~Finds second path $\pi_2$ avoiding $e_{\pi_2}$. Since APP successfully finds two disjoint paths at this step, these paths are sufficient to avoid any configuration of $o_1$.
+    %
+    (\subref{fig:p4})~Constructs envelope $e_{\pi_2}$ around $\pi_2$.
+    %
+    (\subref{fig:p5})~Attempts to find the third disjoint path but fails and bisects $e_{\pi_1}$ into $e^l$ and $e^r$.
+    %
+    (\subref{fig:p6})~Finds path $\pi_3$ around $e^l$ and $e_{\pi_2}$
+    %
+    (\subref{fig:p7})~Finds path $\pi_4$ around $e^r$ and $e_{\pi_2}$ 
+    %
+    (\subref{fig:p8})~Set of paths needed to avoid any configuration of $o_1,o_2$.
+    }
+    
+    %
+    \label{fig:illustration}
+    % \vspace{-4mm}
+\end{figure*}
+
+\newlength{\textfloatsepsave}
+\setlength{\textfloatsepsave}{\textfloatsep}
+\setlength{\textfloatsep}{0pt}
+\begin{algorithm}[t]
+\caption{\textsc{Preprocess($g$)}} \label{alg1}
+% \AlgFontSize
+
+\hspace*{\algorithmicindent} \textbf{Inputs:} $\Sstart, \calW_S, \calO$
+
+\hspace*{\algorithmicindent} \textbf{Output:} $\Pi_g$
+\begin{algorithmic}[1]
+\State $\pi_1 \leftarrow$ \textsc{FindPath}($\Sstart,g,\calW_S$)
+\State $\calE_{\pi_1} \leftarrow \emptyset$
+\State \textsc{SetAvoidedEnvelopesOfPath($\pi_1,\calE_{\pi_1}$)}
+\State $\Pi_1 \leftarrow \{\pi_1\}$
+% \State $\calE \leftarrow \emptyset$
+\State $\Pi_g \leftarrow \Pi_1$
+\For {$i = 1$ to $n$}  \Comment{$n = |\calO|$}  \label{alg1:l1}
+    \State $\Pi_{i+1} \leftarrow \emptyset$
+    \For{each $\pi_j \in \Pi_i$} \label{alg1:l2}
+    \State $e_{\pi_j} \leftarrow$ \textsc{ConstructEnvelope($\pi_j$)}
+    % \State $\calE \leftarrow \calE \cup \{e\}$
+    % \State $\Pi_{i+1} \leftarrow$ 
+    % \For{each $e \in \calE_i$}
+    \State \textbf{If} $e_{\pi_j} = \emptyset$ \textbf{skip to next iteration}
+        \State $\calE_{\pi_j} \leftarrow$ \textsc{GetAvoidedEnvelopesOfPath}($\pi_j$)
+        \State $\calE_{\pi_j'} \leftarrow \calE_{\pi_j} \cup \{e_{\pi_j}\}$
+        % \State $\pi_j' \leftarrow$ \textsc{FindPathAroundEnvelopes}($\calE_{\pi_j'}$)
+        \State $\pi_j' \leftarrow$ \textsc{FindPath}($\Sstart,g,\calW_S,\calE_{\pi_j'}$) \Comment{Avoiding $\calE_{\pi_j'}$}
+        \If{success}
+            \State \textsc{SetAvoidedEnvelopesOfPath($\pi_j', \calE_{\pi_j'}$)}
+            % \State \textbf{insert} $<e_{\pi_j}, \pi_j>$ in $\calD_g$
+            \State $\Pi_{i+1} \leftarrow \Pi_{i+1} \cup \{\pi_j'\}$
+        \Else
+            \State $\Pi_{i+1} \leftarrow \Pi_{i+1} \cup \textsc{BisectAndFindMorePaths}(\calE_{\pi_j'})$ \label{alg1:bisect}
+            % \State update $\calE_i$ in \calE
+            % \State $\Pi \leftarrow \Pi \cup \Pi_{i+1}$
+    \EndIf
+    \EndFor
+    \State $\Pi_g \leftarrow \Pi_g \cup \Pi_{i+1}$
+\EndFor
+% \State $\calD_g = \Pi_1 \cup \Pi_2 \cup ... \cup \Pi_{n+1}$
+\end{algorithmic}
+\end{algorithm}
+\setlength{\textfloatsep}{\textfloatsepsave}
+
+
+\setlength{\textfloatsepsave}{\textfloatsep}
+\setlength{\textfloatsep}{0pt}
+\begin{algorithm}[t]
+\caption{\textsc{BisectAndFindMorePaths($\calE$)}} \label{alg2}
+% \AlgFontSize
+\begin{algorithmic}[1]
+    \State $\Pi \leftarrow \emptyset$
+    % \State $\calE_\pi \leftarrow$ \textsc{GetAvoidedEnvelopesOfPath}($\pi$)
+    % \State $\calE_\pi \leftarrow \calE_\pi \cup \{e\}$
+    \State $e \leftarrow \calE$.pop()     \Comment{pop an envelope to bisect}
+    \label{alg2:pop}
+    \If {\textsc{CheckSingleton}($e$)}    \Comment{contains one position}
+        \State \textbf{return} $\emptyset$  \Comment{no further bisection possible}
+    \EndIf
+    \State $e^{l},e^{r} \leftarrow$ \textsc{BisectEnvelope($e$)} \label{alg:2:bisect}
+    \State $\calE_{\pi_l} \leftarrow \calE \cup \{e^l\}$
+    \State $\calE_{\pi_r} \leftarrow \calE \cup \{e^r\}$
+    \For {each $\calE_{\pi_i} \in \{\calE_{\pi_l},\calE_{\pi_r}\}$}
+    
+        % first path
+        % \State $\calE_{\pi_b} \leftarrow \calE \cup \{e^b\}$
+        \State $\pi_i \leftarrow$ \textsc{FindPath}($\Sstart,g,\calW_S,\calE_{\pi_i'}$) \Comment{Avoiding $\calE_{\pi_i'}$}
+        \If{success}
+            \State \textsc{SetAvoidedEnvelopesOfPath($\pi_i, \calE_{\pi_i}$)}
+            % \State \textbf{insert} $<e_{\pi_j}, \pi_j>$ in $\calD_g$
+            \State $\Pi \leftarrow \Pi \cup \{\pi_i\}$
+        \Else
+            \State $\Pi \leftarrow \Pi \cup \textsc{BisectAndFindMorePaths}(\calE_{\pi_i})$
+        \EndIf
+    \EndFor
+    % \State $\calE_s \leftarrow \calE_s \cup \{\tau_{a},\tau_{b}\}$
+    \State \textbf{return} $\Pi$
+    
+    % \For {}
+% \EndFor
+\end{algorithmic}
+\end{algorithm}
+\setlength{\textfloatsep}{5pt}
+
+\subsubsection{Query}
+A query is comprised of a goal $g \in G$ (\Sstart is fixed) and obstacle configurations $q(o_1) \in Q(o_1), q(o_2) \in Q(o_2),..., q(o_n) \in Q(o_n)$. The query phase first looks up the datastructures stored for the queried $g$. It then loops over the set of paths $\Pi_g$ until it finds a collision free path. It is important to note that while doing so, it does not require any collision checking, which typically is the most computationally expensive operation in motion planning. Instead, it uses the envelope $e_{\pi_j}$ of each path $\pi_j$ to find the collision free path. The following data structures are stored for the query phase to efficiently return collision free paths.
+\begin{center}
+\begin{tabular}{l}
+    $\calM : \; [G \rightarrow \{\calD_{g_1}, \calD_{g_2},...\}]$ \\
+    $\calD_{g_i} : \; <\{e_{\pi_1},e_{\pi_2},...\} : \{\pi_1,\pi_2,...\}>$ \Comment{for each $g_i \in G$}\\
+    % $\calM_e : Q(o_i) \rightarrow \{e_{\pi_1},e_{\pi_2},...\}$ \Comment{for each envelope}\\
+\end{tabular}{}
+\end{center}
+
+Namely, $\calM$ is a lookup table that maps a goal~$g_i \in G$ to a dictionary~$\calD_{g_i}$ where ~$\calD_{g_i}$ contains $<e_{\pi_j},\pi_j>$ pairs where $\pi_j \in \Pi_{g_i}$. The query phase is a straight-forward two step process; in the first step, the dictionary~$\calD_{g_i}$ is fetched for the queried $g_i$ from $\calM$. In the second step, the algorithm loops through all the pairs in $\calD_{g_i}$ to search for an envelope $e_{\pi_j}$ that \emph{does not} contain any of the obstacle configurations i.e. $e_{\pi_j} | q(o_1),q(o_2),...,q(o_n) \notin e_{\pi_j}$ in the given planning query. By construction of the preprocessing algorithm, atleast one of the envelopes in $\calD_{g_i}$ is guaranteed to satisfy this condition.  To efficiently check whether a configuration is contained in an envelope or not, we store envelopes as hash tables, which allows the algorithm to perform this check in constant time.
+
+\section{Analysis}
+\subsection{Time Complexity}
+\label{sec:complexity_app}
+\begin{lemma}[Fixed-time query]
+The query time of APP is upper-bounded by a (small) time limit $t_{\textrm {query}}$.
+\label{lemma1}
+\end{lemma}
+\begin{proof}[Sketch of Proof]
+The query phase includes a lookup operation on \calM, running a loop over the set of alternative paths $\Pi_g$ to the queried $g$ and a nested loop through \calO which also only involves lookup operations since the envelopes are stored as sets. Since with perfect hashing (~\cite{czech1997perfect}), the lookup operations can be performed in constant time. The overall complexity thus is bounded and is given by $O(|\Pi_g|\cdot |\calO|)$ which bounds $t_{\textrm {query}}$.
+\end{proof}
+
+\textbf{Special case:} When all paths in $\Pi_g$ are disjoint, then we have that $|\Pi_g| \leq n+1$ and so the complexity of the query phase becomes $O(|\calO|^2)$
+
+In practice we have that $|\Pi_g| \ll Q(o_1) \times Q(o_2) \times ... \times Q(o_n)$ (number of paths required for the naive approach) and therefore, $t_{\textrm {query}}$ is very small.
+
+\subsection{Space Complexity}
+In this section, we analyze the space complexity of APP for two specific types of obstacle environments.
+
+\subsubsection{$n$ movable obstacles and zero static obstacles}
+We know that APP requires at most $n+1$ disjoint paths for $n$ movable obstacles. We analyze the case where the required number of disjoint paths exist.
+
+\vspace{2mm}
+\begin{lemma}
+For an unbounded environment with $n$ movable obstacles and no static obstacles, APP computes at most $n+1$ (disjoint) paths, provided that the \Sstart and $g$ are at least some specific clearance distance $\epsilon_n$ away from obstacle configuration spaces $Q(o_i) \; \forall \; i = 1$ to $n$
+\end{lemma}
+
+The larger the $n$, the larger the $\epsilon_n$ is since it gets harder to fit more number of disjoint paths closer to the start and goal. We omit the analysis of the distance $\epsilon_n$.
+
+\subsubsection{One movable obstacle and $k$ narrow passages}
+For one movable obstacle $o_1$ APP requires at most two disjoint paths $\pi_1$ and $\pi_2$. Consider an environment where the $\pi_2$ is blocked off by the first path's envelope $e_{\pi_1}$. Let $m$ be the size of the $e_{\pi_1}$. Consider the case where $k$ out of $m$ configurations in the $e_{\pi_1}$ obstruct $\pi_2$. This case is depicted in Fig.~\ref{fig:app_space}.
+
+First consider the case where $k=1$. An example for this case is where there exists a narrow passage in the environment between \Sstart and $g$ which the robot must pass through. One configuration of the movable obstacle within the $e_{\pi_1}$ blocks off this narrow passage and therefore obstructs $\pi_2$. We first analyze the worst case space complexity (that is the maximum number of paths needed by APP) for this environment and then generalize that to $k \geq 1$.
+
+Consider an example shown in Fig.~\ref{fig:one_narrow}. We show $e_{\pi_1}$ within which one configuration lies in the narrow passage (shown in red). Here $m=8$ and $k=1$. It can be seen that, in this case APP requires computing $\log m$ paths.
+
+A generalized scenario for $k$ obstacles is analyzed in Fig.~\ref{fig:two_narrow} for $k = 2$. We deduce that in the general case for $k \geq 1$, APP requires $k \cdot \log\frac{m}{k}$ paths. To analyze the worst case complexity, we position the narrow passage configurations such that APP computes the maximum number of paths. To give an intuition for the added term $k$ in the complexity for the generalized case, the general problem with $k \geq 1$ can be seen as a collection of $k$ sub-problems each with $k = 1$, which we arrive at by successive bisections. For a general example, $n$ and $k$ are rounded-off to the nearest power of 2 to evaluate the expression. Note that for the case where $k \geq \frac{n}{2}$, APP would perform no better than the brute force and would compute $n-k$ paths. 
+
+\vspace{2mm}
+\begin{lemma}
+For an environment with one movable obstacle $o_1$ and with $k$ of its configurations in $e_{\pi_1}$ obstructing $\pi_2$, APP computes $O(k \cdot \log \frac{m}{k})$ paths if $k < \frac{n}{2}$ and $O(n-k)$ paths if $k \geq \frac{n}{2}$.
+\end{lemma}
+
+We omit the analysis of the general case of $n$ movable obstacles and $k$ narrow passages.
+
+\begin{figure}[H]
+\begin{subfigure}{0.5\textwidth}
+\centering
+  \includegraphics[width=0.9\linewidth]{space_app}
+  \caption{}
+  \label{fig:one_narrow}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.5\textwidth}
+\centering
+  \includegraphics[width=0.9\linewidth]{space_app2}
+  \caption{}
+  \label{fig:two_narrow}
+\end{subfigure}
+    \caption{Space complexity analysis for environments with one movable obstacle. The envelopes are depicted as rectangles with circles being the obstacle configurations. The first envelope $e_{\pi_1}$ contains eight configurations in this example. The red circles are the configurations that obstruct the disjoint path (These configurations block off a narrow passage). The envelopes that do not contain red configurations and for which APP successfully finds a path avoiding them are colored in green lines~(\subref{fig:one_narrow}) One obstacle configuration obstructs disjoint path. After the first path $\pi_1$ APP requires computing additional $\log (8) = 3$ paths (\subref{fig:one_narrow}) Two obstacle configurations obstruct disjoint path. APP requires computing additional $2 \cdot \log (\frac{8}{2}) = 4$ paths}
+    \label{fig:app_space}
+\end{figure}
+
+\subsection{Correctness}
+\begin{lemma}
+\label{lemma:complete_app}
+If the offline motion planner \calP can find a collision-free path from \Sstart to a $g \in G$ in a (large) timeout $t_{\textrm preprocess}$, then APP is guaranteed to generate a path for the same planning problem in time $t_{\textrm {query}}$.
+\end{lemma}
+\begin{proof}[Sketch of Proof]
+For the special case when all paths in $\Pi_g$ are disjoint, the proof follows from Def.~\ref{def:disjointness} because, since the envelopes of paths in $\Pi_g$ are disjoint sets, no obstacle configuration $q(o_i)$ can intersect with more than one path in $\Pi_g$. Since the algorithm computes $n+1$ paths if required for $n$ obstacles, at least one path is collision free.
+
+For the general case where not all paths in $\Pi_g$ are necessarily disjoint, the lemma can be proven by assessing the recursive bisection procedure in APP. In the Alg.~\ref{alg1}, \calP attempts to find the ($n+1$)th path which avoids $n$ envelopes and bisects one of the $n$ envelopes if \calP fails within $t_{\textrm {preprocess}}$. The bisection occurs recursively until either the path is computed for every leaf envelope or further recursion is not possible, thus covering all possible configurations of obstacles in \calO. Since APP uses \calP with the timeout $t_{\textrm {preprocess}}$ to solve each problem, it guarantees to have precomputed a valid path for any problem that \calP can solve in $t_{\textrm {preprocess}}$.
+Furthermore from Lemma~\ref{lemma1}, we have that the query time is guaranteed to be within $t_{\textrm {query}}$.
+\end{proof}
+
+\subsection{CTMP-Completeness}
+We now analyse the algorithm under the CTMP-Completeness criteria described in Chapter~\ref{sec:ctmp} for the special case described in Sec.~\ref{sec:complexity_app} when all paths in $\Pi_g$ are disjoint. For the general case, we observe that $|\Pi_g|$ is unbounded (the worst case analysis of $|\Pi_g|$ is outside the scope of this thesis). However, for the special case, we showed that the complexity of the query phase becomes $O(|\calO|^2)$. In addition, if we make the assumption that the maximum number of movable obstacles $\calO$ is a constant, the complexity then becomes $O(1)$.
+%
+Since the algorithm requires~$O(1)$ time to generate the full path, it would also require~$O(1)$ time to get the next action along the path. Therefore, $T_\textrm{const} (< \Tbound)$ is constant-time bounded. Furthermore, we select the motion planner \calP such that the planned paths contain no cycles. Hence from lemma~\ref{lemma:complete_app} and by Def.~\ref{def:complete}, we have the following theorem.
+
+\vspace{2mm}
+\begin{theorem}
+	For the case when all paths in $|\Pi_g|$ are disjoint, the algorithm is CTMP-Complete under the assumption that $|\calO|$ is upper-bounded by a constant.
+\end{theorem}
+
+As for this special case the algorithm is CTMP-Complete, we also have the following corollary.
+
+\vspace{2mm}
+\begin{cor}
+	The algorithm can be used for non-stop execution under the condition~$\Tconst < \Texec$
+\end{cor}
+
+\section{Implementation Details} % : Motion Planning for Robot Arm}
+%In this section we cover two main components of our approach specifically for the motion planning problem for a high-DoF robot arm, (1) envelope construction and (2) envelope bisection.
+In this section we cover three main components of our implementation for the motion planning problem of a high-DoF robot arm, (1) envelope construction, (2) envelope bisection and (3) computing envelope occupancy.
+%
+Our implementation approximates the geometry of the movable obstacles with spheres. This approximation restricts the dimensionality of $Q(o_i)$ to $\mathbb{R}^3$.
+
+
+\subsection{Envelope Computation using Distance Field}
+\label{sec:impl_details}
+The naive approach of computing an envelope $e_\pi$ around a path $\pi$ (recall Def.~\ref{def:envp}) requires collision checking all obstacle configurations with each robot state $s \in \pi$. This can be very expensive for a large number of configurations that the obstacles can have.
+% To optimize this computation, we approximate an obstacle $o_i$ with a sphere of radius $r_i$, which allows us to efficiently perform this computation using a distance field.
+% Recall Def.~\ref{def:envp} of the envelope. The naive approach of constructing an envelope $e_\pi$ for a path $\pi$ is to make use of a collision checker for the robot and find the set of all configurations of all obstacles $o_i \in \calO$ that collide with any configuration of the robot along~$\pi$. This would require~$|\pi| \times Q(o_1) \times Q(o_2) \times ... \times Q(o_n)$ collision checks, where $|\pi|$ is the length of $\pi$. This clearly is prohibitive to compute, even offline.
+%
+% To optimize for the preprocessing computation, we make the following simplistic assumption.
+%
+% % \begin{assumption}
+% % \label{assum:1}
+% % We assume that all obstacles $o_i \in \calO$ are identical in geometry.
+% % \end{assumption}
+%
+% % For the naive approach, this now requires~$|\pi| \times Q(o_i)$ collision checks which still is not affordable. To this end we make another assumption~\ref{assum:2}.
+%
+% \begin{assumption}
+% \label{assum:2}
+% We approximate the geometry of each obstacles $o_i \in \calO$ by a sphere of radius $r_i$.
+% \end{assumption}
+%
+% This allows us to use a method for envelope construction that does not require the expensive collision checking. With the spherical approximation, we now refer to obstacle configurations as positions in the 3D world.
+%
+Instead, the envelope is constructed in a simple two step process.
+%\begin{enumerate}
+First, the path $\pi$ is voxelized (using the collision model of the robot) and added to an occupancy grid.
+% This is done by converting the collision model of the robot at each configuration $s \in \pi$ to voxels and inserting them in the occupancy grid.
+Second, 
+to compute the positions of each $o_i \in \calO$ that collide with $\pi$, the occupancy grid is inflated by the radius~$r_i$ of $o_i$, (approximating an obstacle $o_i$ with a sphere of radius $r_i$) which is efficiently done by using a signed distance field.
+%The method iterates through all cells in the occupancy grid and fills the ones which are at most~$r_i$ distance away from the occupied cells.
+%
+The intersection of the set of discrete positions of the occupied cells with $Q(o_i)$, constitutes $e_{\pi}$.
+%\end{enumerate}
+%
+To allow computing disjoint paths, following Def.~\ref{def:envp}, the obstacle positions that collide with \Sstart or are within a small distance $\epsilon$ from the goal position are excluded from $e_\pi$. This enforces an assumption that an obstacle is not placed within $\epsilon$ distance from the goal position.
+% By the end of this two step process, the cells that are occupied constitutes~$e_\pi$, i.e. the discrete obstacle positions corresponding to each of these cells, collide with $\pi$.
+% (since we assume the same geometrical approximation for all $o \in \calO$)
+
+\subsection{Envelope Bisection}
+The envelope bisection refers to splitting an envelope~$e$ into two sub-envelopes~$e_l$ and $e_r$ (see Alg.~\ref{alg2} line~\ref{alg:2:bisect}). Several schemes could be used to make this split. In our implementation, we split the envelope along either of the three planes $x=x_c, y=y_c$ or $z=z_c$. where the $x_c,y_c$ and $z_c$ are the means of the $x,y$ and $z$ components respectively of all positions in the envelope $e$ to be bisected. Among the three axes, we pick the axis that has the largest span of positions. As described earlier, each envelope is implemented as a binary tree and this bisection results in creation of two children~$e_l$ and~$e_r$ for the parent~$e$ in this binary tree. Note that we remove subscripts for paths once the envelope is bisected since the bisected envelopes no more follow Def.~\ref{def:envp}.
+%
+Alg.~\ref{alg2} also makes a choice at line~\ref{alg2:pop} for the envelope to be bisected from the input set of envelopes \calE. While this decision does not affect the properties of the algorithm, different heuristics can be used for this choice as well. In our implementation, we simply select the largest envelope for bisection.
+
+\subsection{Computing Envelope Occupancy}
+This step corresponds to an implementation detail within procedure \textsc{FindPath} in Alg.~\ref{alg1}. In order to find a path around the set of envelopes \calE, the joint occupancy of all envelopes in \calE is computed. To do so, for each obstacle $o_i$, all of its discrete positions in \calE are added to an empty occupancy grid, followed by the inflation of the occupancy grid (as described earlier) by the radius $r_i$ of the corresponding obstacle $o_i$. The joint occupancy of all these grids constitutes the occupancy of \calE.
+%
+%
+\footnote{In our experiments, we consider all obstacles of the same sizes. In that case, a single inflation operation is needed, each for the envelope construction and computing envelope occupancy steps.}
+
+\begin{figure*}[t]
+    \centering
+    \begin{subfigure}{0.48\textwidth}
+    %   \centering
+        \includegraphics[trim={8cm 0 10cm 1cm},clip, width=\textwidth]{path1.png}
+        \caption{}
+        \label{fig:pr1}
+    \end{subfigure} 
+    \begin{subfigure}{0.48\textwidth}
+    %   \centering
+        \includegraphics[trim={8cm 0 10cm 1cm},clip, width=\textwidth]{path2.png}
+        \caption{}
+        \label{fig:pr2}
+    \end{subfigure}
+    \begin{subfigure}{0.48\textwidth}
+    %   \centering
+        \includegraphics[trim={8cm 0 10cm 1cm},clip, width=\textwidth]{path3.png}
+        \caption{}
+        \label{fig:pr3}
+    \end{subfigure}
+    \begin{subfigure}{0.48\textwidth}
+    %   \centering
+        \includegraphics[trim={8cm 0 10cm 1cm},clip, width=\textwidth]{path4.png}
+        \caption{}
+        \label{fig:prq}
+    \end{subfigure}
+    \caption{
+    Illustration of the preprocessing steps for the mail-sorting environment with two movable obstacles on a tabletop for a single start and goal pair.
+     (\subref{fig:pr1})~APP finds the first path avoiding $\calW_S$ only.
+    %
+    (\subref{fig:pr2})~Constructs envelope around first path and finds the second path avoiding the first envelope.
+    %
+    (\subref{fig:pr3})~Constructs a second envelope around the second path and finds the third path avoiding the two envelopes.
+    %
+    (\subref{fig:prq})~At query time, given a random configuration of movable obstacles, APP looks up a valid path~(second path, Fig.~\subref{fig:pr2}) among the set of precomputed paths.
+    }
+    %
+    \label{fig:pr}
+    % \vspace{-4mm}
+\end{figure*}
+
+\section{Experimental Results}
+
+\begin{table*}[tbh!]
+\footnotesize
+\begin{center}
+\begin{adjustbox}{angle=-90}
+\begin{tabular}{|r|r||c|c|c|c|c|c|c|c|c|}
+\hline
+\multicolumn{2}{|l|}{} & \multicolumn{3}{c|}{Shelving} & \multicolumn{3}{c|}{Sorting} & \multicolumn{3}{c|}{Sorting (time constrained)} \\
+\multicolumn{2}{|l|}{} & \multicolumn{3}{c|}{\scriptsize{[248 goals]}} & \multicolumn{3}{c|}{\scriptsize{[680 goals]}} & \multicolumn{3}{c|}{\scriptsize{[680 goals]}} \\
+\multicolumn{2}{|r|}{No. of Obstacles} & 1 & 2 & 3 & 1 & 2 & 3 & 1 & 2 & 3 \\ \hline\hline
+%%%%%%%%%%%%%%%%%%%  Success Rates
+\multirow{7}{*}{\rotatebox[origin=c]{90}{Success Rate [\%]}}
+& \textbf{APP}  & \textbf{100}  & \textbf{100}  & \textbf{100}  & \textbf{100}  & \textbf{100}  & \textbf{100}  & \textbf{100}  & \textbf{100}  & \textbf{100} \\ \cline{2-11}
+& Lightning~\cite{berenson2012robot}  & 94  & 95  & 97  & \textbf{100}  & \textbf{100}  & \textbf{100}  & 97  & 96  & 75 \\ \cline{2-11}
+& E-Graphs~\cite{Phillips-RSS-12}  & 20  & 15  & 14  & 89  & 89  & 81  & 50  & 45  & 41 \\ \cline{2-11}
+& RRTConnect~\cite{kuffner2000rrt}  & 96  & 95  & 97  & \textbf{100}  & \textbf{100}  & \textbf{100}  & 19  & 14  & 11 \\ \cline{2-11}
+& LazyPRM~\cite{kavraki2000path}  & 46  & 34  & 23  & 98  & 99  & 93  & 46  & 35  & 28 \\ \cline{2-11}
+& BIT\textsuperscript{\textasteriskcentered}~\cite{gammell2020batch}  & 92  & 75  & 64  & 84  & 81  & 75  & 37  & 42  & 40 \\ \cline{2-11}
+% & InformedRRT\textsuperscript{\textasteriskcentered}~\cite{gammell2018informed}  & 6  & 11  & 12  & \textbf{100}  & \textbf{100}  & \textbf{100}  & 25  & 23  & 16 \\ \cline{2-11}
+& RRT\textsuperscript{\textasteriskcentered}~\cite{karaman2011sampling}  & 9  & 12  & 17  & \textbf{100}  & \textbf{100}  & \textbf{100}  & 20  & 15  & 25 \\ \hline\hline
+%%%%%%%%%%%%%%%%%%%  Planning Times
+\multirow{14}{*}{\rotatebox[origin=c]{90}{Mean Time (std, max) [ms]}}
+& \multirow{2}{*}{\textbf{APP}}  & \textbf{.005}  & \textbf{.006}  & \textbf{.006}  & \textbf{.005}  & \textbf{.005}  & \textbf{.007}  & \textbf{.005}  & \textbf{.005}  & \textbf{.006} \\
+&  & \scriptsize{(.001, .009)} & \scriptsize{(.001, .013)} & \scriptsize{(.001, .014)} & \scriptsize{(.001, .008)} & \scriptsize{(.001, .009)} & \scriptsize{(.001, .011)} & \scriptsize{(.001, .009)} & \scriptsize{(.001, .009)} & \scriptsize{(.001, .008)}\\ \cline{2-11}
+& \multirow{2}{*}{Lightning~\cite{berenson2012robot}}  & 124  & 149  & 162  & 31.1  & 37.5  & 48.6  & 70.7  & 77.5  & 98.4 \\
+&  & \scriptsize{(28.2, 221)} & \scriptsize{(63.3, 413)} & \scriptsize{(82.2, 552)} & \scriptsize{(13.7, 76.8)} & \scriptsize{(20.0, 96.1)} & \scriptsize{(30.2, 144)} & \scriptsize{(80.3, 542)} & \scriptsize{(63.0, 307)} & \scriptsize{(84.6, 414)}\\ \cline{2-11}
+& \multirow{2}{*}{E-Graphs~\cite{Phillips-RSS-12}}  & 988  & 1044  & 904  & 203  & 273  & 275  & 162  & 210  & 176 \\
+&  & \scriptsize{(587, 1943)} & \scriptsize{(484, 1952)} & \scriptsize{(364, 1520)} & \scriptsize{(92.0, 824)} & \scriptsize{(290, 1936)} & \scriptsize{(250, 1918)} & \scriptsize{(55.2, 534)} & \scriptsize{(78.1, 575)} & \scriptsize{(78.6, 567)}\\ \cline{2-11}
+& \multirow{2}{*}{RRTConnect~\cite{kuffner2000rrt}}  & 168  & 167  & 260  & 62.0  & 59.5  & 72.9  & 112  & 110  & 104 \\
+&  & \scriptsize{(192, 1880)} & \scriptsize{(71.7, 488)} & \scriptsize{(228, 1363)} & \scriptsize{(46.7, 364)} & \scriptsize{(29.2, 151)} & \scriptsize{(38.1, 194)} & \scriptsize{(75.0, 311)} & \scriptsize{(71.6, 272)} & \scriptsize{(72.4, 279)}\\ \cline{2-11}
+& \multirow{2}{*}{LazyPRM~\cite{kavraki2000path}}  & 1014  & 1204  & 1196  & 338  & 480  & 442  & 219  & 219  & 224 \\
+&  & \scriptsize{(388, 1921)} & \scriptsize{(410, 1954)} & \scriptsize{(516, 1967)} & \scriptsize{(265, 1454)} & \scriptsize{(402, 1716)} & \scriptsize{(405, 1919)} & \scriptsize{(65.8, 386)} & \scriptsize{(72.6, 478)} & \scriptsize{(93.1, 568)}\\ \cline{2-11}
+& \multirow{2}{*}{BIT\textsuperscript{\textasteriskcentered}~\cite{gammell2020batch}}  & 727  & 904  & 833  & 327  & 298  & 442  & 251  & 262  & 252 \\
+&  & \scriptsize{(256, 1997)} & \scriptsize{(380, 1950)} & \scriptsize{(363, 1923)} & \scriptsize{(357, 1963)} & \scriptsize{(305, 1555)} & \scriptsize{(417, 1728)} & \scriptsize{(102, 556)} & \scriptsize{(92.9, 540)} & \scriptsize{(109, 633)}\\ \cline{2-11}
+% & \multirow{2}{*}{InformedRRT\textsuperscript{\textasteriskcentered}~\cite{gammell2018informed}}  & 515  & 546  & 562  & 136  & 136  & 139  & 178  & 190  & 171 \\
+% &  & \scriptsize{(76.4, 617)} & \scriptsize{(69.8, 634)} & \scriptsize{(28.6, 603)} & \scriptsize{(31.6, 201)} & \scriptsize{(31.5, 203)} & \scriptsize{(33.1, 209)} & \scriptsize{(44.0, 267)} & \scriptsize{(50.4, 323)} & \scriptsize{(43.4, 253)}\\ \cline{2-11}
+& \multirow{2}{*}{RRT\textsuperscript{\textasteriskcentered}~\cite{karaman2011sampling}}  & 572  & 539  & 566  & 137  & 137  & 137  & 193  & 187  & 193 \\
+&  & \scriptsize{(128, 893)} & \scriptsize{(54.6, 616)} & \scriptsize{(29.0, 617)} & \scriptsize{(31.9, 196)} & \scriptsize{(31.7, 199)} & \scriptsize{(32.4, 214)} & \scriptsize{(50.3, 289)} & \scriptsize{(36.7, 261)} & \scriptsize{(50.5, 290)}\\ \hline\hline
+%%%%%%%%%%%%%%%%%%%  APP Preprocessing
+\multirow{6}{*}{\rotatebox[origin=c]{90}{APP}}
+& Preprocessing & \multirow{2}{*}{8.9} & \multirow{2}{*}{48.2} & \multirow{2}{*}{49.9} & \multirow{2}{*}{17.6} & \multirow{2}{*}{31.2} & \multirow{2}{*}{74.6} & \multirow{2}{*}{17.5} & \multirow{2}{*}{30.4} & \multirow{2}{*}{98.8} \\
+& Time [min] & & & & & & & & & \\ \cline{2-11}
+& Paths per Goal & \multirow{2}{*}{2.0 ({0.1})} & \multirow{2}{*}{3.2 ({0.7})} & \multirow{2}{*}{4.1 ({0.9})} & \multirow{2}{*}{2.0 ({0.0})} & \multirow{2}{*}{3.1 ({0.5})} & \multirow{2}{*}{6.1 ({4.0})} & \multirow{2}{*}{2.0 ({0.1})} & \multirow{2}{*}{3.1 ({0.4})} & \multirow{2}{*}{5.8 ({7.7})} \\
+& (mean, std)& & & & & & & & & \\ \cline{2-11}
+& \multirow{2}{*}{Memory [Mb]} & \multirow{2}{*}{9.7} & \multirow{2}{*}{15.6} & \multirow{2}{*}{20.6} & \multirow{2}{*}{24.8} & \multirow{2}{*}{37.8} & \multirow{2}{*}{70.6} & \multirow{2}{*}{17.5} & \multirow{2}{*}{28.5} & \multirow{2}{*}{54.7} \\
+& & & & & & & & & & \\ \hline
+\end{tabular}
+\end{adjustbox}
+\end{center}
+\caption{
+The table shows the success rates and planning times of APP and the baselines, as well as the preprocessing statistics for three different domains, with 1, 2 and 3 movable obstacles. 100 random tests were run for each experiment with the timeout of 2s. The same timeout was used for APP during preprocessing.
+}
+\label{table:results}
+% \vskip -0.5cm
+\end{table*}
+
+\begin{figure}
+\centering
+\includegraphics[width=\textwidth]{figs/app_fig3_v2_lo-res.png}
+\caption{Left: Shelving/unshelving task. Right: mail sorting task. Both tasks involve a mix of static obstacles and obstacles which may appear at many different positions. Target object is shown in red, and approximate movable obstacles are shown in yellow. The goal regions are depicted with green rectangles.}
+\label{fig:scenarios}
+% \vskip -0.5cm
+\end{figure}
+
+We evaluated APP on the 7 DoF Franka arm in three different semi-structured domains and compared its performance with other state-of-the-art sampling-based and search-based motion planning algorithms. For sampling-based algorithms we used OMPL's implementations~\cite{sucan2012open}
+
+%\subsection{Experimental setup}
+%\subsubsection*{Manipulation Planning}
+%We consider the manipulation planning problem as joint motion and grasp planning problem. Namely,
+We consider the problem of reaching a feasible grasp pose $\phi \in \Phi$ for a target object $o_T$ at configuration $q(o_T)$, where $\Phi$ is a set of precomputed grasps (transformed into the robot's frame) for $o_T$. The resultant problem is a multi-goal planning problem where given $\Phi$, the robot has to find a collision free path $\pi$ to any $\phi \in \Phi$ while avoiding obstacles in \calW and meeting the success criterion. We use YCB objects~\cite{calli2015ycb} as targets with the grasps from~\cite{eppner2019billion}.
+
+In all our experiments, we sort the grasp poses using a distance metric selecting the next best grasp being the one closest to the grasps already attempted so far. We use collision-aware IK to find valid grasps. For the baselines that support multi-goal planning (RRT*~\cite{karaman2011sampling}, BIT*~\cite{gammell2020batch}, LazyPRM~\cite{kavraki2000path}) in OMPL, the planner picks the top five grasps from the sorted list and plans to the corresponding goals within a single planning query. For the remaining baselines (Lightning~\cite{berenson2012robot}, RRT-Connect~\cite{kuffner2000rrt}, E-graphs~\cite{Phillips-RSS-12}) the planner sequentially iterates through all the grasps in $\Phi$ and terminates when the success criterion is met or until the timeout. APP uses Lightning as its underlying motion planner \calP.
+
+%\subsubsection*{Goal Region Specification}
+We define the goal region \calG as a space of possible configurations of $o_T$ in the world. \calG is domain specific and depends on the allowable region of $o_T$ in the world as well as the geometry of $o_T$. To give an example, we used the bowl from the YCB dataset as the target object in our experiments. Since it is symmetric about the vertical axis and can rest on a planer surface, that limits the dimension of \calG to $\mathbb{R}^2$. For an object like a mug, its \calG would be in $SE(2)$. \calG is discretized to get a discrete set of poses $G$ of $o_T$.
+% The discretization is chosen depending upon the precision required for the given domain.
+
+
+% We test on four different simulated environments to show our proposed method's superiority over a number of common baselines. Specifically, we compare to RRT-Connect (RRTC)~\cite{kuffner2000rrt}, Lightning~\cite{berenson2012robot}, and Lazy PRM~\cite{}.
+
+% TODO: results tables and experiment descriptions plus images here. 
+
+\subsection{Experimental Scenarios}
+Fig.~\ref{fig:scenarios} shows two of our example scenarios. In both the scenarios, we define the goal regions \calG as bounded $x,y$ planes since the target objects that we use are symmetric about the $z$-axis. The obstacle regions $\calQ(o_i)$ are also bounded $x,y$ planes and are identical for all obstacles in \calO.~\calG and $\calQ(o_i)$ both are discretized with a resolution of 2cm. We use occupancy grid to represent the occupancy of \calW which also has a 2cm discretization. The value of parameter $\epsilon$ (defined in Def.~\ref{def:envp}) in all the experiments is 20cm.
+%
+% We design these scenerios such that if an obstacle is place at every position $q(o_i) \in Q(o_i)$, none of the goals in $G$ is reachable. Without that, the planning problem becomes trivial, since we can treat the resultant \calW as completely static.
+%
+Table~\ref{table:results} shows the statistical results of all our experiments. The experiments were run on Intel Core i7-7800X CPU @3.5Ghz with 32 GB memory.
+
+APP shows a success rate of 100\% for all the experiments, with several orders of magnitude speedup compared to the baselines. The baselines do well in the sorting domain but they suffer in shelving and the time-constrained sorting domains, which are more challenging.
+%
+Lightning's lower success rate for the shelving domain compared to APP is because randomly positioned obstacles can potentially create harder planning problems, compared to the problems it solves within the APP framework.
+%
+Lightning's lower success rate for the time-constrained domain is due to its higher planning time, which makes it harder to satisfy the overall timeout~$t_\textrm{task}$.
+%
+% \hl{Even though APP uses Lightning as its underlying planner \calP, it achieves 100\% success rate which Lightning fails to achieve}
+% \hl{For the time-constrained domain, the baselines show lower success rates due to their higher planning times, which makes it harder to satisfy the overall timeout}~$t_\textrm{task}$.
+%
+%Also, note that the performance of preprocessing and experience-based planners (LazyPRM, Lightning, E-graphs) drops with the increase in the number of movable obstacles.
+The performance of preprocessing and experience-based planners (LazyPRM, Lightning, E-graphs) drops with the increase in the number of movable obstacles.
+%
+In the time constrained domain, optimal sampling-based planners (RRT*, BIT*) do not perform better than non-optimal planners, because besides being slower, their convergence rate is not as fast as the time bound requires. Secondly more significant cost reduction is achieved by post-processing in our domains, which is used for all the planners.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\textbf{Shelving/Unshelving:}
+ %In the shelving/unshelving scenario, the robot is tasked with reaching out to a target object (soup can in this example from the YCB dataset) placed in the rear section of a shelf, while avoiding other objects arbitrarily located at the front section of the shelf. Conversely the task could be to place the object in the rear section of the shelf. We approximate each $o_i \in \calO$ as a sphere (voxelized) of radius 6cm. The planning problem is challenging because the static shelf and the movable obstacles create narrow passages in the configuration space of the robot. Since the target object is symmetric about the vertical $z$-axis,~\calG is a bounded $x,y$ plane in the rear section of the shelve.
+ In the shelving/unshelving scenario, the robot is tasked with reaching a target object placed in the rear section of a shelf while avoiding other objects. % arbitrarily located at the front section of the shelf.
+ %Conversely the task could be to place the object in the rear section of the shelf.
+ We approximate each $o_i \in \calO$ as a voxelized sphere of radius 6cm.
+ This problem is challenging because the movable obstacles create narrow passages in the configuration space of the robot.
+ Since the target object is symmetric about the vertical axis,~\calG is a bounded plane in the rear section of the shelve.
+ 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\textbf{Mail Sorting:}
+%For the mail-sorting task, the robot picks up packages from a tabletop while avoiding collisions with other packages and sorts them in cubby shelves. We approximate each $o_i \in \calO$ as a sphere (voxelized) of radius 8cm for this task. This problem is challenging because in addition to planning to a grasp pose, the planner needs to search for a valid pregrasp pose which gets harder with more clutter around the target object. Additionally the target cubby creates a narrow passage for the motion planner.
+The robot must pick up packages from a tabletop while avoiding collisions with other packages and put them in a cubby. We approximate each $o_i \in \calO$ as a voxelized sphere of radius 8cm. %This problem is challenging because i
+In addition to planning to a grasp pose, the planner needs to search for a valid pregrasp pose which gets harder with more clutter around the target object. Additionally, the target cubby creates a narrow passage for the motion planner.
+%
+An example of the preprocessing phase for a single start and goal pair for this domain is depicted in Fig.~\ref{fig:pr} 
+% \begin{figure*}[t]
+%     \centering
+%     \includegraphics[width=0.5\textwidth]{figs/times_sorting.pdf}
+%     \includegraphics[width=0.45\textwidth]{figs/times_shelving.pdf}
+%     \caption{Planning times for two use cases: mail sorting (left) and shelving (right).}
+%     \label{fig:boxplot}
+% \end{figure*}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\textbf{Mail Sorting under Time Constraint:}
+\textbf{Time-Constrained Mail Sorting:}
+%In this domain we add an additional constraint on the robot that both the planning and execution must be completed within an overall timeout $t_\textrm{task}$. Such constraints are often required for robots operating at conveyor belts~\cite{islam2020provably}. This setting makes the planning problem even harder because the manipulation planner not only has to plan fast but also must return a solution that is executable within the remainder of the time. We use $t_\textrm{task} = 2.0s$ in our experiments.
+We add an additional constraint on the robot that both the planning and execution must be completed within an overall timeout $t_\textrm{task}=2.0s$. Such constraints are often required for robots operating at conveyor belts~\cite{islam2020provably}. This setting makes the planning problem even harder because the manipulation planner not only has to plan fast but also must return a solution that is executable within the remainder of the time.
+%We use $t_\textrm{task} = 2.0s$ in our experiments.
+
+\subsection{Real-World Case Study}
+We also tested APP on a pick-and-place task inspired by a kitchen environment, both in simulation and in the real world. We used Isaac Gym~\cite{liang2018gpu} for our simulation tests. The task is shown in Fig.~\ref{fig:real-world}. The goal is for the robot to pick up the red bowl, while avoiding two obstacles: large blue pitchers from the YCB object set~\cite{calli2015ycb}. We approximate the geometry of each pitcher with two spheres (one on top of the other).
+The generation of paths with APP took less than 10 microseconds and was 100\% successful. Object poses were estimated by PoseCNN~\cite{xiang2017posecnn}.
+%The system was implemented using the Robot Operating System (ROS)~\cite{quigley2009ros}.
+On average, perception took $0.22 \pm 0.3$ seconds to return accurate poses; the high variance was due to some obstacle configurations being more challenging than others. For videos, see the supplementary materials.\footnote{Experiment videos: \url{https://bit.ly/34F8LrP}}
+
+\begin{figure}[t]
+    \centering
+    \begin{subfigure}{0.48\textwidth}
+    %   \centering
+        \includegraphics[trim={0.5cm 1.5cm 3cm 0},clip, width=\textwidth]{path_real.png}
+        \caption{}
+        \label{fig:real}
+    \end{subfigure} 
+    \begin{subfigure}{0.48\textwidth}
+    %   \centering
+        \includegraphics[trim={8cm 0.55cm 8cm 0.55cm},clip, width=\textwidth]{path_sim.png}
+        \caption{}
+        \label{fig:sim}
+    \end{subfigure}
+    \caption{
+    Real-world case study in a kitchen environment: 
+     (\subref{fig:real})~Snapshots of a collision-free path genearated by APP in the real world.
+    %
+    (\subref{fig:sim})~Snapshots of a collision-free path in simulation.
+    %
+    }
+\label{fig:real-world}
+\end{figure}
 
 \newpage
 \chapter{CTMP for Conveyor-pickup Task}
@@ -1686,10 +2454,12 @@ Namely, $\Delta \dot{x}$ is the magnitude of the difference of the target object
 
 The new heuristic function is given by
 
-\begin{multline}
- h(s,g) = \max (\Delta t(s,g), \\
+
+$$
+ h(s,g) = \max (\Delta t(s,g),
  \lambda_1 \cdot \textsc{AngleDiff}(s,g) + \lambda_2 \cdot \Delta \dot{x}(s)).
-\end{multline}
+ $$
+
 
 where $\lambda_1$ and $\lambda_2$ are the weighting factor. Intuitively, this additional term guides the search to match the end-effector velocity with $o$'s velocity as the end-effector approaches the object. This increases the likelihood of generating a dynamic primitive that satisfies the kinodynamic constraints of the robot. 
 
@@ -1790,7 +2560,7 @@ The process is illustrated in Fig.~\ref{fig:crp}.
 \begin{algorithm}[t]
 \caption{Plan Root Paths}
 \label{alg:step1}
-    \AlgFontSize
+%    \AlgFontSize
 \begin{algorithmic}[1]
 \Procedure{PlanRootPaths}{$s_{\textrm{start}}, \Guncov$}
 \State $\Psi_{\Sstart} \leftarrow \emptyset$   \Comment{a list of pairs ($\Pi_i, G_i)$}
@@ -1837,7 +2607,7 @@ The process is illustrated in Fig.~\ref{fig:crp}.
 %
 \begin{algorithm}[t]
 \caption{Preprocess}\label{alg:preprocess}
-    \AlgFontSize
+   % \AlgFontSize
 \begin{algorithmic}[1]
 \Procedure{TryLatching}{$s,\Psi_{\Shome}\Guncov,\Gcov$}
 %\State \textbf{Input:} $\Psi_{\Shome}$ \Comment{root paths and goals for $\Shome$ } 
@@ -2123,7 +2893,7 @@ For pseudocode describing our approach see~\ref{alg:query}.
 
 \begin{algorithm}[t]
 \caption{Query}\label{alg:query}  
-    \AlgFontSize
+   % \AlgFontSize
 \hspace*{\algorithmicindent} \textbf{Inputs:} $\calM, \Shome$
 \begin{algorithmic}[1]
 \Procedure{PlanPathByLatching}{$s,g,\pi_{\textrm{curr}}$}
@@ -2257,7 +3027,7 @@ Pertaining to the structure of our problem, the algorithm works under the assump
 
 
 \subsection{CTMP-Completeness}
-We now analyse the algorithm under the CTMP-Completeness criteria described in chapter~\ref{sec:ctmp}
+We now analyse the algorithm under the CTMP-Completeness criteria described in Chapter~\ref{sec:ctmp}
 \vspace{2mm}
 \begin{theorem}
 For any state \Sstart of the robot during execution, provided $t(\Sstart) \leq \Trc$, the algorithm is CTMP-complete.
@@ -2692,618 +3462,6 @@ For the kinodynamic planner, the preprocessing takes about 7 hours. The dynamic 
 While we only performed experiments for a single target object with a single grasp, difference in object geometries and grasps may affect the performance of the planner. Specifically, the number of reachable goals for any given $\Sstart$ would change depending on the difficulty of the motion planning problems that the CTMP algorithm attempts to solve. This would impact the query success rate as well as the preprocessing time of the CTMP algorithm.
 
 \newpage
-\chapter{CTMP for Semi-static Environments}
-\label{sec:icra}
-\section{Overview}
-%% motivate the need of planners for semi-static environments
-In a wide range of environments, be it warehouses, factories or homes, robots share their workspace with humans or other robots. While the obstacle occupancy in such environments is largely fixed or static, yet small regions within these environments may vary in occupancy during operation. We categorise such environments as \emph{semi-structured}. Additionally in these applications robots are often performing repetitive tasks and require fast and reliable motion planning capabilities.
-
-%% use example
-Consider the scenario in Fig.~\ref{fig:cover}. The robot must grasp the bowl while avoiding the pitchers, table and walls.
-%Most of the environment (e.g. table, walls, free space above the table etc.) can be assumed to be known, and since the task of picking up an object from a tabletop is repetitive, some information from previous similar planning queries can be re-used to speedup planning.
-Most of the environment (e.g. table, walls, free space above the table etc.) can be assumed to be known, and since the task is repetitive some information from previous planning queries can be re-used to speedup planning.
- %More commonly used planning algorithms such as RRTs neither exploit the distinction between static and movable obstacles, nor do they take advantage of the repetitive nature of planning problems to speedup planning. 
-Commonly used algorithms such as RRTs~\cite{kuffner2000rrt} neither exploit the distinction between static and movable obstacles nor take advantage of the repetitive nature of planning problems to speedup planning. 
-
-%% existing approaches
-%Preprocessing based methods like PRMs, precompute roadmaps to speedup online planning. They
-Roadmap-based methods like PRMs are either limited to fully static environments or incur considerable overheads in repair operations which they require to handle movable obstacles. While there exists several algorithms that use information from previous similar planning episodes such as Lightning~\cite{berenson2012robot}, E-graphs~\cite{Phillips-RSS-12} etc., their performance also degrades when the past information is invalidated by the changes in the environment. All these methods therefore can not provide fixed-time planning guarantees. 
-
-%% my prior work
-Recently, provably fixed-time motion planning approaches have been proposed for repetitive tasks in fully known environments~\cite{islam2019provable},~\cite{islam2020provably}. They precompute library of paths using the known models of obstacles and other task-specific information. These approaches have been used before for mail-sorting~\cite{islam2019provable} and for grasping objects moving down a conveyor belt~\cite{islam2020provably}. They, however, are also not designed to handle movable obstacles.
-
-\begin{figure}[bt]
-\centering
-\includegraphics[width=\columnwidth]{figs/cover.jpg}
-\caption{Semi-structured tabletop manipulation scenario --- The robot must grasp the bowl while avoiding pitchers and the table itself; the pitchers and bowl may be at any position. The Alternate Paths Planner (APP) guarantees to find solution for any configuration within few microseconds.}
-\label{fig:cover}
-\vskip -0.5cm
-\end{figure}
-
-%% our contribution
-%In this work we aim to extend these recent approaches to be able to handle movable obstacles while still provably fixed-time planning guarantees.
-In this work we extend these approaches to handle movable obstacles while still guaranteeing provably fixed-time planning.
-%key idea of our approach is to generate multiple alternative paths for each planning problem, such that for any configuration of movable obstacles, one of these alternative paths is guaranteed to be traversable.
-The key idea is to generate multiple alternative paths for each planning problem, such that for any configuration of movable obstacles, one path is guaranteed to be traversable.
-One approach to achieve this is to enforce %a constraint
-that these paths are \emph{disjoint}: they are separated enough that no single obstacle configuration can intersect two paths simultaneously.
-To get the aforementioned guarantee, $n$ movable obstacles require generating only $n+1$ fully disjoint paths.
-%However, if $n+1$ disjoint paths cannot be found for the given problem, our approach uses more preprocessing and finds additional paths to provide the guarantee.
-However, if $n+1$ disjoint paths cannot be found for the given problem, we find additional additional paths partially-overlapping paths to provide the same guarantee.
-%We make some simplistic assumptions about the geometry of movable obstacles to provide strong guarantees on the planning time.
-We call this approach \emph{Alternative Paths Planner (APP)}
-
-%APP can be applied to many performance critical real-world robotics use cases such as mail-sorting, conveyor-belt picking, and shelving. 
-APP can be applied to performance-critical real-world use cases such as mail-sorting, conveyor-belt picking, and shelving. 
-For scenarios with multiple movable obstacles, we demonstrate microsecond-scale lookup times and achieve a 100\% success rate. We include experimental results from three domains, compare with state-of-the-art existing approaches and validate our approach with a real-world case study. 
-
-\section{Algorithmic Framework}
-%\subsection{Problem Setup and Assumptions}
-\label{subsec:setup}
-%Let \calX be the configuration space of the robot. Let $\Sstart \in \calX$ be a fixed start configuration of the robot and \calG be the goal region. 
-Let \calX be the configuration space of the robot, $\Sstart \in \calX$ be a fixed start configuration of the robot, and \calG be the goal region. 
-%\calG could be defined in the configuration space \calX i.e $\calG \subset \calX$ 
-\calG could be defined in the configuration space \calX (i.e $\calG \subset \calX$) or it could be under-defined, e.g., as the position in $\mathbb{R}^3$ or pose in $SE(3)$ of a target object or the robot end-effector. \calG is discretized to have a finite set of goals $G$. 
-
-Let \calW be a 3D semi-static world in which the robot operates. \calW contains a fixed set of movable obstacles $\calO = \{o_1, o_2, o_3,...,o_n\}$, that occupy $\calW_\calO \subset \calW$, and can be displaced in between different planning queries. A movable obstacle $o_i$ can attain any configuration within a space $\calQ(o_i)$ which is discretized into a set of configurations $Q(o_i)$. Additionally, \calW has a partial occupancy $\calW_S$, which is static i.e $\calW_S = \calW \backslash \calW_\calO$. The motion planning problem is to find a collision-free path for the robot operating in \calW from \Sstart to any goal $g \in G$.
-
-% \begin{assumption}
-% \label{assum:1}
-% We assume that all obstacles $o_i \in \calO$ are identical in geometry.
-% \end{assumption}
-
-\subsection{Approach}
-%In this work, we aim to develop an algorithm that can provide provable bounds on the planning time for each planning query.
-In this work, we describe an algorithm that provides provable bounds on the planning time for each planning query, where these bounds are small enough to guarantee real-time performance.
-%Furthermore we want the bounds to be small to guarantee real-time performance.
-%Before we describe our approach, we begin by briefly describing a strawman algorithm which solves the aforementioned problem with the provable bounded-time guarantee but is practically prohibitive due to its memory and computational requirements.
-We begin by briefly describing a strawman algorithm which solves the aforementioned problem with the provable bounded-time guarantee but is practically prohibitive due to its memory and computational requirements.
-%This will also prepare the ground to describe our method which also provides bounded-time guarantee but with minimal memory and computational load.
-
-
-\subsubsection{Strawman Algorithm}
-Assume that we have access to a motion planner \calP that can be used offline to find feasible paths for the given planning problems. The naive approach
-%of providing bounded-time guarantee
-is to precompute and store paths for all possible planning problems using \calP %owing to the problem setup described in Sec.~\ref{subsec:setup},
-offline in a preprocessing stage.
-%, and at 
-%Then, at query time a lookup table is used to answer any query in bounded time. Specifically, it requires computing the lookup table
-At query time, a lookup table can answer any query in bounded time. Specifically, we precompute the lookup table
-$$
-\calM : G \times Q(o_1) \times Q(o_2) \times ... \times Q(o_n) \rightarrow \{\pi_1, \pi_2,\pi_3,...\}
-$$
-
-\noindent that maps every configuration of goal and the $n$ obstacles to a unique path $\pi_i$ resulting in $|G|.|Q(o_1)|.|Q(o_2)|....|Q(o_n)|$ paths. Assuming that each object $o_i$ can be in the same set of configurations in $\calW$, the space complexity then is $O(|G|.|Q(o_i)|^{n})$ which is exponential in the number of movable objects in \calO.
-%This complexity clearly is severely restrictive in practice.
-
-\subsubsection{Proposed Approach}
-While the strawman algorithm provides bounded-time guarantees, its memory and precomputation load is prohibitive for practical purposes. To this end we propose an algorithm that can provide bounded-time guarantees but requires significantly smaller resources in practice.
-
-Our key idea is that, for the given \Sstart and $g$, instead of precomputing path for every possible configuration of obstacles \calO, our algorithm systematically precomputes a small set of paths $\Pi_g$ from \Sstart to $g$ with the guarantee that for any possible configuration of \calO in \calW, at least one path $\pi \in \Pi_g$ will be collision free. At query time, this path can be looked up efficiently in provably bounded time.
-
-\subsection{Algorithm Overview}
-Before we describe the approach, we introduce some terminology.
-
-\begin{definition}[Envelope]
-\label{def:envp}
-For a path $\pi$, an envelope is a set of all obstacle configurations $e_\pi \subset Q(o_1) \cup Q(o_2) \cup...\cup Q(o_n)$, that collide with any robot state $s \in \pi$, except \Sstart, and are not within $\epsilon$ distance of $\textsc{Proj}(g)$
-\end{definition}
-
-\noindent where $\textsc{Proj}(g)$ is the projection of $g$ in $\mathbb{R}^3$ and $\epsilon$ is in Euclidean space. Fig.~\ref{fig:envp} illustrates an envelope with a simple example.
-The implementation details of envelope construction for the manipulation domain are discussed in Sec.~\ref{sec:impl_details}
-
-\begin{figure}[bt]
-\centering
-% \includegraphics[width=\columnwidth]{figs/envp.pdf}
-\includegraphics[width=\columnwidth]{figs/envp_grid.pdf}
-\caption{Depiction of an envelope for a single movable obstacle $o$: the blue rectangles represent the robot states in $SE(2)$ along the path $\pi$, the red circle is the movable obstacle $o$ that can have any position in $Q(o) \in \mathbb{R}^2$ and the small circles show positions $q(o)$ for which $o$ collides with $\pi$ and thus constitute the envelope $e_\pi$}
-\label{fig:envp}
-% \vskip -0.5cm
-\end{figure}
-
-\begin{definition}[Disjoint paths]
-\label{def:disjointness}
-The paths $\pi_1,\pi_2,...,\pi_n$ are disjoint if their corresponding envelopes $e_{\pi_1},e_{\pi_2},...e_{\pi_n}$ are disjoint sets.
-\end{definition}
-
-%For simplicity, consider a simple planning problem of finding a collision-free path from \Sstart to a goal $g \in G$ in the presence of a single movable obstacle $o$ and some static occupancy $\calW_S$.
-Consider finding a collision-free path from \Sstart to a goal $g \in G$ in the presence of a single movable obstacle $o$ and some static occupancy $\calW_S$.
-We first find a path $\pi_1$ from \Sstart to $g$ using \calP while avoiding collisions with only $\calW_S$.
-Next we construct an envelope $e_{\pi_1}$ around $\pi_1$, where $e_{\pi_1}$ (by Def.~\ref{def:envp}) is the set of all configurations that $o$ can take that invalidate $\pi_1$.
-If $e_{\pi_1}$ is non-empty, we attempt to find a second path $\pi_2$ that avoids collisions with $\calW_S$ as well as with the occupancy of $e_{\pi_1}$.
-%This gives us two disjoint paths $\pi_1$ and $\pi_2$ (since $e_{\pi_2}$ and $e_{\pi_1}$ would be disjoint by Def.~\ref{def:disjointness}).
-This gives us two disjoint paths $\pi_1$ and $\pi_2$, by Def.~\ref{def:disjointness}.
-%These two paths constitute the minimal set of paths with the guarantee that for any configuration $q(o) \in Q(o)$, one of these two paths will be collision free.
-These two paths constitute the minimal set of paths with the guarantee that for any configuration $q(o) \in Q(o)$, one path will be collision free.
-%At query time given any configuration $q(o)$, we can check if it lies within $e_{\pi_1}$ or not and based on that, use the path $\pi_2$ or $\pi_1$ respectively. By storing envelopes as sets implemented using hash tables, we can check it in constant time~\cite{czech1997perfect}.
-At query time given any configuration $q(o)$, we can check if it lies within $e_{\pi_1}$ or not and use the path $\pi_2$ or $\pi_1$ respectively. By storing envelopes as sets implemented using hash tables, we can check it in constant time~\cite{czech1997perfect}. Note that if $e_{\pi_1}$ is empty, we only require a single path $\pi_1$.
-
-\textbf{Extending to $n$ movable obstacles:} A single movable obstacle, requires at most two disjoint paths. Extending to $n$ objects would require at most $n+1$ disjoint paths. Therefore, for the scenarios in which the required number of disjoint paths exists and \calP can find them within a given allowed planning time, the computational complexity of the preprocessing phase grows linearly with number of movable obstacles i.e $O(|\calO|)$.
-If \calP fails to find the required number of disjoint paths, however,
-%which is possible if the paths do not exist or \calP cannot find them in a finite preprocessing time,
-then this method is incomplete as is, and it would require more preprocessing efforts to find more paths to satisfy the criterion that for any possible configuration of the set of obstacles \calO, at least one of the paths from the set is guaranteed to be collision free. %The following section discusses the details of the complete preprocessing and query algorithms.
-
-\subsection{Algorithm Details}
-%We now describe the two phases of our algorithm, i.e., the preprocessing and the query phases.
-We now describe the two phases of our algorithm: the preprocessing and the query phases.
-
-\subsubsection{Preprocessing}
-The preprocessing algorithm is described in Alg.~\ref{alg1} and is illustrated in Fig.~\ref{fig:illustration}. It starts with finding the first collision-free path $\pi_1$ from \Sstart to the given goal $g \in G$ in $\calW_S$. For each computed path $\pi_j$, the algorithm maintains the set of envelopes $\calE_{\pi_j}$ that were avoided while computing $\pi_j$. For the first path $\pi_1$, the set $\calE_{\pi_1}$ is empty since \calP only considers $\calW_S$ for this step. The algorithm then runs a loop for $n=|\calO|$ iterations, attempting to find $n$ more mutually disjoint paths (loop at line~\ref{alg1:l1}). Another loop at line~\ref{alg1:l2} is needed for the case when $n+1$ disjoint paths do not exist and therefore, more than one paths are computed in a single iteration of loop at line~\ref{alg1:l1}.
-In every iteration of the loop at line~\ref{alg1:l2}, the algorithm first constructs the envelope $e_{\pi_j}$ around the path $\pi_j$ found in the previous iteration of loop at line~\ref{alg1:l1}. Next, $\pi_j'$ is computed while avoiding collisions with the occupancy of the set of envelopes $\calE_{\pi_j}'$, which is the union of $e_{\pi_j}$ and the envelopes in $\calE_{\pi_j}$. $\calE_{\pi_j}'$ thus constitutes the set of avoided envelopes for $\pi_j'.$
-
-For the case when \calP fails to find the disjoint path at any iteration of loop at line~\ref{alg1:l1}, the algorithm bisects one of the envelopes (line~\ref{alg1:bisect} and Alg.~\ref{alg2}) that \calP attempted to avoid, resulting in two sets of envelopes (each one containing a bisected envelope along with the remaining envelopes). \calP then tries to find paths around the occupancy of envelopes in each of the two sets independently. Note that this process (Alg.~\ref{alg2}) repeats recursively until either \calP successfully finds paths around all the newly created sets of envelopes or until further recursion is not possible. The latter occurs in the worst case, when the algorithm recurses down to the deepest level, where each envelope contains individual obstacle configurations. Owing to the structure of these envelopes, we implement them as binary-trees. Because of this envelope bisection, the algorithm may compute more than one path in a single iteration of loop at line~\ref{alg1:l1}. It therefore maintains a set of paths $\Pi_i$ for each iteration and attempts to compute disjoint paths for all paths $\pi_j \in \Pi_i$ in the following iteration.
-
-The preprocessing algorithm (Alg.~\ref{alg1}) returns a database of paths $\Pi_g = \Pi_1 \cup \Pi_2 \cup ... \cup \Pi_{n+1}$ from \Sstart to a goal $g$ with the guarantee that for any possible configuration of obstacles \calO, one of the paths $\pi \in \Pi_g$ is collision free. To cover the full goal region $G$, Alg~\ref{alg1} is called for each $g \in G$ in the preprocessing phase.
-
-\begin{figure*}[t]
-    \centering
-    \begin{subfigure}{0.48\textwidth}
-    %   \centering
-        \includegraphics[width=\textwidth]{2.pdf}
-        \caption{}
-        \label{fig:p1}
-    \end{subfigure} 
-    \begin{subfigure}{0.48\textwidth}
-    %   \centering
-        \includegraphics[width=\textwidth]{3.pdf}
-        \caption{}
-        \label{fig:p2}
-    \end{subfigure}
-    \begin{subfigure}{0.48\textwidth}
-    %   \centering
-        \includegraphics[width=\textwidth]{4.pdf}
-        \caption{}
-        \label{fig:p3}
-    \end{subfigure}
-    \begin{subfigure}{0.48\textwidth}
-    %   \centering
-        \includegraphics[width=\textwidth]{5.pdf}
-        \caption{}
-        \label{fig:p4}
-    \end{subfigure}
-        \begin{subfigure}{0.48\textwidth}
-    %   \centering
-        \includegraphics[width=\textwidth]{6.pdf}
-        \caption{}
-        \label{fig:p5}
-    \end{subfigure}
-        \begin{subfigure}{0.48\textwidth}
-    %   \centering
-        \includegraphics[width=\textwidth]{7.pdf}
-        \caption{}
-        \label{fig:p6}
-    \end{subfigure}
-        \begin{subfigure}{0.48\textwidth}
-    %   \centering
-        \includegraphics[width=\textwidth]{8.pdf}
-        \caption{}
-        \label{fig:p7}
-    \end{subfigure}
-        \begin{subfigure}{0.48\textwidth}
-    %   \centering
-        \includegraphics[width=\textwidth]{9.pdf}
-        \caption{}
-        \label{fig:p8}
-    \end{subfigure}
-    \caption{
-    Illustration of preprocessing steps in a 2D environment with two movable obstacles $\{o_1,o_2\} \in \calO$ for a point robot. APP plans a set of paths from \Sstart to $g$ such that for any configuration of $o_1,o_2$ at least one of the paths from the set is collision free. Static obstacles $\calW_S$ are shown in green and $o_1,o_2$ are depicted as circles. The dotted region depicts $\calQ(o_i)$ (identical for $o_1,o_2$). Namely, $o_1,o_2$ are confined within the dotted region.
-     (\subref{fig:p1})~APP finds the first path $\pi_1$ avoiding $\calW_S$ only
-    %
-    (\subref{fig:p2})~Constructs envelope $e_{\pi_1}$ around $\pi_1$. The dark shaded region shows $e_{\pi_1}$ and the light region shows its occupancy.
-    %
-    (\subref{fig:p3})~Finds second path $\pi_2$ avoiding $e_{\pi_2}$. Since APP successfully finds two disjoint paths at this step, these paths are sufficient to avoid any configuration of $o_1$.
-    %
-    (\subref{fig:p4})~Constructs envelope $e_{\pi_2}$ around $\pi_2$.
-    %
-    (\subref{fig:p5})~Attempts to find the third disjoint path but fails and bisects $e_{\pi_1}$ into $e^l$ and $e^r$.
-    %
-    (\subref{fig:p6})~Finds path $\pi_3$ around $e^l$ and $e_{\pi_2}$
-    %
-    (\subref{fig:p7})~Finds path $\pi_4$ around $e^r$ and $e_{\pi_2}$ 
-    %
-    (\subref{fig:p8})~Set of paths needed to avoid any configuration of $o_1,o_2$.
-    }
-    
-    %
-    \label{fig:illustration}
-    % \vspace{-4mm}
-\end{figure*}
-
-\newlength{\textfloatsepsave}
-\setlength{\textfloatsepsave}{\textfloatsep}
-\setlength{\textfloatsep}{0pt}
-\begin{algorithm}[t]
-\caption{\textsc{Preprocess($g$)}} \label{alg1}
-% \AlgFontSize
-
-\hspace*{\algorithmicindent} \textbf{Inputs:} $\Sstart, \calW_S, \calO$
-
-\hspace*{\algorithmicindent} \textbf{Output:} $\Pi_g$
-\begin{algorithmic}[1]
-\State $\pi_1 \leftarrow$ \textsc{FindPath}($\Sstart,g,\calW_S$)
-\State $\calE_{\pi_1} \leftarrow \emptyset$
-\State \textsc{SetAvoidedEnvelopesOfPath($\pi_1,\calE_{\pi_1}$)}
-\State $\Pi_1 \leftarrow \{\pi_1\}$
-% \State $\calE \leftarrow \emptyset$
-\State $\Pi_g \leftarrow \Pi_1$
-\For {$i = 1$ to $n$}  \Comment{$n = |\calO|$}  \label{alg1:l1}
-    \State $\Pi_{i+1} \leftarrow \emptyset$
-    \For{each $\pi_j \in \Pi_i$} \label{alg1:l2}
-    \State $e_{\pi_j} \leftarrow$ \textsc{ConstructEnvelope($\pi_j$)}
-    % \State $\calE \leftarrow \calE \cup \{e\}$
-    % \State $\Pi_{i+1} \leftarrow$ 
-    % \For{each $e \in \calE_i$}
-    \State \textbf{If} $e_{\pi_j} = \emptyset$ \textbf{skip to next iteration}
-        \State $\calE_{\pi_j} \leftarrow$ \textsc{GetAvoidedEnvelopesOfPath}($\pi_j$)
-        \State $\calE_{\pi_j'} \leftarrow \calE_{\pi_j} \cup \{e_{\pi_j}\}$
-        % \State $\pi_j' \leftarrow$ \textsc{FindPathAroundEnvelopes}($\calE_{\pi_j'}$)
-        \State $\pi_j' \leftarrow$ \textsc{FindPath}($\Sstart,g,\calW_S,\calE_{\pi_j'}$) \Comment{Avoiding $\calE_{\pi_j'}$}
-        \If{success}
-            \State \textsc{SetAvoidedEnvelopesOfPath($\pi_j', \calE_{\pi_j'}$)}
-            % \State \textbf{insert} $<e_{\pi_j}, \pi_j>$ in $\calD_g$
-            \State $\Pi_{i+1} \leftarrow \Pi_{i+1} \cup \{\pi_j'\}$
-        \Else
-            \State $\Pi_{i+1} \leftarrow \Pi_{i+1} \cup \textsc{BisectAndFindMorePaths}(\calE_{\pi_j'})$ \label{alg1:bisect}
-            % \State update $\calE_i$ in \calE
-            % \State $\Pi \leftarrow \Pi \cup \Pi_{i+1}$
-    \EndIf
-    \EndFor
-    \State $\Pi_g \leftarrow \Pi_g \cup \Pi_{i+1}$
-\EndFor
-% \State $\calD_g = \Pi_1 \cup \Pi_2 \cup ... \cup \Pi_{n+1}$
-\end{algorithmic}
-\end{algorithm}
-\setlength{\textfloatsep}{\textfloatsepsave}
-
-
-\setlength{\textfloatsepsave}{\textfloatsep}
-\setlength{\textfloatsep}{0pt}
-\begin{algorithm}[t]
-\caption{\textsc{BisectAndFindMorePaths($\calE$)}} \label{alg2}
-% \AlgFontSize
-\begin{algorithmic}[1]
-    \State $\Pi \leftarrow \emptyset$
-    % \State $\calE_\pi \leftarrow$ \textsc{GetAvoidedEnvelopesOfPath}($\pi$)
-    % \State $\calE_\pi \leftarrow \calE_\pi \cup \{e\}$
-    \State $e \leftarrow \calE$.pop()     \Comment{pop an envelope to bisect}
-    \label{alg2:pop}
-    \If {\textsc{CheckSingleton}($e$)}    \Comment{contains one position}
-        \State \textbf{return} $\emptyset$  \Comment{no further bisection possible}
-    \EndIf
-    \State $e^{l},e^{r} \leftarrow$ \textsc{BisectEnvelope($e$)} \label{alg:2:bisect}
-    \State $\calE_{\pi_l} \leftarrow \calE \cup \{e^l\}$
-    \State $\calE_{\pi_r} \leftarrow \calE \cup \{e^r\}$
-    \For {each $\calE_{\pi_i} \in \{\calE_{\pi_l},\calE_{\pi_r}\}$}
-    
-        % first path
-        % \State $\calE_{\pi_b} \leftarrow \calE \cup \{e^b\}$
-        \State $\pi_i \leftarrow$ \textsc{FindPath}($\Sstart,g,\calW_S,\calE_{\pi_i'}$) \Comment{Avoiding $\calE_{\pi_i'}$}
-        \If{success}
-            \State \textsc{SetAvoidedEnvelopesOfPath($\pi_i, \calE_{\pi_i}$)}
-            % \State \textbf{insert} $<e_{\pi_j}, \pi_j>$ in $\calD_g$
-            \State $\Pi \leftarrow \Pi \cup \{\pi_i\}$
-        \Else
-            \State $\Pi \leftarrow \Pi \cup \textsc{BisectAndFindMorePaths}(\calE_{\pi_i})$
-        \EndIf
-    \EndFor
-    % \State $\calE_s \leftarrow \calE_s \cup \{\tau_{a},\tau_{b}\}$
-    \State \textbf{return} $\Pi$
-    
-    % \For {}
-% \EndFor
-\end{algorithmic}
-\end{algorithm}
-\setlength{\textfloatsep}{5pt}
-
-\subsubsection{Query}
-A query is comprised of a goal $g \in G$ (\Sstart is fixed) and obstacle configurations $q(o_1) \in Q(o_1), q(o_2) \in Q(o_2),..., q(o_n) \in Q(o_n)$. The query phase first looks up the datastructures stored for the queried $g$. It then loops over the set of paths $\Pi_g$ until it finds a collision free path. It is important to note that while doing so, it does not require any collision checking, which typically is the most computationally expensive operation in motion planning. Instead, it uses the envelope $e_{\pi_j}$ of each path $\pi_j$ to find the collision free path. The following data structures are stored for the query phase to efficiently return collision free paths.
-\begin{center}
-\begin{tabular}{l}
-    $\calM : \; [G \rightarrow \{\calD_{g_1}, \calD_{g_2},...\}]$ \\
-    $\calD_{g_i} : \; <\{e_{\pi_1},e_{\pi_2},...\} : \{\pi_1,\pi_2,...\}>$ \Comment{for each $g_i \in G$}\\
-    % $\calM_e : Q(o_i) \rightarrow \{e_{\pi_1},e_{\pi_2},...\}$ \Comment{for each envelope}\\
-\end{tabular}{}
-\end{center}
-
-Namely, $\calM$ is a lookup table that maps a goal~$g_i \in G$ to a dictionary~$\calD_{g_i}$ where ~$\calD_{g_i}$ contains $<e_{\pi_j},\pi_j>$ pairs where $\pi_j \in \Pi_{g_i}$. The query phase is a straight-forward two step process; in the first step, the dictionary~$\calD_{g_i}$ is fetched for the queried $g_i$ from $\calM$. In the second step, the algorithm loops through all the pairs in $\calD_{g_i}$ to search for an envelope $e_{\pi_j}$ that \emph{does not} contain any of the obstacle configurations i.e. $e_{\pi_j} | q(o_1),q(o_2),...,q(o_n) \notin e_{\pi_j}$ in the given planning query. By construction of the preprocessing algorithm, atleast one of the envelopes in $\calD_{g_i}$ is guaranteed to satisfy this condition.  To efficiently check whether a configuration is contained in an envelope or not, we store envelopes as hash tables, which allows the algorithm to perform this check in constant time.
-
-\section{Analysis}
-\subsection{Time Complexity}
-\label{sec:complexity_app}
-\begin{lemma}[Fixed-time query]
-The query time of APP is upper-bounded by a (small) time limit $t_{\textrm {query}}$.
-\label{lemma1}
-\end{lemma}
-\begin{proof}[Sketch of Proof]
-The query phase includes a lookup operation on \calM, running a loop over the set of alternative paths $\Pi_g$ to the queried $g$ and a nested loop through \calO which also only involves lookup operations since the envelopes are stored as sets. Since with perfect hashing (~\cite{czech1997perfect}), the lookup operations can be performed in constant time. The overall complexity thus is bounded and is given by $O(|\Pi_g|\cdot |\calO|)$ which bounds $t_{\textrm {query}}$.
-\end{proof}
-
-\textbf{Special case:} When all paths in $\Pi_g$ are disjoint, then we have that $|\Pi_g| \leq n+1$ and so the complexity of the query phase becomes $O(|\calO|^2)$
-
-In practice we have that $|\Pi_g| \ll Q(o_1) \times Q(o_2) \times ... \times Q(o_n)$ (number of paths required for the naive approach) and therefore, $t_{\textrm {query}}$ is very small.
-
-\subsection{Correctness}
-\begin{lemma}
-\label{lemma:complete_app}
-If the offline motion planner \calP can find a collision-free path from \Sstart to a $g \in G$ in a (large) timeout $t_{\textrm preprocess}$, then APP is guaranteed to generate a path for the same planning problem in time $t_{\textrm {query}}$.
-\end{lemma}
-\begin{proof}[Sketch of Proof]
-For the special case when all paths in $\Pi_g$ are disjoint, the proof follows from Def.~\ref{def:disjointness} because, since the envelopes of paths in $\Pi_g$ are disjoint sets, no obstacle configuration $q(o_i)$ can intersect with more than one path in $\Pi_g$. Since the algorithm computes $n+1$ paths if required for $n$ obstacles, at least one path is collision free.
-
-For the general case where not all paths in $\Pi_g$ are necessarily disjoint, the lemma can be proven by assessing the recursive bisection procedure in APP. In the Alg.~\ref{alg1}, \calP attempts to find the ($n+1$)th path which avoids $n$ envelopes and bisects one of the $n$ envelopes if \calP fails within $t_{\textrm {preprocess}}$. The bisection occurs recursively until either the path is computed for every leaf envelope or further recursion is not possible, thus covering all possible configurations of obstacles in \calO. Since APP uses \calP with the timeout $t_{\textrm {preprocess}}$ to solve each problem, it guarantees to have precomputed a valid path for any problem that \calP can solve in $t_{\textrm {preprocess}}$.
-Furthermore from Lemma~\ref{lemma1}, we have that the query time is guaranteed to be within $t_{\textrm {query}}$.
-\end{proof}
-
-\subsection{CTMP-Completeness}
-We now analyse the algorithm under the CTMP-Completeness criteria described in chapter~\ref{sec:ctmp} for the special case described in Sec.~\ref{sec:complexity_app} when all paths in $\Pi_g$ are disjoint. For the general case, we observe that $|\Pi_g|$ is unbounded (the worst case analysis of $|\Pi_g|$ is outside the scope of this thesis). However, for the special case, we showed that the complexity of the query phase becomes $O(|\calO|^2)$. In addition, if we make the assumption that the maximum number of movable obstacles $\calO$ is a constant, the complexity then becomes $O(1)$.
-%
-Since the algorithm requires~$O(1)$ time to generate the full path, it would also require~$O(1)$ time to get the next action along the path. Therefore, $T_\textrm{const} (< \Tbound)$ is constant-time bounded. Furthermore, we select the motion planner \calP such that the planned paths contain no cycles. Hence from lemma~\ref{lemma:complete_app} and by Def.~\ref{def:complete}, we have the following theorem.
-
-\vspace{2mm}
-\begin{theorem}
-	For the case when all paths in $|\Pi_g|$ are disjoint, the algorithm is CTMP-Complete under the assumption that $|\calO|$ is upper-bounded by a constant.
-\end{theorem}
-
-\section{Implementation Details} % : Motion Planning for Robot Arm}
-%In this section we cover two main components of our approach specifically for the motion planning problem for a high-DoF robot arm, (1) envelope construction and (2) envelope bisection.
-In this section we cover three main components of our implementation for the motion planning problem of a high-DoF robot arm, (1) envelope construction, (2) envelope bisection and (3) computing envelope occupancy.
-%
-Our implementation approximates the geometry of the movable obstacles with spheres. This approximation restricts the dimensionality of $Q(o_i)$ to $\mathbb{R}^3$.
-
-
-\subsection{Envelope Computation using Distance Field}
-\label{sec:impl_details}
-The naive approach of computing an envelope $e_\pi$ around a path $\pi$ (recall Def.~\ref{def:envp}) requires collision checking all obstacle configurations with each robot state $s \in \pi$. This can be very expensive for a large number of configurations that the obstacles can have.
-% To optimize this computation, we approximate an obstacle $o_i$ with a sphere of radius $r_i$, which allows us to efficiently perform this computation using a distance field.
-% Recall Def.~\ref{def:envp} of the envelope. The naive approach of constructing an envelope $e_\pi$ for a path $\pi$ is to make use of a collision checker for the robot and find the set of all configurations of all obstacles $o_i \in \calO$ that collide with any configuration of the robot along~$\pi$. This would require~$|\pi| \times Q(o_1) \times Q(o_2) \times ... \times Q(o_n)$ collision checks, where $|\pi|$ is the length of $\pi$. This clearly is prohibitive to compute, even offline.
-%
-% To optimize for the preprocessing computation, we make the following simplistic assumption.
-%
-% % \begin{assumption}
-% % \label{assum:1}
-% % We assume that all obstacles $o_i \in \calO$ are identical in geometry.
-% % \end{assumption}
-%
-% % For the naive approach, this now requires~$|\pi| \times Q(o_i)$ collision checks which still is not affordable. To this end we make another assumption~\ref{assum:2}.
-%
-% \begin{assumption}
-% \label{assum:2}
-% We approximate the geometry of each obstacles $o_i \in \calO$ by a sphere of radius $r_i$.
-% \end{assumption}
-%
-% This allows us to use a method for envelope construction that does not require the expensive collision checking. With the spherical approximation, we now refer to obstacle configurations as positions in the 3D world.
-%
-Instead, the envelope is constructed in a simple two step process.
-%\begin{enumerate}
-First, the path $\pi$ is voxelized (using the collision model of the robot) and added to an occupancy grid.
-% This is done by converting the collision model of the robot at each configuration $s \in \pi$ to voxels and inserting them in the occupancy grid.
-Second, 
-to compute the positions of each $o_i \in \calO$ that collide with $\pi$, the occupancy grid is inflated by the radius~$r_i$ of $o_i$, (approximating an obstacle $o_i$ with a sphere of radius $r_i$) which is efficiently done by using a signed distance field.
-%The method iterates through all cells in the occupancy grid and fills the ones which are at most~$r_i$ distance away from the occupied cells.
-%
-The intersection of the set of discrete positions of the occupied cells with $Q(o_i)$, constitutes $e_{\pi}$.
-%\end{enumerate}
-%
-To allow computing disjoint paths, following Def.~\ref{def:envp}, the obstacle positions that collide with \Sstart or are within a small distance $\epsilon$ from the goal position are excluded from $e_\pi$. This enforces an assumption that an obstacle is not placed within $\epsilon$ distance from the goal position.
-% By the end of this two step process, the cells that are occupied constitutes~$e_\pi$, i.e. the discrete obstacle positions corresponding to each of these cells, collide with $\pi$.
-% (since we assume the same geometrical approximation for all $o \in \calO$)
-
-\subsection{Envelope Bisection}
-The envelope bisection refers to splitting an envelope~$e$ into two sub-envelopes~$e_l$ and $e_r$ (see Alg.~\ref{alg2} line~\ref{alg:2:bisect}). Several schemes could be used to make this split. In our implementation, we split the envelope along either of the three planes $x=x_c, y=y_c$ or $z=z_c$. where the $x_c,y_c$ and $z_c$ are the means of the $x,y$ and $z$ components respectively of all positions in the envelope $e$ to be bisected. Among the three axes, we pick the axis that has the largest span of positions. As described earlier, each envelope is implemented as a binary tree and this bisection results in creation of two children~$e_l$ and~$e_r$ for the parent~$e$ in this binary tree. Note that we remove subscripts for paths once the envelope is bisected since the bisected envelopes no more follow Def.~\ref{def:envp}.
-%
-Alg.~\ref{alg2} also makes a choice at line~\ref{alg2:pop} for the envelope to be bisected from the input set of envelopes \calE. While this decision does not affect the properties of the algorithm, different heuristics can be used for this choice as well. In our implementation, we simply select the largest envelope for bisection.
-
-\subsection{Computing Envelope Occupancy}
-This step corresponds to an implementation detail within procedure \textsc{FindPath} in Alg.~\ref{alg1}. In order to find a path around the set of envelopes \calE, the joint occupancy of all envelopes in \calE is computed. To do so, for each obstacle $o_i$, all of its discrete positions in \calE are added to an empty occupancy grid, followed by the inflation of the occupancy grid (as described earlier) by the radius $r_i$ of the corresponding obstacle $o_i$. The joint occupancy of all these grids constitutes the occupancy of \calE.
-%
-%
-\footnote{In our experiments, we consider all obstacles of the same sizes. In that case, a single inflation operation is needed, each for the envelope construction and computing envelope occupancy steps.}
-
-\begin{figure*}[t]
-    \centering
-    \begin{subfigure}{0.48\textwidth}
-    %   \centering
-        \includegraphics[trim={8cm 0 10cm 1cm},clip, width=\textwidth]{path1.png}
-        \caption{}
-        \label{fig:pr1}
-    \end{subfigure} 
-    \begin{subfigure}{0.48\textwidth}
-    %   \centering
-        \includegraphics[trim={8cm 0 10cm 1cm},clip, width=\textwidth]{path2.png}
-        \caption{}
-        \label{fig:pr2}
-    \end{subfigure}
-    \begin{subfigure}{0.48\textwidth}
-    %   \centering
-        \includegraphics[trim={8cm 0 10cm 1cm},clip, width=\textwidth]{path3.png}
-        \caption{}
-        \label{fig:pr3}
-    \end{subfigure}
-    \begin{subfigure}{0.48\textwidth}
-    %   \centering
-        \includegraphics[trim={8cm 0 10cm 1cm},clip, width=\textwidth]{path4.png}
-        \caption{}
-        \label{fig:prq}
-    \end{subfigure}
-    \caption{
-    Illustration of the preprocessing steps for the mail-sorting environment with two movable obstacles on a tabletop for a single start and goal pair.
-     (\subref{fig:pr1})~APP finds the first path avoiding $\calW_S$ only.
-    %
-    (\subref{fig:pr2})~Constructs envelope around first path and finds the second path avoiding the first envelope.
-    %
-    (\subref{fig:pr3})~Constructs a second envelope around the second path and finds the third path avoiding the two envelopes.
-    %
-    (\subref{fig:prq})~At query time, given a random configuration of movable obstacles, APP looks up a valid path~(second path, Fig.~\subref{fig:pr2}) among the set of precomputed paths.
-    }
-    %
-    \label{fig:pr}
-    % \vspace{-4mm}
-\end{figure*}
-
-\section{Experimental Results}
-
-\begin{table*}[tbh!]
-\footnotesize
-\begin{center}
-\begin{adjustbox}{angle=-90}
-\begin{tabular}{|r|r||c|c|c|c|c|c|c|c|c|}
-\hline
-\multicolumn{2}{|l|}{} & \multicolumn{3}{c|}{Shelving} & \multicolumn{3}{c|}{Sorting} & \multicolumn{3}{c|}{Sorting (time constrained)} \\
-\multicolumn{2}{|l|}{} & \multicolumn{3}{c|}{\scriptsize{[248 goals]}} & \multicolumn{3}{c|}{\scriptsize{[680 goals]}} & \multicolumn{3}{c|}{\scriptsize{[680 goals]}} \\
-\multicolumn{2}{|r|}{No. of Obstacles} & 1 & 2 & 3 & 1 & 2 & 3 & 1 & 2 & 3 \\ \hline\hline
-%%%%%%%%%%%%%%%%%%%  Success Rates
-\multirow{7}{*}{\rotatebox[origin=c]{90}{Success Rate [\%]}}
-& \textbf{APP}  & \textbf{100}  & \textbf{100}  & \textbf{100}  & \textbf{100}  & \textbf{100}  & \textbf{100}  & \textbf{100}  & \textbf{100}  & \textbf{100} \\ \cline{2-11}
-& Lightning~\cite{berenson2012robot}  & 94  & 95  & 97  & \textbf{100}  & \textbf{100}  & \textbf{100}  & 97  & 96  & 75 \\ \cline{2-11}
-& E-Graphs~\cite{Phillips-RSS-12}  & 20  & 15  & 14  & 89  & 89  & 81  & 50  & 45  & 41 \\ \cline{2-11}
-& RRTConnect~\cite{kuffner2000rrt}  & 96  & 95  & 97  & \textbf{100}  & \textbf{100}  & \textbf{100}  & 19  & 14  & 11 \\ \cline{2-11}
-& LazyPRM~\cite{kavraki2000path}  & 46  & 34  & 23  & 98  & 99  & 93  & 46  & 35  & 28 \\ \cline{2-11}
-& BIT\textsuperscript{\textasteriskcentered}~\cite{gammell2020batch}  & 92  & 75  & 64  & 84  & 81  & 75  & 37  & 42  & 40 \\ \cline{2-11}
-% & InformedRRT\textsuperscript{\textasteriskcentered}~\cite{gammell2018informed}  & 6  & 11  & 12  & \textbf{100}  & \textbf{100}  & \textbf{100}  & 25  & 23  & 16 \\ \cline{2-11}
-& RRT\textsuperscript{\textasteriskcentered}~\cite{karaman2011sampling}  & 9  & 12  & 17  & \textbf{100}  & \textbf{100}  & \textbf{100}  & 20  & 15  & 25 \\ \hline\hline
-%%%%%%%%%%%%%%%%%%%  Planning Times
-\multirow{14}{*}{\rotatebox[origin=c]{90}{Mean Time (std, max) [ms]}}
-& \multirow{2}{*}{\textbf{APP}}  & \textbf{.005}  & \textbf{.006}  & \textbf{.006}  & \textbf{.005}  & \textbf{.005}  & \textbf{.007}  & \textbf{.005}  & \textbf{.005}  & \textbf{.006} \\
-&  & \scriptsize{(.001, .009)} & \scriptsize{(.001, .013)} & \scriptsize{(.001, .014)} & \scriptsize{(.001, .008)} & \scriptsize{(.001, .009)} & \scriptsize{(.001, .011)} & \scriptsize{(.001, .009)} & \scriptsize{(.001, .009)} & \scriptsize{(.001, .008)}\\ \cline{2-11}
-& \multirow{2}{*}{Lightning~\cite{berenson2012robot}}  & 124  & 149  & 162  & 31.1  & 37.5  & 48.6  & 70.7  & 77.5  & 98.4 \\
-&  & \scriptsize{(28.2, 221)} & \scriptsize{(63.3, 413)} & \scriptsize{(82.2, 552)} & \scriptsize{(13.7, 76.8)} & \scriptsize{(20.0, 96.1)} & \scriptsize{(30.2, 144)} & \scriptsize{(80.3, 542)} & \scriptsize{(63.0, 307)} & \scriptsize{(84.6, 414)}\\ \cline{2-11}
-& \multirow{2}{*}{E-Graphs~\cite{Phillips-RSS-12}}  & 988  & 1044  & 904  & 203  & 273  & 275  & 162  & 210  & 176 \\
-&  & \scriptsize{(587, 1943)} & \scriptsize{(484, 1952)} & \scriptsize{(364, 1520)} & \scriptsize{(92.0, 824)} & \scriptsize{(290, 1936)} & \scriptsize{(250, 1918)} & \scriptsize{(55.2, 534)} & \scriptsize{(78.1, 575)} & \scriptsize{(78.6, 567)}\\ \cline{2-11}
-& \multirow{2}{*}{RRTConnect~\cite{kuffner2000rrt}}  & 168  & 167  & 260  & 62.0  & 59.5  & 72.9  & 112  & 110  & 104 \\
-&  & \scriptsize{(192, 1880)} & \scriptsize{(71.7, 488)} & \scriptsize{(228, 1363)} & \scriptsize{(46.7, 364)} & \scriptsize{(29.2, 151)} & \scriptsize{(38.1, 194)} & \scriptsize{(75.0, 311)} & \scriptsize{(71.6, 272)} & \scriptsize{(72.4, 279)}\\ \cline{2-11}
-& \multirow{2}{*}{LazyPRM~\cite{kavraki2000path}}  & 1014  & 1204  & 1196  & 338  & 480  & 442  & 219  & 219  & 224 \\
-&  & \scriptsize{(388, 1921)} & \scriptsize{(410, 1954)} & \scriptsize{(516, 1967)} & \scriptsize{(265, 1454)} & \scriptsize{(402, 1716)} & \scriptsize{(405, 1919)} & \scriptsize{(65.8, 386)} & \scriptsize{(72.6, 478)} & \scriptsize{(93.1, 568)}\\ \cline{2-11}
-& \multirow{2}{*}{BIT\textsuperscript{\textasteriskcentered}~\cite{gammell2020batch}}  & 727  & 904  & 833  & 327  & 298  & 442  & 251  & 262  & 252 \\
-&  & \scriptsize{(256, 1997)} & \scriptsize{(380, 1950)} & \scriptsize{(363, 1923)} & \scriptsize{(357, 1963)} & \scriptsize{(305, 1555)} & \scriptsize{(417, 1728)} & \scriptsize{(102, 556)} & \scriptsize{(92.9, 540)} & \scriptsize{(109, 633)}\\ \cline{2-11}
-% & \multirow{2}{*}{InformedRRT\textsuperscript{\textasteriskcentered}~\cite{gammell2018informed}}  & 515  & 546  & 562  & 136  & 136  & 139  & 178  & 190  & 171 \\
-% &  & \scriptsize{(76.4, 617)} & \scriptsize{(69.8, 634)} & \scriptsize{(28.6, 603)} & \scriptsize{(31.6, 201)} & \scriptsize{(31.5, 203)} & \scriptsize{(33.1, 209)} & \scriptsize{(44.0, 267)} & \scriptsize{(50.4, 323)} & \scriptsize{(43.4, 253)}\\ \cline{2-11}
-& \multirow{2}{*}{RRT\textsuperscript{\textasteriskcentered}~\cite{karaman2011sampling}}  & 572  & 539  & 566  & 137  & 137  & 137  & 193  & 187  & 193 \\
-&  & \scriptsize{(128, 893)} & \scriptsize{(54.6, 616)} & \scriptsize{(29.0, 617)} & \scriptsize{(31.9, 196)} & \scriptsize{(31.7, 199)} & \scriptsize{(32.4, 214)} & \scriptsize{(50.3, 289)} & \scriptsize{(36.7, 261)} & \scriptsize{(50.5, 290)}\\ \hline\hline
-%%%%%%%%%%%%%%%%%%%  APP Preprocessing
-\multirow{6}{*}{\rotatebox[origin=c]{90}{APP}}
-& Preprocessing & \multirow{2}{*}{8.9} & \multirow{2}{*}{48.2} & \multirow{2}{*}{49.9} & \multirow{2}{*}{17.6} & \multirow{2}{*}{31.2} & \multirow{2}{*}{74.6} & \multirow{2}{*}{17.5} & \multirow{2}{*}{30.4} & \multirow{2}{*}{98.8} \\
-& Time [min] & & & & & & & & & \\ \cline{2-11}
-& Paths per Goal & \multirow{2}{*}{2.0 ({0.1})} & \multirow{2}{*}{3.2 ({0.7})} & \multirow{2}{*}{4.1 ({0.9})} & \multirow{2}{*}{2.0 ({0.0})} & \multirow{2}{*}{3.1 ({0.5})} & \multirow{2}{*}{6.1 ({4.0})} & \multirow{2}{*}{2.0 ({0.1})} & \multirow{2}{*}{3.1 ({0.4})} & \multirow{2}{*}{5.8 ({7.7})} \\
-& (mean, std)& & & & & & & & & \\ \cline{2-11}
-& \multirow{2}{*}{Memory [Mb]} & \multirow{2}{*}{9.7} & \multirow{2}{*}{15.6} & \multirow{2}{*}{20.6} & \multirow{2}{*}{24.8} & \multirow{2}{*}{37.8} & \multirow{2}{*}{70.6} & \multirow{2}{*}{17.5} & \multirow{2}{*}{28.5} & \multirow{2}{*}{54.7} \\
-& & & & & & & & & & \\ \hline
-\end{tabular}
-\end{adjustbox}
-\end{center}
-\caption{
-The table shows the success rates and planning times of APP and the baselines, as well as the preprocessing statistics for three different domains, with 1, 2 and 3 movable obstacles. 100 random tests were run for each experiment with the timeout of 2s. The same timeout was used for APP during preprocessing.
-}
-\label{table:results}
-% \vskip -0.5cm
-\end{table*}
-
-\begin{figure}
-\centering
-\includegraphics[width=\textwidth]{figs/app_fig3_v2_lo-res.png}
-\caption{Left: Shelving/unshelving task. Right: mail sorting task. Both tasks involve a mix of static obstacles and obstacles which may appear at many different positions. Target object is shown in red, and approximate movable obstacles are shown in yellow. The goal regions are depicted with green rectangles.}
-\label{fig:scenarios}
-% \vskip -0.5cm
-\end{figure}
-
-We evaluated APP on the 7 DoF Franka arm in three different semi-structured domains and compared its performance with other state-of-the-art sampling-based and search-based motion planning algorithms. For sampling-based algorithms we used OMPL's implementations~\cite{sucan2012open}
-
-%\subsection{Experimental setup}
-%\subsubsection*{Manipulation Planning}
-%We consider the manipulation planning problem as joint motion and grasp planning problem. Namely,
-We consider the problem of reaching a feasible grasp pose $\phi \in \Phi$ for a target object $o_T$ at configuration $q(o_T)$, where $\Phi$ is a set of precomputed grasps (transformed into the robot's frame) for $o_T$. The resultant problem is a multi-goal planning problem where given $\Phi$, the robot has to find a collision free path $\pi$ to any $\phi \in \Phi$ while avoiding obstacles in \calW and meeting the success criterion. We use YCB objects~\cite{calli2015ycb} as targets with the grasps from~\cite{eppner2019billion}.
-
-In all our experiments, we sort the grasp poses using a distance metric selecting the next best grasp being the one closest to the grasps already attempted so far. We use collision-aware IK to find valid grasps. For the baselines that support multi-goal planning (RRT*~\cite{karaman2011sampling}, BIT*~\cite{gammell2020batch}, LazyPRM~\cite{kavraki2000path}) in OMPL, the planner picks the top five grasps from the sorted list and plans to the corresponding goals within a single planning query. For the remaining baselines (Lightning~\cite{berenson2012robot}, RRT-Connect~\cite{kuffner2000rrt}, E-graphs~\cite{Phillips-RSS-12}) the planner sequentially iterates through all the grasps in $\Phi$ and terminates when the success criterion is met or until the timeout. APP uses Lightning as its underlying motion planner \calP.
-
-%\subsubsection*{Goal Region Specification}
-We define the goal region \calG as a space of possible configurations of $o_T$ in the world. \calG is domain specific and depends on the allowable region of $o_T$ in the world as well as the geometry of $o_T$. To give an example, we used the bowl from the YCB dataset as the target object in our experiments. Since it is symmetric about the vertical axis and can rest on a planer surface, that limits the dimension of \calG to $\mathbb{R}^2$. For an object like a mug, its \calG would be in $SE(2)$. \calG is discretized to get a discrete set of poses $G$ of $o_T$.
-% The discretization is chosen depending upon the precision required for the given domain.
-
-
-% We test on four different simulated environments to show our proposed method's superiority over a number of common baselines. Specifically, we compare to RRT-Connect (RRTC)~\cite{kuffner2000rrt}, Lightning~\cite{berenson2012robot}, and Lazy PRM~\cite{}.
-
-% TODO: results tables and experiment descriptions plus images here. 
-
-\subsection{Experimental Scenarios}
-Fig.~\ref{fig:scenarios} shows two of our example scenarios. In both the scenarios, we define the goal regions \calG as bounded $x,y$ planes since the target objects that we use are symmetric about the $z$-axis. The obstacle regions $\calQ(o_i)$ are also bounded $x,y$ planes and are identical for all obstacles in \calO.~\calG and $\calQ(o_i)$ both are discretized with a resolution of 2cm. We use occupancy grid to represent the occupancy of \calW which also has a 2cm discretization. The value of parameter $\epsilon$ (defined in Def.~\ref{def:envp}) in all the experiments is 20cm.
-%
-% We design these scenerios such that if an obstacle is place at every position $q(o_i) \in Q(o_i)$, none of the goals in $G$ is reachable. Without that, the planning problem becomes trivial, since we can treat the resultant \calW as completely static.
-%
-Table~\ref{table:results} shows the statistical results of all our experiments. The experiments were run on Intel Core i7-7800X CPU @3.5Ghz with 32 GB memory.
-
-APP shows a success rate of 100\% for all the experiments, with several orders of magnitude speedup compared to the baselines. The baselines do well in the sorting domain but they suffer in shelving and the time-constrained sorting domains, which are more challenging.
-%
-Lightning's lower success rate for the shelving domain compared to APP is because randomly positioned obstacles can potentially create harder planning problems, compared to the problems it solves within the APP framework.
-%
-Lightning's lower success rate for the time-constrained domain is due to its higher planning time, which makes it harder to satisfy the overall timeout~$t_\textrm{task}$.
-%
-% \hl{Even though APP uses Lightning as its underlying planner \calP, it achieves 100\% success rate which Lightning fails to achieve}
-% \hl{For the time-constrained domain, the baselines show lower success rates due to their higher planning times, which makes it harder to satisfy the overall timeout}~$t_\textrm{task}$.
-%
-%Also, note that the performance of preprocessing and experience-based planners (LazyPRM, Lightning, E-graphs) drops with the increase in the number of movable obstacles.
-The performance of preprocessing and experience-based planners (LazyPRM, Lightning, E-graphs) drops with the increase in the number of movable obstacles.
-%
-In the time constrained domain, optimal sampling-based planners (RRT*, BIT*) do not perform better than non-optimal planners, because besides being slower, their convergence rate is not as fast as the time bound requires. Secondly more significant cost reduction is achieved by post-processing in our domains, which is used for all the planners.
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\textbf{Shelving/Unshelving:}
- %In the shelving/unshelving scenario, the robot is tasked with reaching out to a target object (soup can in this example from the YCB dataset) placed in the rear section of a shelf, while avoiding other objects arbitrarily located at the front section of the shelf. Conversely the task could be to place the object in the rear section of the shelf. We approximate each $o_i \in \calO$ as a sphere (voxelized) of radius 6cm. The planning problem is challenging because the static shelf and the movable obstacles create narrow passages in the configuration space of the robot. Since the target object is symmetric about the vertical $z$-axis,~\calG is a bounded $x,y$ plane in the rear section of the shelve.
- In the shelving/unshelving scenario, the robot is tasked with reaching a target object placed in the rear section of a shelf while avoiding other objects. % arbitrarily located at the front section of the shelf.
- %Conversely the task could be to place the object in the rear section of the shelf.
- We approximate each $o_i \in \calO$ as a voxelized sphere of radius 6cm.
- This problem is challenging because the movable obstacles create narrow passages in the configuration space of the robot.
- Since the target object is symmetric about the vertical axis,~\calG is a bounded plane in the rear section of the shelve.
- 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\textbf{Mail Sorting:}
-%For the mail-sorting task, the robot picks up packages from a tabletop while avoiding collisions with other packages and sorts them in cubby shelves. We approximate each $o_i \in \calO$ as a sphere (voxelized) of radius 8cm for this task. This problem is challenging because in addition to planning to a grasp pose, the planner needs to search for a valid pregrasp pose which gets harder with more clutter around the target object. Additionally the target cubby creates a narrow passage for the motion planner.
-The robot must pick up packages from a tabletop while avoiding collisions with other packages and put them in a cubby. We approximate each $o_i \in \calO$ as a voxelized sphere of radius 8cm. %This problem is challenging because i
-In addition to planning to a grasp pose, the planner needs to search for a valid pregrasp pose which gets harder with more clutter around the target object. Additionally, the target cubby creates a narrow passage for the motion planner.
-%
-An example of the preprocessing phase for a single start and goal pair for this domain is depicted in Fig.~\ref{fig:pr} 
-% \begin{figure*}[t]
-%     \centering
-%     \includegraphics[width=0.5\textwidth]{figs/times_sorting.pdf}
-%     \includegraphics[width=0.45\textwidth]{figs/times_shelving.pdf}
-%     \caption{Planning times for two use cases: mail sorting (left) and shelving (right).}
-%     \label{fig:boxplot}
-% \end{figure*}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%\textbf{Mail Sorting under Time Constraint:}
-\textbf{Time-Constrained Mail Sorting:}
-%In this domain we add an additional constraint on the robot that both the planning and execution must be completed within an overall timeout $t_\textrm{task}$. Such constraints are often required for robots operating at conveyor belts~\cite{islam2020provably}. This setting makes the planning problem even harder because the manipulation planner not only has to plan fast but also must return a solution that is executable within the remainder of the time. We use $t_\textrm{task} = 2.0s$ in our experiments.
-We add an additional constraint on the robot that both the planning and execution must be completed within an overall timeout $t_\textrm{task}=2.0s$. Such constraints are often required for robots operating at conveyor belts~\cite{islam2020provably}. This setting makes the planning problem even harder because the manipulation planner not only has to plan fast but also must return a solution that is executable within the remainder of the time.
-%We use $t_\textrm{task} = 2.0s$ in our experiments.
-
-\subsection{Real-World Case Study}
-We also tested APP on a pick-and-place task inspired by a kitchen environment, both in simulation and in the real world. We used Isaac Gym~\cite{liang2018gpu} for our simulation tests. The task is shown in Fig.~\ref{fig:real-world}. The goal is for the robot to pick up the red bowl, while avoiding two obstacles: large blue pitchers from the YCB object set~\cite{calli2015ycb}. We approximate the geometry of each pitcher with two spheres (one on top of the other).
-The generation of paths with APP took less than 10 microseconds and was 100\% successful. Object poses were estimated by PoseCNN~\cite{xiang2017posecnn}.
-%The system was implemented using the Robot Operating System (ROS)~\cite{quigley2009ros}.
-On average, perception took $0.22 \pm 0.3$ seconds to return accurate poses; the high variance was due to some obstacle configurations being more challenging than others. For videos, see the supplementary materials.\footnote{Experiment videos: \url{https://bit.ly/34F8LrP}}
-
-\begin{figure}[t]
-    \centering
-    \begin{subfigure}{0.48\textwidth}
-    %   \centering
-        \includegraphics[trim={0.5cm 1.5cm 3cm 0},clip, width=\textwidth]{path_real.png}
-        \caption{}
-        \label{fig:real}
-    \end{subfigure} 
-    \begin{subfigure}{0.48\textwidth}
-    %   \centering
-        \includegraphics[trim={8cm 0.55cm 8cm 0.55cm},clip, width=\textwidth]{path_sim.png}
-        \caption{}
-        \label{fig:sim}
-    \end{subfigure}
-    \caption{
-    Real-world case study in a kitchen environment: 
-     (\subref{fig:real})~Snapshots of a collision-free path genearated by APP in the real world.
-    %
-    (\subref{fig:sim})~Snapshots of a collision-free path in simulation.
-    %
-    }
-\label{fig:real-world}
-\end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{CTMP for Robot-shielding Task-- A Case Study}
@@ -3341,7 +3499,28 @@ With this approach, the size of the $G$ becomes equal to the number of pairs of 
 \subsubsection{Domes Specification}
 The geometry of $D_i$ is such that it tightly encapulates \calB or in other words over approximates the geometry of \calB with a simple shape. In our set up, we use cuboid shaped domes. The outer dome $D_o$ is co-centric with $D_i$ and has the same shape to $D_i$. It is however, larger than $D_i$. The size of $D_o$ depends on the reachability of the robot. An larger $D_o$ would allow more freedom to the robot but would also increase the preprocessing demand. On the other hand a smaller $D_o$ would restrict the robot and limit its protection capability.
 We choose the size of $D_o$ such that the robot can reach its side which the robot faces at full extension. While our appoach is simple, a more rigorous reachability analysis could be performed to optimize for the geometry of $D_o$.
-Fig.~\ref{} shows the two domes configured for the PR2 robot's body. The volume between the $D_o$ and $D_i$ is where the robot attempts to intercept any incoming objects. 
+Fig.~\ref{fig:domes} shows the two domes configured for the PR2 robot's body. The volume between the $D_o$ and $D_i$ is where the robot attempts to intercept any incoming objects. 
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{0.48\textwidth}
+    %   \centering
+        \includegraphics[width=\textwidth]{domes_top}
+        \caption{Top view}
+        \label{fig:domes_top}
+    \end{subfigure} 
+    \begin{subfigure}{0.48\textwidth}
+    %   \centering
+        \includegraphics[width=\textwidth]{domes_front}
+        \caption{Side view}
+        \label{fig:domes_front}
+    \end{subfigure}
+    \caption{
+    Specification of inner and outer dome for PR2 robot.
+    %
+    }
+\label{fig:domes}
+\end{figure}
 
 \subsubsection{Domes Discretization and Shield geometry}
 Each side of $D_i$ and $D_o$ are discretized into cells. The discretization is correlated with the shape and size of \calS. We use a square-shaped \calS of in our set up.
@@ -3374,7 +3553,7 @@ We are now ready to describe the preprocessing and query stages of our CTMP appr
 \subsubsection{Preprocessing Stage}
 In the preprocessing stage, for each pair of cells, the tunnel centerlines are computed. Each tunnel is checked for feasibility. Namely, the tunnels whose volume snaps to zero anywhere along the length are discarded because no incoming object coming through such a tunnel can reach the tunnel's end on $D_i$. The centerlines of all the feasible tunnels constitute the goal region $G$
 
-First, the algorithm computes the paths from \Shome to cover $G$ by satisfying the goal criteria described above. These paths are then time-profiled and then descretized evenly in time to get a set of \emph{replannable} states. The algorithm then recursively computes additional paths to cover the goal regions for these replannable states. During this process, the algorithm tries to reuse the existing paths by computing \emph{latching} edges that connect one path to another. Note that we borrow the preprocessing algorithm from chapter~\ref{chap:rss} (see. Alg.~\ref{alg:preprocess}). However, we do a major simplification to the approach by not making use of experience-based planning. We use this simplification for two reasons, first that the preprocessing computational requirements for this task are much less compared to the conveyor pickup task and therefore can be met without experience-based planning. Second, for the shield-based protection task, the available time for planning is almost zero and therefore, we want to make it as fast as possible.
+First, the algorithm computes the paths from \Shome to cover $G$ by satisfying the goal criteria described above. These paths are then time-profiled and then descretized evenly in time to get a set of \emph{replannable} states. The algorithm then recursively computes additional paths to cover the goal regions for these replannable states. During this process, the algorithm tries to reuse the existing paths by computing \emph{latching} edges that connect one path to another. Note that we borrow the preprocessing algorithm from Chapter~\ref{chap:rss} (see. Alg.~\ref{alg:preprocess}). However, we do a major simplification to the approach by not making use of experience-based planning. We use this simplification for two reasons, first that the preprocessing computational requirements for this task are much less compared to the conveyor pickup task and therefore can be met without experience-based planning. Second, for the shield-based protection task, the available time for planning is almost zero and therefore, we want to make it as fast as possible.
 
 Specifically we make a single change in Alg.~\ref{alg:preprocess}, we call a new function \textsc{PlanPaths} instead of \textsc{PlanRootPaths} which finds paths to all \emph{reachable} goals in $G$ and thus we process the replanable states on those paths instead of root paths. The rest of the algorithm remains as is.
 
@@ -3389,9 +3568,20 @@ Note that actual paths to the goals are stored instead of the root paths for eac
 
 \subsubsection{Query Stage}
 In the query stage, for a given query, the associated path is retrieved from \calM.
-The query stage is also almost the same as was used in chapter~\ref{chap:rss} Alg.~\ref{alg:query}. The only difference is that the step of calling \textsc{PlanPathWithExperience} is not needed since the lookup from \calM directly returns the paths to the queried $g$.
+The query stage is also almost the same as was used in Chapter~\ref{chap:rss} Alg.~\ref{alg:query}. The only difference is that the step of calling \textsc{PlanPathWithExperience} is not needed since the lookup from \calM directly returns the paths to the queried $g$.
 
 \section{Evaluation}
+\subsection{Analytical results}
+We evaluated the system by testing our CTMP planner for all the tunnels between $D_i$ and $D_o$. For each cell on $D_o$, we iterate over all of its feasible tunnels and calculate the ratio of the number of tunnels for which the planner successfully finds a path to the total number of feasible tunnels for that cell. This gives us a measure of the percentage of attacks that the robot can shield against out of all possible attacks that can enter from that outer cell. We call this measure the \emph{shielding factor}. In Fig.~\ref{fig:coverage_front} we show this measure for all the cells in the front side of $D_o$. We get better shielding capability on the right-hand side of the robot as we use the robot's right hand in our experiments.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.8\columnwidth]{heatmap1}
+\caption{Shielding factor for all cells in the front side of $D_o$.}
+\label{fig:coverage_front}
+\end{figure}
+
+The average shielding factor which we obtain by averaging over all the cells on the dome's front side is 0.5. Note that this analysis doesn't take the time dimension into account. If we assume a minimum time of flight of the attack, we can additionally check if the precomputed motion plans can be executed within that time threshold and then discount the results if that check fails.
 
 \section{Chapter Appendix}
 \subsection{Cell Size Computation: Geometric Analysis}
@@ -3521,9 +3711,45 @@ We now analyse the required reduction in the cell size to account for the error 
 
 \newpage
 
-\chapter{Conclusion and Future Work}
+\chapter{Conclusion}
+In this thesis, we proposed a novel motion planning framework called Constant-Time Motion Planning (CTMP) for repetitive tasks. Our approach is motivated by applications in semi-structured robot environments which are often encountered in manufacturing, warehouse or logistics scenarios. The manipulation tasks in such environments required fast and reliable motion planning. Our CTMP class of algorithms provide provable constant-time planning guarantee which is highly desirable for semi-structured environments.
+
+We introduced and formalized the concept of CTMP and detailed the theoretical properties of CTMP algorithms. We defined a CTMP-completeness property which requires a planning algorithm to guarantee to generate the next action along a path to goal (without myopic behaviors) within a small constant time which is predefined by a user. CTMP-complete algorithms provably guarantee real-time planning and execution. These algorithms can be used for non-stop motion execution in an interleaving planning and execution fashion, provided that the planning and execution are parallelized.
+
+We developed a CTMP algorithm for static environments; the environments in which the obstacle occupancy remains fixed in between planning queries. We used the key idea of computing attractor regions inside the goal region in the preprocessing stage. Within this region, a local search is efficiently guided by a greedy heuristic without the need of expensive collision checking in the query stage. We demonstrated our approach on a mail-sorting task.
+
+We then develeoped a CTMP approach for semi-static environments; the environments which have a fixed number of movable obstacles in addition to the static occcupancy. We proposed Alternative Paths Planner (APP) which provably guarantees to generate a valid plan in fixed time. We used the idea of precomputing a set of alternative plans for each start and goal, such that for any configuration of the movable obstacles at lease one plan is collision-free. In the query stage, the valid plan is looked up within a few microseconds for any given query.
+
+We developed a CTMP algorithm for the manipulation task of picking up moving objects off conveyor belts. Our planning approach plans with the dynamic constraints involved in the problem setup. To react to perception updates in real-time, our approach provably guarantees to plan and replan within small constant time specified by the user. We used the key idea of using experience-based planning to speed up search for similar queries. Our proposed framework uses experience-based planning in a way that guarantees fixed time planning in the query stage. We demonstrated our approach on the PR2 robot working on a conveyor belt.
+
+We developed a CTMP framework for the task of manipulating a shield to protect the robot from attacks. We used an adaptation of the planning framework for conveyor-pick task to achieve tighter planning-time bounds which the robot shielding task requires. In this work our major contribution is the representation of the goal region for the CTMP planner which provides a tractable way of discretizing the space of all possible attacks that the robot might have to shield. We demonstrate the approach on the PR2 in a lab environment.
+
+We performed comprehensive statistical results and compared our CTMP algorithms with several state-of-the-art baselines. We showed several orders of magnitude speedup in planning times and a success rate of 100\% in almost all of our experiments (except the robot-shielding task). Note that the success rate of less than 100\% is attributed to the fact that the goals for which the planner fails were not ``reachable", as for the reachable goals CTMP algorithms provably guarantee success.
 
 \newpage
+
+\section{Future Research Directions}
+%- what if user allows more than O(1) time say O(logn)?
+
+\subsection{CTMP algorithms with \emph{anytime} preprocessing}
+A very promising research direction is to construct anytime variants of our CTMP class of algorithms. An anytime CTMP algorithm would be given a bounded time to finish preprocessing. The anytime preprocessing problem is to maximumize the number of queries a CTMP algorithm can answer in the query stage from the discrete set of all possible queries, while utilizing the available preprocessing time. Such an extension is very useful to scale our algorithms to more complex environments. For instance our APP algorithm which is designed for semi-static environments has a major limitation that its preprocessing time grows drastically if the movable obstacles increase beyond a certain number. Having an anytime version of APP would help in scaling it to handle more movable obstacles.
+
+\subsection{CTMP algorithms with \emph{asymptotic} preprocessing}
+Another interesting and very practical extension is to construct asymptotic CTMP algorithms that asymptotically cover the discrete set of all possible queries and interleave preprocessing and query phases. To give an example, for a robot operating in a warehouse, the CTMP algorithm would run its preprocessing phase in non-operational hours and would be used in its query phase during operational hours. Instead of aiming to preprocess for all possible queries in a single preprocessing cycle, it covers the queries encountered in the last working shift. Over the coarse of weeks or may be months, it would cover the set of all possible scenarios that the robot encounters during its operation, assuming that the total number of scenarios is finite.
+
+\subsection{Anytime-ness in solution quality}
+While the main focus in this thesis is not on the quality of solution, however it is a very important metric in determining the overall performance of a robotic system. While we do provide bounds on solution quality for some of our CTMP algorithms, we think that an important research direction is to target tighter solution-quality bounds for these algorithms.
+
+Another future direction is to construct anytime CTMP algorithms which seek to improve solution quality by using the surplus \Tbound time provided by the user. Anytime algorithms are readily used in search-based as well as sampling based motion planning~\cite{likhachev2004ara,karaman2011sampling}. While in some of our approaches~\ref{chap:rss}, we use larger \Tbound values to save on memory consumption, the allowed time could also be used to improve the solution quality in an anytime fashion.
+
+\subsection{Extending space-complexity analysis}
+
+%\subsection{CTMP for static environments}
+%Key questions that remain open for future work regard providing stronger guarantees on the solution quality and bounding the number of covering subregions. We conjuncture that computing the minimal number of subregions is an NP-Hard problem and, if this is the case, we can possibly seek to compute a set of subregions whose size is within some constant-factor approximation of the size of the optimal set. Finally, we plan to extend our approach to semi-static environments where there exists both static andnon-static obstacles.
+%
+%\subsection{CTMP for semi-static environments}
+%\subsection{CTMP for conveyor-pickup task}
+%\subsection{CTMP for robot-shielding task}
 
 \bibliographystyle{IEEEtran}
 \bibliography{references}
