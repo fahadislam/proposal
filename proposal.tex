@@ -112,17 +112,19 @@ Copyright~$\copyright$ 2021 Fahad Islam. All rights reserved.
 
 \newpage
 \begin{abstract}
-In manufacturing and warehouse scenarios, robots often operate in semi-structured environments. In these environments, the robots perform recurring manipulation tasks with no or little changes in the their surroundings.
-Fast and reliable motion planning is one of the key elements that ensure efficient operations in such environments. A very common example scenario is of manipulators working at conveyor belts, where they have limited time to pick moving objects and if the planner exceeds a certain time threshold, they would fail to pick the objects up. Similar scenarios are encountered in automated assembly lines. Such time-critical applications spur the need for planners which are \emph{guaranteed} to be fast. To this end we introduce and formalize the concept of Constant-time Motion Planning (CTMP); namely, the ability to provably guarantee to generate a motion plan within a (small) constant time. We then develop several algorithms that fall into the class of CTMP algorithms.
+In many robotic applications, including logistics and manufacturing, robots often operate in semi-structured environments and perform highly repetitive manipulation tasks. Additionaly, large parts of these environments are static most of the time.
+Fast and reliable motion planning is one of the key elements that ensure efficient operations in such environments. A very common example scenario is of manipulators working at conveyor belts, where they have limited time to pick moving items and if the planner exceeds a certain time threshold, they would fail to pick the items up. Similar scenarios are encountered in automated assembly lines. Such time-critical applications spur the need for planners which are \emph{guaranteed} to be fast. To this end we introduce and formalize the concept of Constant-Time Motion Planning (CTMP); namely, the ability to provably guarantee to generate a motion plan within a (small) constant time. We then develop several algorithms that fall into the class of CTMP algorithms.
 
-In this thesis we have developed constant-time motion planning algorithms for four semi-structured domains; (1) Manipulation for repetitive tasks in static environments (2) Manipulation for repetitive tasks in semi-static environments (3) Manipulation for the task of picking up moving objects (of known models) off a conveyor belt (4) Manipulation for the task of protecting a robot with a shield from incoming attack.
-Domain (1) assumes that the environment occupancy remains purely static during robot's operation.
-Domain (2) relaxes the purely-static assumption by allowing a fixed number of movable obstacles that may get displaced during operation.
-Domains (3) and (4) have dynamic environments. In these domains, the robot typically perceives a rough pose estimate viewing from a distance, but it must start moving early on (relying on that rough estimate) and then adjust its motion in real time as it gets improved estimates to be able to reach the object in time.
+This thesis presents constant-time motion planning algorithms for three types of semi-structured environments; (1) static environments (2) semi-static environments and (3) dynamic environments (specifically for the task of picking up moving objects off a conveyor belt).
+For (1) we assume that the environment occupancy remains purely static during robot's operation.
+For (2) we relax the purely-static assumption by allowing a fixed number of known movable obstacles that may get displaced during operation.
+For (3), it requires planning with time as an additional dimension.
+In addition, we also demonstrate an application of our CTMP framework for a manipulation task of a robot protecting itself with a shield from incoming attacks.
+For the conveyor-pickup and the shield-manipulation tasks, the robot typically perceives a rough pose estimate viewing from a distance, but it must start moving early on (relying on that rough estimate) and then adjust its motion by continuously replanning in real time as it gets improved estimates, to be able to reach the object in time.
 
-Our key insight is that in these semi-structured domains, the space in which the robot operates is a very small subset of its configuration space which allows us to preprocess it exhaustively. The preprocessing step generates a representative set of paths that can be used by search at query time in a way that assures small constant-time planning.
+Our key insight is that for highly recurring tasks in semi-structured environments, the space in which the robot operates is a very small subset of its configuration space. This allows us to preprocess it exhaustively. The preprocessing step generates a small representative set of paths that can be used by search at query time in a way that guarantees small constant-time planning for any query.
 %
-For domain (1), we evaluate our algorithm for a mail sorting task in simulation on PR2 and also test the algorithm on a real truck-unloading robot. For domain (2), we perform simulation and real-robot experiments on Franka arm for a pick and place task in a kitchen environment. For domain (3) we perform real-robot experiments on PR2 working at a conveyor belt. Finally, for domain (4) we perform simulation and real-robot experiments on PR2 shielding itself from incoming attack.
+For domain (1), we evaluated our approach on a mail-sorting task in simulation on PR2 and also tested it on a real truck-unloading robot. For (2), we tested our algorithm on Franka robot in simulation and on the real robot for pick and place tasks in a kitchen environment. For (3) we performed real-robot experiments on PR2 working at a conveyor belt. Finally, for the shield-manipulation task, we ran experiments on PR2 in simulation and on the real robot.
 
 %For the remainder of this thesis we propose the following work. First, we propose to further study and formalize what CTMP implies in practice and what underlying assumptions it entails. Second, we propose to extend our  planning framework to semi-static environments (i.e. containing some movable obstacles). Third, we aim to boost the capability of the conveyor pick-up task by having multiple robot arms simultaneously picking up objects, while still maintaining constant-time planning guarantees.
 
@@ -147,7 +149,7 @@ I would like to thank my partner Sara Hassan Soomro for being a constant support
 
 I would like to thank my siblings, Maria, Saad and Zahra for their love and encouragement, especially my big brother, Saad. You have always been my go-to person for every decision that I have to make no matter big or small. You are the first person that I call in the time of need, difficulty, or to share a success or failure news. Thank you brother for always being there for me.
 
-My biggest thanks goes to my mother. Throughout my life, you have been a constant source of love, care, support and motivation. You instilled in me the importance of education and always pushed me to achieve excellence. Despite being a single parent and having limited financial resources, you took care of all my wants and wishes. You brought me up with high moral values and principles and ingrained in me a strong sense of responsibility. I can never pay back in the least for whatever you have done for me. Finally, I want to thank my deceased father who set the foundations right for the family and before leaving, left us with enough resources to lead a respectable life.
+My biggest thanks goes to my mother. Throughout my life, you have been a constant source of love, care, support and motivation. You instilled in me the importance of education and always pushed me to achieve excellence. Despite being a single parent and having limited financial resources, you took care of all my wants and wishes. You brought me up with high moral values and principles and ingrained in me a strong sense of responsibility. I can never pay back in the least for whatever you have done for me. Finally, I want to thank my deceased father who set the foundations right for the family and before leaving, left us with enough resources to be self-sufficient.
 
 \tableofcontents
 \newpage
@@ -467,7 +469,7 @@ We demonstrate a speedup of over tenfold in query time when compared to the PRM 
 
 \begin{figure}[tb]
   \centering
-    \includegraphics[width=0.8\textwidth]{pr2.png}
+    % \includegraphics[width=0.8\textwidth]{pr2.png}
     % \vspace{-2mm}
   \caption{
   Motivating scenario---a robot (PR2) picking up objects from shelves and placing them into a bin.
@@ -577,7 +579,7 @@ For a visualization of our algorithm, see Fig.~\ref{fig:approach}.
 
 \begin{figure}
 \centering
-\includegraphics[width=\textwidth]{orig_version.pdf}
+% \includegraphics[width=\textwidth]{orig_version.pdf}
     % \vspace{-2mm}
   \caption{
   Visualization of approach. The discretized goal region~$G_\calS$ is shown. Subregions are depicted in green, and  obstacles are depicted in red.
@@ -683,7 +685,7 @@ $\calR, \calL$
 
 \begin{figure}[tb]
   \centering
-    \includegraphics[width=\textwidth]{region.pdf}
+    % \includegraphics[width=\textwidth]{region.pdf}
     % \vspace{-2mm}
   \caption{
   Visualization of Alg~\ref{alg:2}. Subregion $R_i$ (green) grown from $\sAttract$ in a discretized goal region~$G_\calS$ with obstacles (in red). The covered states are depicted in white
@@ -1316,14 +1318,14 @@ Among other planners, PRM shows the highest success rate but at the cost of a la
 \begin{figure}
 \begin{subfigure}{0.5\textwidth}
 \centering
-  \includegraphics[width=0.9\linewidth]{success.png}
+  % \includegraphics[width=0.9\linewidth]{success.png}
   \caption{}
   \label{fig:success}
 \end{subfigure}
 \hfill
 \begin{subfigure}{0.5\textwidth}
 \centering
-  \includegraphics[width=0.9\linewidth]{memory.png}
+  % \includegraphics[width=0.9\linewidth]{memory.png}
   \caption{}
   \label{fig:memory}
 \end{subfigure}
@@ -1339,7 +1341,7 @@ We compare our results with Weighted A* (WA*)algorithm. The results are summariz
 
 \begin{figure}
 \centering
-\includegraphics[width=\textwidth]{gmt.JPG}
+% \includegraphics[width=\textwidth]{gmt.JPG}
     % \vspace{-2mm}
   \caption{
   Truck-unloader robot with its manipulator-like (arm) and scooper-like (nose) end effectors
@@ -1350,7 +1352,7 @@ We compare our results with Weighted A* (WA*)algorithm. The results are summariz
 
 \begin{figure}
 \centering
-\includegraphics[width=\textwidth]{gmt_sim.png}
+% \includegraphics[width=\textwidth]{gmt_sim.png}
     % \vspace{-2mm}
   \caption{
   A simulated real world truck-unloading scenario
@@ -1391,7 +1393,7 @@ We make the following high-level modifications to the previous algorithm to cons
 
 \begin{figure}
 \centering
-\includegraphics[width=\textwidth]{flip_version.pdf}
+% \includegraphics[width=\textwidth]{flip_version.pdf}
     % \vspace{-2mm}
   \caption{
   Visualization of approach. A discretized start region $S_\calS$ is shown. Subregions are depicted in green and the  obstacles are depicted in red.
@@ -1462,7 +1464,7 @@ Recently, provably fixed-time motion planning approaches have been proposed for 
 
 \begin{figure}[bt]
 \centering
-\includegraphics[width=\columnwidth]{figs/cover.jpg}
+% \includegraphics[width=\columnwidth]{figs/cover.jpg}
 \caption{Semi-structured tabletop manipulation scenario --- The robot must grasp the bowl while avoiding pitchers and the table itself; the pitchers and bowl may be at any position. The Alternate Paths Planner (APP) guarantees to find solution for any configuration within few microseconds.}
 \label{fig:cover}
 \vskip -0.5cm
@@ -1542,8 +1544,8 @@ The implementation details of envelope construction for the manipulation domain 
 
 \begin{figure}[bt]
 \centering
-% \includegraphics[width=\columnwidth]{figs/envp.pdf}
-\includegraphics[width=\columnwidth]{figs/envp_grid.pdf}
+% % \includegraphics[width=\columnwidth]{figs/envp.pdf}
+% \includegraphics[width=\columnwidth]{figs/envp_grid.pdf}
 \caption{Depiction of an envelope for a single movable obstacle $o$: the blue rectangles represent the robot states in $SE(2)$ along the path $\pi$, the red circle is the movable obstacle $o$ that can have any position in $Q(o) \in \mathbb{R}^2$ and the small circles show positions $q(o)$ for which $o$ collides with $\pi$ and thus constitute the envelope $e_\pi$}
 \label{fig:envp}
 % \vskip -0.5cm
@@ -1587,49 +1589,49 @@ The preprocessing algorithm (Alg.~\ref{alg1}) returns a database of paths $\Pi_g
     \centering
     \begin{subfigure}{0.36\textwidth}
     %   \centering
-        \includegraphics[width=\textwidth]{2.pdf}
+        % \includegraphics[width=\textwidth]{2.pdf}
         \caption{}
         \label{fig:p1}
     \end{subfigure} 
     \begin{subfigure}{0.36\textwidth}
     %   \centering
-        \includegraphics[width=\textwidth]{3.pdf}
+        % \includegraphics[width=\textwidth]{3.pdf}
         \caption{}
         \label{fig:p2}
     \end{subfigure}
     \begin{subfigure}{0.36\textwidth}
     %   \centering
-        \includegraphics[width=\textwidth]{4.pdf}
+        % \includegraphics[width=\textwidth]{4.pdf}
         \caption{}
         \label{fig:p3}
     \end{subfigure}
     \begin{subfigure}{0.36\textwidth}
     %   \centering
-        \includegraphics[width=\textwidth]{5.pdf}
+        % \includegraphics[width=\textwidth]{5.pdf}
         \caption{}
         \label{fig:p4}
     \end{subfigure}
         \begin{subfigure}{0.36\textwidth}
     %   \centering
-        \includegraphics[width=\textwidth]{6.pdf}
+        % \includegraphics[width=\textwidth]{6.pdf}
         \caption{}
         \label{fig:p5}
     \end{subfigure}
         \begin{subfigure}{0.36\textwidth}
     %   \centering
-        \includegraphics[width=\textwidth]{7.pdf}
+        % \includegraphics[width=\textwidth]{7.pdf}
         \caption{}
         \label{fig:p6}
     \end{subfigure}
         \begin{subfigure}{0.36\textwidth}
     %   \centering
-        \includegraphics[width=\textwidth]{8.pdf}
+        % \includegraphics[width=\textwidth]{8.pdf}
         \caption{}
         \label{fig:p7}
     \end{subfigure}
         \begin{subfigure}{0.36\textwidth}
     %   \centering
-        \includegraphics[width=\textwidth]{9.pdf}
+        % \includegraphics[width=\textwidth]{9.pdf}
         \caption{}
         \label{fig:p8}
     \end{subfigure}
@@ -1802,14 +1804,14 @@ We omit the analysis of the general case of $n$ movable obstacles and $k$ narrow
 \begin{figure}[H]
 \begin{subfigure}{0.5\textwidth}
 \centering
-  \includegraphics[width=0.9\linewidth]{space_app}
+  % \includegraphics[width=0.9\linewidth]{space_app}
   \caption{}
   \label{fig:one_narrow}
 \end{subfigure}
 \hfill
 \begin{subfigure}{0.5\textwidth}
 \centering
-  \includegraphics[width=0.9\linewidth]{space_app2}
+  % \includegraphics[width=0.9\linewidth]{space_app2}
   \caption{}
   \label{fig:two_narrow}
 \end{subfigure}
@@ -1905,25 +1907,25 @@ This step corresponds to an implementation detail within procedure \textsc{FindP
     \centering
     \begin{subfigure}{0.48\textwidth}
     %   \centering
-        \includegraphics[trim={8cm 0 10cm 1cm},clip, width=\textwidth]{path1.png}
+        % \includegraphics[trim={8cm 0 10cm 1cm},clip, width=\textwidth]{path1.png}
         \caption{}
         \label{fig:pr1}
     \end{subfigure} 
     \begin{subfigure}{0.48\textwidth}
     %   \centering
-        \includegraphics[trim={8cm 0 10cm 1cm},clip, width=\textwidth]{path2.png}
+        % \includegraphics[trim={8cm 0 10cm 1cm},clip, width=\textwidth]{path2.png}
         \caption{}
         \label{fig:pr2}
     \end{subfigure}
     \begin{subfigure}{0.48\textwidth}
     %   \centering
-        \includegraphics[trim={8cm 0 10cm 1cm},clip, width=\textwidth]{path3.png}
+        % \includegraphics[trim={8cm 0 10cm 1cm},clip, width=\textwidth]{path3.png}
         \caption{}
         \label{fig:pr3}
     \end{subfigure}
     \begin{subfigure}{0.48\textwidth}
     %   \centering
-        \includegraphics[trim={8cm 0 10cm 1cm},clip, width=\textwidth]{path4.png}
+        % \includegraphics[trim={8cm 0 10cm 1cm},clip, width=\textwidth]{path4.png}
         \caption{}
         \label{fig:prq}
     \end{subfigure}
@@ -2001,7 +2003,7 @@ Success rates and planning times of APP and the baselines and preprocessing stat
 
 \begin{figure}
 \centering
-\includegraphics[width=\textwidth]{figs/app_fig3_v2_lo-res.png}
+% \includegraphics[width=\textwidth]{figs/app_fig3_v2_lo-res.png}
 \caption{Left: Shelving/unshelving task. Right: mail sorting task. Both tasks involve a mix of static obstacles and obstacles which may appear at many different positions. Target object is shown in red, and approximate movable obstacles are shown in yellow. The goal regions are depicted with green rectangles.}
 \label{fig:scenarios}
 % \vskip -0.5cm
@@ -2064,8 +2066,8 @@ In addition to planning to a grasp pose, the planner needs to search for a valid
 An example of the preprocessing phase for a single start and goal pair for this domain is depicted in Fig.~\ref{fig:pr} 
 % \begin{figure*}[t]
 %     \centering
-%     \includegraphics[width=0.5\textwidth]{figs/times_sorting.pdf}
-%     \includegraphics[width=0.45\textwidth]{figs/times_shelving.pdf}
+%     % \includegraphics[width=0.5\textwidth]{figs/times_sorting.pdf}
+%     % \includegraphics[width=0.45\textwidth]{figs/times_shelving.pdf}
 %     \caption{Planning times for two use cases: mail sorting (left) and shelving (right).}
 %     \label{fig:boxplot}
 % \end{figure*}
@@ -2087,13 +2089,13 @@ On average, perception took $0.22 \pm 0.3$ seconds to return accurate poses; the
     \centering
     \begin{subfigure}{0.48\textwidth}
     %   \centering
-        \includegraphics[trim={0.5cm 1.5cm 3cm 0},clip, width=\textwidth]{path_real.png}
+        % \includegraphics[trim={0.5cm 1.5cm 3cm 0},clip, width=\textwidth]{path_real.png}
         \caption{}
         \label{fig:real}
     \end{subfigure} 
     \begin{subfigure}{0.48\textwidth}
     %   \centering
-        \includegraphics[trim={8cm 0.55cm 8cm 0.55cm},clip, width=\textwidth]{path_sim.png}
+        % \includegraphics[trim={8cm 0.55cm 8cm 0.55cm},clip, width=\textwidth]{path_sim.png}
         \caption{}
         \label{fig:sim}
     \end{subfigure}
@@ -2115,7 +2117,7 @@ Conveyor belts are widely used in automated distribution, warehousing, as well a
 
 \begin{figure}[t]
     \centering
-    \includegraphics[trim=0 50 0 100, clip, width=\columnwidth]{figs/cover_pic.jpg}
+    % \includegraphics[trim=0 50 0 100, clip, width=\columnwidth]{figs/cover_pic.jpg}
     \caption{
     \CaptionTextSize
     A scene demonstrating the PR2 robot picking up a moving object (sugar box) off a conveyor belt.}
@@ -2148,13 +2150,13 @@ We experimentally show that constant-time planning and replanning capability is 
     \centering
     \begin{subfigure}{.49\textwidth}
     %   \centering
-        \includegraphics[width=\textwidth]{object_blur}
+        % \includegraphics[width=\textwidth]{object_blur}
         \caption{}
         \label{fig:obj1}
     \end{subfigure}
     \begin{subfigure}{0.49\textwidth}
     %   \centering
-        \includegraphics[width=\textwidth]{pose_error_plot}
+        % \includegraphics[width=\textwidth]{pose_error_plot}
         \caption{}
         \label{fig:obj2}
     \end{subfigure}
@@ -2268,16 +2270,16 @@ This can be seen as a warmup before describing our algorithm which exhibits the 
     % \hspace{3mm}
     \begin{subfigure}{.49\textwidth}
     %   \centering
-        % \includegraphics[trim=0 0 40 0, clip,width=0.9\textwidth]{naive1}
-        \includegraphics[width=0.9\textwidth]{naive1}
+        % % \includegraphics[trim=0 0 40 0, clip,width=0.9\textwidth]{naive1}
+        % \includegraphics[width=0.9\textwidth]{naive1}
         \caption{}
         \label{fig:naive1}
     \end{subfigure}
     %\hfill
     \begin{subfigure}{0.49\textwidth}
     %   \centering
-        % \includegraphics[trim=0 0 15 0, clip,width=0.9\textwidth]{naive2}
-        \includegraphics[width=0.9\textwidth]{naive2}
+        % % \includegraphics[trim=0 0 15 0, clip,width=0.9\textwidth]{naive2}
+        % \includegraphics[width=0.9\textwidth]{naive2}
         \caption{}
         \label{fig:naive2}
     \end{subfigure}
@@ -2397,11 +2399,11 @@ The desired velocity of the end effector is computed for which the end-effector 
     \centering
     % \hspace{3mm}
     % \begin{subfigure}{.35\textwidth}
-        \includegraphics[width=0.48\textwidth]{amp1.png}
+        % \includegraphics[width=0.48\textwidth]{amp1.png}
     % \end{subfigure}
     %\hfill
     % \begin{subfigure}{0.35\textwidth}
-        \includegraphics[width=0.48\textwidth]{amp2.png}
+        % \includegraphics[width=0.48\textwidth]{amp2.png}
     % \end{subfigure}
     \caption{
     The figures show the dynamic motion primitive for two different initial poses of the sugar box. (Only the gripper poses are visualized.) The sugar box shown at the rear of the conveyor belt in the examples depicts its initial pose.
@@ -2512,21 +2514,21 @@ We are finally ready to describe our algorithm describing first the preprocessin
     \centering
     \begin{subfigure}{.47\textwidth}
     %   \centering
-        \includegraphics[width=\textwidth]{2_compute_root_paths_1}
+        % \includegraphics[width=\textwidth]{2_compute_root_paths_1}
         \caption{}
         \label{fig:crp1}
     \end{subfigure}
     \hspace{4mm}
     \begin{subfigure}{0.47\textwidth}
     %   \centering
-        \includegraphics[width=\textwidth]{2_compute_root_paths_2}
+        % \includegraphics[width=\textwidth]{2_compute_root_paths_2}
         \caption{}
         \label{fig:crp2}
     \end{subfigure}
     \hspace{4mm}
     \begin{subfigure}{0.48\textwidth}
     %   \centering
-        \includegraphics[width=\textwidth]{2_compute_root_paths_3}
+        % \includegraphics[width=\textwidth]{2_compute_root_paths_3}
         \caption{}
         \label{fig:crp3}
     \end{subfigure}
@@ -2775,21 +2777,21 @@ See Fig.~\ref{fig:pl} and  Alg.~\ref{alg:all} and~\ref{alg:preprocess}, respecti
     \centering
     \begin{subfigure}{.48\textwidth}
     %   \centering
-        \includegraphics[width=\textwidth]{pre1}
+        % \includegraphics[width=\textwidth]{pre1}
         \caption{}
         \label{fig:pre1}
     \end{subfigure}
 %    \hspace{1mm}
     \begin{subfigure}{.48\textwidth}
     %   \centering
-        \includegraphics[width=\textwidth]{pre2}
+        % \includegraphics[width=\textwidth]{pre2}
         \caption{}
         \label{fig:pre2}
     \end{subfigure} 
 %    \hspace{1mm}
     \begin{subfigure}{.48\textwidth}
     %   \centering
-        \includegraphics[width=\textwidth]{pre3}
+        % \includegraphics[width=\textwidth]{pre3}
         \caption{}
         \label{fig:pre3}
     \end{subfigure}
@@ -2797,7 +2799,7 @@ See Fig.~\ref{fig:pl} and  Alg.~\ref{alg:all} and~\ref{alg:preprocess}, respecti
     % \hspace{8mm}
     \begin{subfigure}{.48\textwidth}
     %   \centering
-        \includegraphics[width=\textwidth]{pre4}
+        % \includegraphics[width=\textwidth]{pre4}
         \caption{}
         \label{fig:pre4}
     \end{subfigure}
@@ -2820,21 +2822,21 @@ See Fig.~\ref{fig:pl} and  Alg.~\ref{alg:all} and~\ref{alg:preprocess}, respecti
     \centering
     \begin{subfigure}{.48\textwidth}
     %   \centering
-        \includegraphics[width=\textwidth]{Latching_1}
+        % \includegraphics[width=\textwidth]{Latching_1}
         \caption{}
         \label{fig:pl1}
     \end{subfigure}
     %\hspace{1mm}
     \begin{subfigure}{.48\textwidth}
     %   \centering
-        \includegraphics[width=\textwidth]{Latching_2}
+        % \includegraphics[width=\textwidth]{Latching_2}
         \caption{}
         \label{fig:pl2}
     \end{subfigure} 
     %\hspace{1mm}
     \begin{subfigure}{.48\textwidth}
     %   \centering
-        \includegraphics[width=\textwidth]{Latching_3}
+        % \includegraphics[width=\textwidth]{Latching_3}
         \caption{}
         \label{fig:pl3}
     \end{subfigure}
@@ -2842,7 +2844,7 @@ See Fig.~\ref{fig:pl} and  Alg.~\ref{alg:all} and~\ref{alg:preprocess}, respecti
     % \hspace{5mm}
     \begin{subfigure}{.48\textwidth}
     %   \centering
-        \includegraphics[width=\textwidth]{Latching_4}
+        % \includegraphics[width=\textwidth]{Latching_4}
         \caption{}
         \label{fig:pl4}
     \end{subfigure}
@@ -3195,7 +3197,7 @@ While executing the plan, if we obtain an updated pose estimate, the execution i
 
 \begin{figure}[t]
     \centering
-    \includegraphics[width=\textwidth]{figs/timeline2.pdf}
+    % \includegraphics[width=\textwidth]{figs/timeline2.pdf}
     \caption{\CaptionTextSize Timeline of the sense-plan-act cycle.}
     \label{fig:tl}
     %\vspace{-5mm}
@@ -3227,7 +3229,7 @@ The first plan is generated for the pose shown at $x_{\textrm{exec}}$. During ex
 
 \begin{figure}
     \centering
-    \includegraphics[width=\textwidth]{pose_error2.pdf}
+    % \includegraphics[width=\textwidth]{pose_error2.pdf}
     \caption{\CaptionTextSize A depiction of \Gfull-specification on a conveyor belt (overhead view) and perception noise handling. 
     }
     \label{fig:pe}
@@ -3329,41 +3331,41 @@ Best-pose planing (E3)   & 34.61                                                
     \centering
     \begin{subfigure}{0.48\textwidth}
     %   \centering
-        \includegraphics[trim=0 0 400 0, clip, width=\textwidth]{1}
+        % \includegraphics[trim=0 0 400 0, clip, width=\textwidth]{1}
         \caption{}
         \label{fig:demo1}
     \end{subfigure}
     \hspace{2mm}
     \begin{subfigure}{0.48\textwidth}
     %   \centering
-        \includegraphics[trim=0 0 400 0, clip, width=\textwidth]{2}
+        % \includegraphics[trim=0 0 400 0, clip, width=\textwidth]{2}
         \caption{}
         \label{fig:demo2}
     \end{subfigure}
     \hspace{2mm}
     \begin{subfigure}{0.48\textwidth}
     %   \centering
-        \includegraphics[trim=0 0 400 0, clip, width=\textwidth]{3}
+        % \includegraphics[trim=0 0 400 0, clip, width=\textwidth]{3}
         \caption{}
         \label{fig:demo3}
     \end{subfigure}
     \begin{subfigure}{0.48\textwidth}
     %   \centering
-        \includegraphics[trim=0 0 400 0, clip, width=\textwidth]{4}
+        % \includegraphics[trim=0 0 400 0, clip, width=\textwidth]{4}
         \caption{}
         \label{fig:demo4}
     \end{subfigure}
     \hspace{2mm}
     \begin{subfigure}{0.48\textwidth}
     %   \centering
-        \includegraphics[trim=0 0 400 0, clip, width=\textwidth]{5}
+        % \includegraphics[trim=0 0 400 0, clip, width=\textwidth]{5}
         \caption{}
         \label{fig:demo5}
     \end{subfigure}
     \hspace{2mm}
     \begin{subfigure}{0.48\textwidth}
     %   \centering
-        \includegraphics[trim=0 0 400 0, clip, width=\textwidth]{6}
+        % \includegraphics[trim=0 0 400 0, clip, width=\textwidth]{6}
         \caption{}
         \label{fig:demo6}
     \end{subfigure}
@@ -3473,7 +3475,7 @@ As a proof of concept, we demonstrate our system on the PR2 robot equipped with 
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.8\columnwidth]{domes_disc}
+% \includegraphics[width=0.8\columnwidth]{domes_disc}
 \caption{PR2 robot to shield from incoming attacks}
 \label{fig:shield_pr2}
 \end{figure}
@@ -3512,13 +3514,13 @@ Fig.~\ref{fig:domes} shows the two domes configured for the PR2 robot's body. Th
     \centering
     \begin{subfigure}{0.48\textwidth}
     %   \centering
-        \includegraphics[width=\textwidth]{domes_top}
+        % \includegraphics[width=\textwidth]{domes_top}
         \caption{Top view}
         \label{fig:domes_top}
     \end{subfigure} 
     \begin{subfigure}{0.48\textwidth}
     %   \centering
-        \includegraphics[width=\textwidth]{domes_front}
+        % \includegraphics[width=\textwidth]{domes_front}
         \caption{Front view}
         \label{fig:domes_front}
     \end{subfigure}
@@ -3535,7 +3537,7 @@ Each side of $D_i$ and $D_o$ are discretized into cells. The discretization is c
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=0.8\columnwidth]{domes_disc}
+% \includegraphics[width=0.8\columnwidth]{domes_disc}
 \caption{Domes discretization---We show the centers of the cells on both domes. For $D_o$ we only show the discretization for the front side. The cell size is 0.24m for a shield size of 0.4m (This is as per the required magnitude of reduction in cell size as described in Sec.~\ref{sec:cell_size})}
 \label{fig:domes_disc}
 \end{figure}
@@ -3591,7 +3593,7 @@ We evaluated the system by testing our CTMP planner for all the tunnels between 
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=0.8\columnwidth]{heatmap1}
+% \includegraphics[width=0.8\columnwidth]{heatmap1}
 \caption{Shielding factor for all cells in the front side of $D_o$.}
 \label{fig:coverage_front}
 \end{figure}
@@ -3626,7 +3628,7 @@ In our analysis, we assume that the error is direction invariant for all $SE(3)$
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=0.5\columnwidth]{shield_frames}
+% \includegraphics[width=0.5\columnwidth]{shield_frames}
 \caption{Top view of the domes: Coordinate systems for poses of \calS. The coordinate frames are color-coordinated with the sides of $D_o$.}
 \label{fig:shield_frames}
 \end{figure}
@@ -3647,7 +3649,7 @@ The effect of $\Delta y$ and $\Delta z$ can be analysed jointly. Fig.~\ref{fig:s
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=0.8\columnwidth]{shield_yz}
+% \includegraphics[width=0.8\columnwidth]{shield_yz}
 \caption{Reduction in cell size as a function of position errors $\Delta y, \Delta z$}
 \label{fig:shield_yz}
 \end{figure}
@@ -3674,13 +3676,13 @@ Since we constrain the cell to remain square-shaped, we take the minimum value o
     \centering
     \begin{subfigure}{0.48\textwidth}
     %   \centering
-        \includegraphics[width=\textwidth]{shield_x_1}
+        % \includegraphics[width=\textwidth]{shield_x_1}
         \caption{}
         \label{fig:shield_xa}
     \end{subfigure} 
     \begin{subfigure}{0.48\textwidth}
     %   \centering
-        \includegraphics[width=\textwidth]{shield_x_2}
+        % \includegraphics[width=\textwidth]{shield_x_2}
         \caption{}
         \label{fig:shield_xb}
     \end{subfigure}
@@ -3702,7 +3704,7 @@ We show the calculated reduction in $L$ to account for the error $\phi$ in $\cal
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=\columnwidth]{shield_py}
+% \includegraphics[width=\columnwidth]{shield_py}
 \caption{Geometric calculation of the required reduction in the cell size $L$ for a given error $\phi$ in \calS's orientation. Here $\phi$ can be interpreted as $\Delta yaw$ or $\Delta pitch$ errors}
 \label{fig:shield_py}
 \end{figure}
@@ -3711,7 +3713,7 @@ While we present the analysis for a horizontal tunnel, the reduction needed for 
 
 %\begin{figure}[bt]
 %\centering
-%\includegraphics[width=0.6\columnwidth]{shield_drawing2}
+%% \includegraphics[width=0.6\columnwidth]{shield_drawing2}
 %\caption{An example where the the tunnel is non-horizontal and thus its width $W$ is less than the cell size $L$}
 %\label{fig:shield2}
 %\end{figure}
@@ -3721,7 +3723,7 @@ We now analyse the required reduction in the cell size to account for the error 
 
 \begin{figure}[bt]
 \centering
-\includegraphics[width=\columnwidth]{shield_r}
+% \includegraphics[width=\columnwidth]{shield_r}
 \caption{Geometric calculation of the required reduction in the cell size $L$ for a given roll error $\phi = \Delta roll$ in the \calS's pose.}
 \label{fig:shield_r}
 \end{figure}
