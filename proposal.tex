@@ -341,12 +341,11 @@ We now formally define a CTMP algorithm.
 
 \begin{definition}
 \label{ctmp:def}
-Let \algname{ALG} be a motion-planning algorithm,
-$\Tbound$ a user-controlled time bound
+Let $\Tbound$ a user-controlled time bound
 and
 $\Tconst < \Tbound$ a small time constant whose value is independent of the size and complexity of the motion-planning problem.
 %
-\algname{ALG} is said to be a \emph{CTMP algorithm} if it is guaranteed to answer any motion planning query within~\Tbound.
+an algorithm is said to be a \emph{CTMP algorithm} if it is guaranteed to answer any motion planning query within~\Tbound.
 \end{definition}
 
 The user-defined time bound~$\Tbound$ is a tunable input that can be used to tradeoff query time with the memory footprint of the preprocessed data and preprocessing time, or the planning lookahead (for the case of interleaving planning and execution). We will discuss the instances of these tradeoffs in the following chapters.
@@ -358,8 +357,7 @@ We now define one such property, namely CTMP-Completeness, that makes a CTMP alg
 
 %%%%%%
 \subsection{CTMP-Completeness}
-The CTMP algorithms make use of an offline motion planner~$\calP$ in the preprocessing phase to compute the representative set of paths that are then used at query time. We introduce a new notion of completeness for CTMP algorithms. We first define some preliminaries. 
-
+The CTMP algorithms make use of an offline motion planner \calP in the preprocessing phase to compute the representative set of paths that are then used at query time. We introduce a new notion of completeness for CTMP algorithms. We first define some preliminaries.
 \vspace{2mm}
 \begin{definition}[Reachability]
 \label{def:reachable}
@@ -375,7 +373,7 @@ A goal $g \in G$ is said to be reachable from a state \Sstart if~$~\calP$ can fi
 \vspace{2mm}
 \begin{definition}[CTMP-Completeness]
 \label{def:complete}
-    An algorithm \algname{ALG} is said to be CTMP-complete if it covers all the reachable goals $g \in G$ for \Sstart.
+An algorithm is said to be CTMP-complete if it covers all the reachable goals $g \in G$ for \Sstart.
 \end{definition}
 
 A CTMP-algorithm provides a planning time bound reduction of ~$T_\calP : \Tbound$, where ~$\Tbound \ll T_\textrm{\calP}$, while still guaranteeing a success rate no worse than what \calP would provide with a time bound of $T_\calP$.
@@ -1243,7 +1241,7 @@ In experiments we notice that the distribution of the subregions as a function o
 Using an efficient nearest neighbor data structure to store the subregions like kdtrees~\cite{bentley1975multidimensional} or cover trees~\cite{beygelzimer2006cover} etc. can reduce the time complexity of the query phase. The radii of the subregions can be included as an extra dimension to the states and specialised metric for the nearest neighbor data structure can be used to find the subregion containing the state.
 
 
-\subsection{Efficiently constructing $\calL$}
+\subsection{Efficiently constructing \calL}
 Constructing paths to the attractor states (Alg.~\ref{alg:1}, line~\ref{alg:1:pp}) can be done using any motion planning algorithm $\calP$.
 In our implementation we chose to use RRT-Connect~\cite{KL00}.
 Interestingly, this step dominates the running time of the preprocessing step.
@@ -1381,7 +1379,9 @@ We compare our results with Weighted A* (WA*)algorithm. The results are summariz
 As this algorithm is only applicable to static (known) environments, we only preprocessed it with collision checking against the walls of the truck and with self collision checking and not with the boxes inside the truck. We also tested our planner in a simulated real world scenario~(see Fig.~\ref{fig:gmt_sim}) in conjunction with the WA* planner. For each query, we first ran our planner and validated the computed path against non-static obstacles i.e the boxes. We employed WA* as a fallback planner in case the first path is invalid. We observed that for all the queries ran for this scene, the fallback planner was never invoked. This experiment gave us an interesting use case for our planner to be employed in conjunction with conventional planners in the environments that are partially static.
 
 \section{Algorithm Variant}
-In this section we introduce a new variant of our algorithm and discuss its properties. The variant provides stronger constant-time guarantee for the case where the robot interleaves planning and execution. Specifically, it provides the same guarantee as lemma~\ref{lemma:o1} but without the included condition. We make the following high-level modifications to the previous algorithm to construct the new variant. 
+In this section we introduce a new variant of our algorithm and discuss its properties.
+%The variant provides stronger constant-time guarantee for the case where the robot interleaves planning and execution. Specifically, it provides the same guarantee as lemma~\ref{lemma:o1} but without the included condition.
+We make the following high-level modifications to the previous algorithm to construct the new variant. 
 
 \begin{enumerate}[label={\textbf{M\arabic*}},leftmargin=0.75cm]
 \item \label{mod:flip} Flip the problem definition described in section~\ref{sec:pdef}. Namely instead of have a fixed start and a goal region, we have a fixed goal~$\sGoal$ and a start region~$S$~(see Fig.~\ref{fig:approach_flip}).
@@ -1585,49 +1585,49 @@ The preprocessing algorithm (Alg.~\ref{alg1}) returns a database of paths $\Pi_g
 
 \begin{figure*}[t]
     \centering
-    \begin{subfigure}{0.48\textwidth}
+    \begin{subfigure}{0.36\textwidth}
     %   \centering
         \includegraphics[width=\textwidth]{2.pdf}
         \caption{}
         \label{fig:p1}
     \end{subfigure} 
-    \begin{subfigure}{0.48\textwidth}
+    \begin{subfigure}{0.36\textwidth}
     %   \centering
         \includegraphics[width=\textwidth]{3.pdf}
         \caption{}
         \label{fig:p2}
     \end{subfigure}
-    \begin{subfigure}{0.48\textwidth}
+    \begin{subfigure}{0.36\textwidth}
     %   \centering
         \includegraphics[width=\textwidth]{4.pdf}
         \caption{}
         \label{fig:p3}
     \end{subfigure}
-    \begin{subfigure}{0.48\textwidth}
+    \begin{subfigure}{0.36\textwidth}
     %   \centering
         \includegraphics[width=\textwidth]{5.pdf}
         \caption{}
         \label{fig:p4}
     \end{subfigure}
-        \begin{subfigure}{0.48\textwidth}
+        \begin{subfigure}{0.36\textwidth}
     %   \centering
         \includegraphics[width=\textwidth]{6.pdf}
         \caption{}
         \label{fig:p5}
     \end{subfigure}
-        \begin{subfigure}{0.48\textwidth}
+        \begin{subfigure}{0.36\textwidth}
     %   \centering
         \includegraphics[width=\textwidth]{7.pdf}
         \caption{}
         \label{fig:p6}
     \end{subfigure}
-        \begin{subfigure}{0.48\textwidth}
+        \begin{subfigure}{0.36\textwidth}
     %   \centering
         \includegraphics[width=\textwidth]{8.pdf}
         \caption{}
         \label{fig:p7}
     \end{subfigure}
-        \begin{subfigure}{0.48\textwidth}
+        \begin{subfigure}{0.36\textwidth}
     %   \centering
         \includegraphics[width=\textwidth]{9.pdf}
         \caption{}
@@ -1993,7 +1993,7 @@ This step corresponds to an implementation detail within procedure \textsc{FindP
 \end{adjustbox}
 \end{center}
 \caption{
-The table shows the success rates and planning times of APP and the baselines, as well as the preprocessing statistics for three different domains, with 1, 2 and 3 movable obstacles. 100 random tests were run for each experiment with the timeout of 2s. The same timeout was used for APP during preprocessing.
+Success rates and planning times of APP and the baselines and preprocessing statistics of APP for three different domains.
 }
 \label{table:results}
 % \vskip -0.5cm
@@ -2030,7 +2030,7 @@ Fig.~\ref{fig:scenarios} shows two of our example scenarios. In both the scenari
 %
 % We design these scenerios such that if an obstacle is place at every position $q(o_i) \in Q(o_i)$, none of the goals in $G$ is reachable. Without that, the planning problem becomes trivial, since we can treat the resultant \calW as completely static.
 %
-Table~\ref{table:results} shows the statistical results of all our experiments. The experiments were run on Intel Core i7-7800X CPU @3.5Ghz with 32 GB memory.
+Table~\ref{table:results} shows the statistical results of all our experiments. Experiments were performed with 1, 2 and 3 movable obstacles. 100 random tests were run for each experiment with the timeout of 2s. The same timeout was used for APP during preprocessing. The experiments were run on Intel Core i7-7800X CPU @3.5Ghz with 32 GB memory.
 
 APP shows a success rate of 100\% for all the experiments, with several orders of magnitude speedup compared to the baselines. The baselines do well in the sorting domain but they suffer in shelving and the time-constrained sorting domains, which are more challenging.
 %
@@ -3181,7 +3181,7 @@ CTMP algorithm uses a fixed $T_b$ (0.2$s$). For the baselines, since their plann
 %%
 
 \subsubsection{Sense-plan-act cycle}
-As object $o$ moves along the conveyor belt, we use the Brute Force ICP pose estimation baseline proposed in \cite{perch} to obtain its 3-Dof pose for each captured input point cloud.
+As object $o$ moves along the conveyor belt, we use the Brute Force ICP pose estimation baseline proposed in \cite{narayanan2016perch} to obtain its 3-Dof pose for each captured input point cloud.
 % The plan is computed for the sensed object pose projected forward by \Tbound time, giving the planner \Tbound time to plan. If the plan comes in earlier, the robot waits until the object reaches the projected pose, before executing the plan to ensure that timing is tracked properly.W
 %% had removed
 We follow the classical sense-plan-act cycle as depicted in Fig.~\ref{fig:tl}.
@@ -3471,6 +3471,13 @@ In manipulation applications, robots often have to do similar tasks over and ove
 Our CTMP algorithmic framework fits well the requirements of this task. First, the decision about how to re-position the shield in order to deflect the incoming attacks needs to be done very fast, literally within milliseconds. Second, we need to have guarantees that the robot will be able to do it in-time because every time the planner fails to meet its planning deadline, the robot may fail to deflect the attack in-time, leading up to a fatal failure. Finally, the perception estimate of the incoming objects (for example, hurled stones) may have to be updated based on continuous sensing, requiring the planner to be able to re-plan during execution. All these requirements demand strong constant-time planning guarantees that the CTMP algorithms provide. This motivates us to equip a robotic system with our developed planning techniques and evaluate the performance of our algorithms in the context of maneuvering its shield to protect itself from incoming attacks, such as from thrown objects, enabling the platform to successfully achieve missions in adversarial settings.
 As a proof of concept, we demonstrate our system on the PR2 robot equipped with a shield. (See Fig.~\ref{fig:shield_pr2}.)
 
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\columnwidth]{domes_disc}
+\caption{PR2 robot to shield from incoming attacks}
+\label{fig:shield_pr2}
+\end{figure}
+
 \section{Algorithmic Framework}
 \subsection{Problem Formulation and Assumptions}
 Our system comprises of a robot manipulator, a shield~\calS, where~\calS is rigidly held in the robot's end effector and a perception system capable of detecting potential attacks. The robot manipulator is attached to a body \calB which needs to be protected against any attacks; objects that might be thrown targetting \calB. We assume that the attacks follow a projectile motion only under the effect of gravity, neglecting any other effects such as air drag.
@@ -3512,7 +3519,7 @@ Fig.~\ref{fig:domes} shows the two domes configured for the PR2 robot's body. Th
     \begin{subfigure}{0.48\textwidth}
     %   \centering
         \includegraphics[width=\textwidth]{domes_front}
-        \caption{Side view}
+        \caption{Front view}
         \label{fig:domes_front}
     \end{subfigure}
     \caption{
@@ -3523,8 +3530,16 @@ Fig.~\ref{fig:domes} shows the two domes configured for the PR2 robot's body. Th
 \end{figure}
 
 \subsubsection{Domes Discretization and Shield geometry}
-Each side of $D_i$ and $D_o$ are discretized into cells. The discretization is correlated with the shape and size of \calS. We use a square-shaped \calS of in our set up.
+Each side of $D_i$ and $D_o$ are discretized into cells. The discretization is correlated with the shape and size of \calS. We use a square-shaped \calS of in our set up. The discretization of the two domes is shown in Fig.~\ref{fig:domes_disc}.
 %
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.8\columnwidth]{domes_disc}
+\caption{Domes discretization---We show the centers of the cells on both domes. For $D_o$ we only show the discretization for the front side. The cell size is 0.24m for a shield size of 0.4m (This is as per the required magnitude of reduction in cell size as described in Sec.~\ref{sec:cell_size})}
+\label{fig:domes_disc}
+\end{figure}
+
 The protrusion of each pair of cells (with one cell from $D_i$ and one cell from $D_o$) into the volume between $D_o$ and $D_i$ constitutes a \emph{tunnel}. A line segment connecting the centers of the cells forming the tunnel is called \emph{centerline}. Our key idea is that if \calS is positioned such that it fully blocks this tunnel, all possible projectiles that cross the pair of cells are blocked by it.
 %
 The size of the cells is propotional to the size of \calS. Specifically, we choose the cell size to be smaller than the size of \calS to 1) allow some tolerance for the pose of \calS which blocks the tunnel 2) account for trajectory tracking errors.
@@ -3581,7 +3596,9 @@ We evaluated the system by testing our CTMP planner for all the tunnels between 
 \label{fig:coverage_front}
 \end{figure}
 
-The average shielding factor which we obtain by averaging over all the cells on the dome's front side is 0.5. Note that this analysis doesn't take the time dimension into account. If we assume a minimum time of flight of the attack, we can additionally check if the precomputed motion plans can be executed within that time threshold and then discount the results if that check fails.
+The average shielding factor which we obtain by averaging over all the cells on the dome's front side is 0.5. Note that this analysis doesn't take the time dimension into account. If we assume a minimum time of flight of the attack, we can additionally check if the precomputed motion plans can be executed within that time threshold and then discount the success cases if that check fails.
+
+\subsection{Empirical results -- Simulation}
 
 \section{Chapter Appendix}
 \subsection{Cell Size Computation: Geometric Analysis}
